@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendario Musical</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .vinyl-spin {
+      animation: spin 10s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .glass-panel {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .calendar-day {
+      transition: all 0.2s ease;
+    }
+    .calendar-day:hover {
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-4 md:p-8">
+
+  <!-- Encabezado -->
+  <header class="max-w-6xl mx-auto w-full flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
+    <div class="flex items-center gap-3">
+      <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center shadow-lg">
+        <i class="fa-solid fa-compact-disc text-2xl text-white vinyl-spin"></i>
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight">Calendario Musical</h1>
+        <p class="text-xs text-slate-400">Descubre los álbumes lanzados cada día del año</p>
+      </div>
+    </div>
+
+    <!-- Controles superiores -->
+    <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+      <div class="relative flex-1 md:w-64">
+        <input type="text" id="searchInput" placeholder="Buscar artista, canción..." 
+               class="w-full bg-slate-800 border border-slate-700 rounded-full py-2 px-4 pl-10 text-sm focus:outline-none focus:border-purple-500">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+      </div>
+
+      <button id="randomBtn" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full px-4 py-2 text-sm flex items-center gap-2 transition">
+        <i class="fa-solid fa-shuffle text-purple-400"></i> Aleatorio
+      </button>
+
+      <button id="adminBtn" class="bg-purple-600 hover:bg-purple-500 text-white rounded-full px-4 py-2 text-sm flex items-center gap-2 transition font-medium shadow-md">
+        <i class="fa-solid fa-lock" id="adminIcon"></i> Modo Admin
+      </button>
+    </div>
+  </header>
+
+  <!-- Navegación de Meses -->
+  <main class="max-w-6xl mx-auto w-full flex-1">
+    <div class="glass-panel rounded-2xl p-6 mb-8 shadow-2xl">
+      <div class="flex justify-between items-center mb-6">
+        <button id="prevMonth" class="p-2 rounded-full hover:bg-slate-700 text-slate-300 transition">
+          <i class="fa-solid fa-chevron-left text-xl"></i>
+        </button>
+        <h2 id="monthTitle" class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 uppercase tracking-wider">
+          Enero
+        </h2>
+        <button id="nextMonth" class="p-2 rounded-full hover:bg-slate-700 text-slate-300 transition">
+          <i class="fa-solid fa-chevron-right text-xl"></i>
+        </button>
+      </div>
+
+      <!-- Días de la semana -->
+      <div class="grid grid-cols-7 gap-2 mb-2 text-center font-semibold text-xs text-slate-400 uppercase tracking-wider">
+        <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
+      </div>
+
+      <!-- Rejilla del Calendario -->
+      <div id="calendarGrid" class="grid grid-cols-7 gap-2 md:gap-3"></div>
+    </div>
+  </main>
+
+  <!-- Modal de Detalle / Edición de Canción -->
+  <div id="modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="glass-panel max-w-lg w-full rounded-2xl p-6 relative shadow-2xl border border-slate-700 max-h-[90vh] overflow-y-auto">
+      <button id="closeModal" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div id="modalContent">
+        <!-- Generado dinámicamente -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Base de datos inicial con lanzamientos
+    const musicData = {
+      "01-01": [{ title: "Aquí vamos otra vez", artist: "1280 Almas", note: "" }],
+      "01-15": [{ title: "Almendra", artist: "Almendra", note: "POR FIN", cover: "https://upload.wikimedia.org/wikipedia/en/a/a2/Almendra_%28album%29.jpg", spotify: "https://open.spotify.com/album/3UaBOn4I1j9vKxR0U7mO13", apple: "" }],
+      "01-17": [{ title: "Circles", artist: "Mac Miller", note: "", cover: "https://upload.wikimedia.org/wikipedia/en/1/15/Mac_Miller_-_Circles.png", spotify: "https://open.spotify.com/album/51R5933C397ThA2S2L9A35", apple: "https://music.apple.com/us/album/circles/1494022631" }],
+      "01-27": [{ title: "Let’s Start Here", artist: "Lil Yachty", note: "", cover: "https://upload.wikimedia.org/wikipedia/en/d/df/Lil_Yachty_-_Let%27s_Start_Here.png", spotify: "https://open.spotify.com/album/6AeeE3R9338J4yL3fN819y", apple: "" }],
+      "02-14": [{ title: "The Life of Pablo", artist: "Kanye West", note: "", cover: "https://upload.wikimedia.org/wikipedia/en/4/4d/The_life_of_pablo_alternate.jpg", spotify: "https://open.spotify.com/album/7222133791e84a28b08709", apple: "" }],
+      "02-19": [{ title: "Por si mañana no estoy", artist: "", note: "" }],
+      "02-24": [{ title: "Todavía No", artist: "La Paloma", note: "" }],
+      "02-25": [{ title: "Dios y la Mata de Lulo", artist: "Nicolas y los Fumadores", note: "" }],
+      "02-26": [{ title: "El Madrileño", artist: "C. Tangana", note: "", cover: "https://upload.wikimedia.org/wikipedia/en/3/3b/C._Tangana_-_El_Madrile%C3%B1o.png", spotify: "https://open.spotify.com/album/32L34898144933", apple: "" }],
+      "02-27": [{ title: "David Ruffin", artist: "David Ruffin", note: "no realmente pero lo es en mi corazón" }],
+      "02-28": [{ title: "CHASE", artist: "AARON MAY", note: "" }],
+      "03-03": [{ title: "American Teen", artist: "Khalid", note: "" }],
+      "03-09": [{ title: "Como Pez en el Hielo", artist: "Nicolás y los Fumadores", note: "" }],
+      "03-16": [{ title: "Gran Santiago", artist: "Teleradio Donoso", note: "" }],
+      "03-18": [{ title: "Cara y Cruz", artist: "Ayax y Prok", note: "" }],
+      "03-22": [{ title: "Mika’s Laundry", artist: "Matt Champion", note: "" }],
+      "03-24": [{ title: "Películas", artist: "La máquina de hacer pájaros", note: "" }],
+      "03-25": [{ title: "Casiopea", artist: "Casiopea", note: "" }],
+      "03-26": [{ title: "Comedown Machine", artist: "The Strokes", note: "", cover: "https://upload.wikimedia.org/wikipedia/en/0/09/The_Strokes_-_Comedown_Machine.png", spotify: "", apple: "" }],
+      "03-28": [{ title: "The Dude", artist: "Quincy Jones", note: "" }, { title: "10 Songs", artist: "Q", note: "" }],
+      "03-31": [{ title: "JúJú & The Flowerbug", artist: "Sunny Colon", note: "" }],
+      "04-02": [{ title: "Starry Cat", artist: "Starry Cat", note: "" }],
+      "04-10": [{ title: "The New Abnormal", artist: "The Strokes", note: "" }, { title: "QNEPT", artist: "JAZE", note: "" }],
+      "04-14": [{ title: "Damn", artist: "Kendrick Lamar", note: "", cover: "https://upload.wikimedia.org/wikipedia/en/5/51/Kendrick_Lamar_-_Damn.png", spotify: "", apple: "" }],
+      "04-18": [{ title: "Cripta y vida", artist: "Pedropiedra", note: "" }, { title: "I Heard That Noise", artist: "quickly, quickly", note: "" }],
+      "04-23": [{ title: "FERXXO (VOL 1: MOR)", artist: "Feid", note: "" }],
+      "04-26": [{ title: "Apricot Princess", artist: "Rex Orange County", note: "" }, { title: "Por Cesarea", artist: "DILLOM", note: "" }],
+      "05-05": [{ title: "Soul, PRESENT", artist: "Q", note: "" }],
+      "05-06": [{ title: "Melanchole", artist: "Salvia Palth", note: "" }],
+      "05-08": [{ title: "Pedropiedra", artist: "Pedropiedra", note: "" }],
+      "05-10": [{ title: "Hopes and Fears", artist: "Keane", note: "" }],
+      "05-13": [{ title: "Mr Morale & the Big Steppers", artist: "Kendrick Lamar", note: "" }],
+      "05-17": [{ title: "IGOR", artist: "TYLER, THE CREATOR", note: "", cover: "https://upload.wikimedia.org/wikipedia/en/5/51/Igor_-_Tyler%2C_the_Creator.png", spotify: "", apple: "" }, { title: "Sayonara", artist: "Alvaro Diaz", note: "" }, { title: "Hit Me Hard and Soft", artist: "Billie Eilish", note: "" }],
+      "05-22": [{ title: "Omakase", artist: "Alvaro Diaz", note: "" }],
+      "05-23": [{ title: "Goodbye and good Riddance", artist: "Juice Wrld", note: "" }],
+      "06-05": [{ title: "The Shave Experiment (Director's Cut)", artist: "Q", note: "" }],
+      "06-06": [{ title: "Les Étolies Vagabondes", artist: "Nekfeu", note: "" }],
+      "06-08": [{ title: "Kids See Ghost", artist: "Kanye West & Kid Cudi", note: "" }],
+      "06-10": [{ title: "Channel Orange", artist: "Frank Ocean", note: "" }],
+      "06-16": [{ title: "Inefable", artist: "Micro Tdh", note: "" }, { title: "Abysmal Thoughts", artist: "The Drums", note: "" }],
+      "06-20": [{ title: "RANDOM ACCESS MEMORIES", artist: "DAFT PUNK", note: "", cover: "https://upload.wikimedia.org/wikipedia/en/a/a7/Random_Access_Memories.jpg", spotify: "", apple: "" }],
+      "06-25": [{ title: "Vice Versa", artist: "Rauw Alejandro", note: "" }],
+      "06-26": [{ title: "El Retorno", artist: "Santiago Motorizado", note: "" }],
+      "06-29": [{ title: "DATA", artist: "Tainy", note: "" }],
+      "07-08": [{ title: "Introducción a los Fother Muckers: Menudencias (Sólo para fanáticos)", artist: "Fother Muckers", note: "" }],
+      "07-11": [{ title: "166", artist: "Milo J", note: "" }],
+      "07-15": [{ title: "Gemini Rights", artist: "Steve Lacy", note: "" }],
+      "07-16": [{ title: "Oh yeah?", artist: "Steve Lacy", note: "" }],
+      "07-17": [{ title: "Kill the Lights", artist: "Tony Molina", note: "" }],
+      "07-28": [{ title: "Utopia", artist: "Travis Scott", note: "" }],
+      "07-30": [{ title: "Is This It", artist: "The Strokes", note: "" }],
+      "08-03": [{ title: "Swimming", artist: "Mac Miller", note: "" }],
+      "08-08": [{ title: "Coastal Grooves", artist: "Blood Orange", note: "" }],
+      "08-10": [{ title: "Off The Wall", artist: "Michael Jackson", note: "" }, { title: "Life is a Trip", artist: "Trippie Redd", note: "" }],
+      "08-14": [{ title: "ATP", artist: "Nsqk", note: "" }],
+      "08-15": [{ title: "Baby", artist: "Dijon", note: "" }],
+      "08-20": [{ title: "Blonde", artist: "Frank Ocean", note: "" }, { title: "Intershibuya La Mafia", artist: "Feid", note: "" }],
+      "08-25": [{ title: "17", artist: "Xxxtentacion", note: "" }],
+      "08-26": [{ title: "All The Topings", artist: "Panuccis Pizza", note: "" }],
+      "08-28": [{ title: "CTV3 Cool Tape Vol.3", artist: "Jaden Smith", note: "" }, { title: "Lets get it on", artist: "Marvin Gaye", note: "" }],
+      "08-29": [{ title: "Donda", artist: "Kanye West", note: "" }],
+      "08-31": [{ title: "Peperina", artist: "Serú Girán", note: "" }],
+      "09-02": [{ title: "Portamento", artist: "The Drums", note: "" }],
+      "09-03": [{ title: "Juventud Americana", artist: "Ases Falsos", note: "" }],
+      "09-04": [{ title: "Rodeo", artist: "Travis Scott", note: "" }, { title: "Bcos U Will Never B Free", artist: "Rex Orange County", note: "" }],
+      "09-05": [{ title: "Mourn", artist: "Corbin", note: "" }, { title: "Absolutely", artist: "Dijon", note: "" }],
+      "09-06": [{ title: "Inútil Corazón", artist: "Axel Catalán", note: "" }],
+      "09-07": [{ title: "Siembra", artist: "Rubén Blades & Willy Colón", note: "" }, { title: "Para Hondo", artist: "Cristobal Briceño", note: "" }],
+      "09-09": [{ title: "ALTA SUCIEDAD", artist: "ANDRES CALAMARO", note: "" }],
+      "09-11": [{ title: "Graduation", artist: "Kanye West", note: "" }],
+      "09-12": [{ title: "Bailar y llorar", artist: "teleradio donoso", note: "" }],
+      "09-13": [{ title: "Heaven Surrounds You", artist: "Surf Curse", note: "" }],
+      "09-14": [{ title: "Feliz Cumpleaños FERXXO te pirateamos el álbum", artist: "Feid", note: "" }],
+      "09-15": [{ title: "I will be on my one because there is a devil inside my body", artist: "Teen Suicide", note: "" }, { title: "SUPERNOVA", artist: "Ralphie Choo", note: "" }],
+      "09-20": [{ title: "El jardin de los presentes", artist: "Invisible", note: "" }],
+      "09-23": [{ title: "El Círculo", artist: "Kase.O", note: "" }],
+      "09-24": [{ title: "Nothing Was The Same", artist: "Drake", note: "" }, { title: "Nectar", artist: "Joji", note: "" }],
+      "09-25": [{ title: "De la Linea Diez al Sol", artist: "Niña Polaca", note: "" }],
+      "09-28": [{ title: "Songs In The Key of Life", artist: "Stevie Wonder", note: "" }],
+      "09-29": [{ title: "The Stranger", artist: "Billy Joel", note: "" }, { title: "Salvavidas(O de las balas perdidas)", artist: "La Maravillosa Orquesta del Alcohol", note: "" }],
+      "10-03": [{ title: "Un Golpe de Suerte", artist: "La Paloma", note: "" }],
+      "10-06": [{ title: "Artaud", artist: "Pescado Rabioso", note: "" }, { title: "Así se hace", artist: "Fother Muckers", note: "" }],
+      "10-08": [{ title: "Melophobia", artist: "Cage the Elephant", note: "" }],
+      "10-11": [{ title: "Emanuel", artist: "Pedro Piedra", note: "" }],
+      "10-18": [{ title: "Reconoceronte", artist: "Los Mil Jinetes", note: "" }, { title: "Salen otras diez", artist: "Las Chaquetas Amarillas", note: "" }, { title: "Glimmer od God", artist: "Jean Dawson", note: "" }],
+      "10-21": [{ title: "Durazno Sangrando", artist: "Invisible", note: "" }],
+      "10-26": [{ title: "Ballads 1", artist: "Joji", note: "" }],
+      "10-28": [{ title: "Chromakopia", artist: "Tyler the Creator", note: "" }, { title: "Room in Fire", artist: "The Strokes", note: "" }, { title: "Dúo Niagara", artist: "Dúo Niagara", note: "" }],
+      "10-29": [{ title: "Felicilandia", artist: "Alvaro Diaz", note: "" }, { title: "No soy uno", artist: "Fother Muckers", note: "" }],
+      "10-31": [{ title: "Ghost with Skin", artist: "Corbin", note: "" }],
+      "11-04": [{ title: "Her Loss", artist: "Drake & 21 Savage", note: "" }],
+      "11-08": [{ title: "Mal que bien", artist: "Nicolas y los fumadores", note: "" }],
+      "11-11": [{ title: "No", artist: "Pánico", note: "" }, { title: "Espejo", artist: "ZPU", note: "" }, { title: "Modal Soul", artist: "Mojabes", note: "" }],
+      "11-15": [{ title: "Cosa Nuestra", artist: "Rauw Alejando", note: "" }],
+      "11-17": [{ title: "Syre", artist: "Jaden Smith", note: "" }],
+      "11-18": [{ title: "Harmless Melodies", artist: "Yellow Days", note: "" }],
+      "11-21": [{ title: "Justo y necesario", artist: "Fother Muckers", note: "" }, { title: "You", artist: "Larry Lovestein & The Velvet Revival", note: "" }],
+      "11-23": [{ title: "Roy", artist: "NSQK", note: "" }],
+      "11-26": [{ title: "Una idea, pero es triste", artist: "La Paloma", note: "" }],
+      "12-02": [{ title: "Awaken, My Love!", artist: "Childish Gambino", note: "" }],
+      "12-04": [{ title: "The Lo-Fis", artist: "Steve Lacy", note: "" }],
+      "12-06": [{ title: "Perro Viejo", artist: "Axel Catalán", note: "" }],
+      "12-09": [{ title: "Stoney", artist: "Post Malone", note: "" }, { title: "Lift Your Skinny Fists like Antennas to Heaven", artist: "Godspeed You! Black Emperor", note: "" }],
+      "12-10": [{ title: "Because the Internet", artist: "Childish Gambino", note: "" }],
+      "12-11": [{ title: "Man On The Moon lll", artist: "Kid Cudi", note: "" }],
+      "12-14": [{ title: "Spiderman Into the Spiderverse", artist: "Muchos", note: "" }],
+      "12-17": [{ title: "El Paisaje Salvaje", artist: "Fother Muckers", note: "" }],
+      "12-20": [{ title: "La Grasa de Las Capitales", artist: "Serú Giran", note: "" }],
+      "12-21": [{ title: "Sin Futuro", artist: "Axel Catalán", note: "" }],
+      "12-24": [{ title: "X100PRE", artist: "Bad Bunny", note: "" }, { title: "Andate Cabrita", artist: "Los Mil Jinetes", note: "" }],
+      "12-25": [{ title: "Una Navidad con los Fother Muckers", artist: "Fother Muckers", note: "" }],
+      "12-30": [{ title: "Diaz Antes", artist: "Alvaro Diaz", note: "" }],
+      "12-31": [{ title: "Si No Tienes Nada Que Decir Entonces Calla", artist: "Fother Muckers", note: "" }]
+    };
+
+    // Meses
+    const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    let currentMonth = 0; // Enero
+    let isAdmin = false;
+
+    // Cargar datos locales guardados
+    const savedData = localStorage.getItem('musicCalendarData');
+    const db = savedData ? JSON.parse(savedData) : musicData;
+
+    function renderCalendar(month) {
+      const grid = document.getElementById('calendarGrid');
+      grid.innerHTML = '';
+      document.getElementById('monthTitle').innerText = monthNames[month];
+
+      const daysInMonth = new Date(2026, month + 1, 0).getDate();
+      const firstDay = new Date(2026, month, 1).getDay();
+
+      // Espacios vacíos
+      for (let i = 0; i < firstDay; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = "h-20 md:h-24 rounded-xl bg-slate-900/40 opacity-30";
+        grid.appendChild(emptyCell);
+      }
+
+      // Días
+      for (let day = 1; day <= daysInMonth; day++) {
+        const monthKey = String(month + 1).padStart(2, '0');
+        const dayKey = String(day).padStart(2, '0');
+        const key = `${monthKey}-${dayKey}`;
+        const releases = db[key] || [];
+
+        const dayCell = document.createElement('div');
+        dayCell.className = `calendar-day h-20 md:h-24 rounded-xl p-2 cursor-pointer flex flex-col justify-between border ${
+          releases.length > 0 ? 'bg-slate-800/80 border-purple-500/40 hover:border-purple-400' : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
+        }`;
+
+        let contentHtml = `<span class="text-xs font-bold ${releases.length > 0 ? 'text-purple-400' : 'text-slate-500'}">${day}</span>`;
+
+        if (releases.length > 0) {
+          contentHtml += `
+            <div class="truncate text-[10px] font-medium text-slate-200 bg-purple-950/60 p-1 rounded border border-purple-800/40">
+              <i class="fa-solid fa-music text-[9px] text-pink-400 mr-1"></i>${releases[0].title}
+              ${releases.length > 1 ? `<span class="text-pink-400 font-bold ml-1">+${releases.length - 1}</span>` : ''}
+            </div>
+          `;
+        } else {
+          contentHtml += `<div class="text-[9px] text-slate-600 italic">Sin registros</div>`;
+        }
+
+        dayCell.innerHTML = contentHtml;
+        dayCell.onclick = () => openDayModal(key, day, monthNames[month]);
+        grid.appendChild(dayCell);
+      }
+    }
+
+    function openDayModal(key, day, monthName) {
+      const modal = document.getElementById('modal');
+      const container = document.getElementById('modalContent');
+      const items = db[key] || [];
+
+      let html = `
+        <div class="mb-4 flex justify-between items-center border-b border-slate-700 pb-3">
+          <div>
+            <h3 class="text-xl font-bold text-purple-300">${day} de ${monthName}</h3>
+            <p class="text-xs text-slate-400">${items.length} lanzamiento(s) registrado(s)</p>
+          </div>
+          <button onclick="copyDayLink('${key}')" class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-share-nodes text-purple-400"></i> Compartir Día
+          </button>
+        </div>
+      `;
+
+      if (items.length === 0) {
+        html += `<p class="text-sm text-slate-400 italic py-6 text-center">No hay canciones registradas para este día.</p>`;
+      } else {
+        items.forEach((item, index) => {
+          html += `
+            <div class="mb-4 p-4 rounded-xl bg-slate-800/60 border border-slate-700 flex flex-col sm:flex-row gap-4 items-center">
+              <div class="w-24 h-24 rounded-lg bg-slate-900 border border-slate-700 overflow-hidden flex-shrink-0 flex items-center justify-center relative shadow-md">
+                ${item.cover ? `<img src="${item.cover}" alt="Portada" class="w-full h-full object-cover">` : '<i class="fa-solid fa-compact-disc text-3xl text-slate-600"></i>'}
+              </div>
+              <div class="flex-1 text-center sm:text-left">
+                <h4 class="font-bold text-base text-white">${item.title}</h4>
+                <p class="text-sm text-purple-300">${item.artist || 'Artista no especificado'}</p>
+                ${item.note ? `<p class="text-xs text-slate-400 italic mt-1 bg-slate-900/50 p-1.5 rounded border border-slate-800">"${item.note}"</p>` : ''}
+
+                <div class="flex flex-wrap gap-2 mt-3 justify-center sm:justify-start">
+                  ${item.spotify ? `<a href="${item.spotify}" target="_blank" class="text-xs bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 px-2.5 py-1 rounded-md flex items-center gap-1 border border-emerald-500/30"><i class="fa-brands fa-spotify"></i> Spotify</a>` : ''}
+                  ${item.apple ? `<a href="${item.apple}" target="_blank" class="text-xs bg-pink-600/20 text-pink-400 hover:bg-pink-600/30 px-2.5 py-1 rounded-md flex items-center gap-1 border border-pink-500/30"><i class="fa-brands fa-apple"></i> Apple Music</a>` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      container.innerHTML = html;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function copyDayLink(key) {
+      const url = `${window.location.origin}${window.location.pathname}?fecha=${key}`;
+      navigator.clipboard.writeText(url);
+      alert('¡Enlace copiado al portapapeles!\n' + url);
+    }
+
+    // Inicializar navegación de meses
+    document.getElementById('prevMonth').onclick = () => {
+      currentMonth = (currentMonth - 1 + 12) % 12;
+      renderCalendar(currentMonth);
+    };
+
+    document.getElementById('nextMonth').onclick = () => {
+      currentMonth = (currentMonth + 1) % 12;
+      renderCalendar(currentMonth);
+    };
+
+    document.getElementById('closeModal').onclick = () => {
+      document.getElementById('modal').classList.add('hidden');
+      document.getElementById('modal').classList.remove('flex');
+    };
+
+    // Verificar si viene una fecha en la URL (?fecha=MM-DD)
+    window.onload = () => {
+      renderCalendar(currentMonth);
+      const urlParams = new URLSearchParams(window.location.search);
+      const fecha = urlParams.get('fecha');
+      if (fecha && db[fecha]) {
+        const [m, d] = fecha.split('-');
+        currentMonth = parseInt(m) - 1;
+        renderCalendar(currentMonth);
+        openDayModal(fecha, parseInt(d), monthNames[currentMonth]);
+      }
+    };
+  </script>
+</body>
+</html>
