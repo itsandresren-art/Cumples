@@ -72,9 +72,6 @@
 
   <!-- Vista Álbum en Pantalla Completa / Vista Compartida -->
   <main id="albumPage" class="max-w-2xl mx-auto w-full flex-1 hidden">
-    <button id="backToCalendarBtn" onclick="goHome()" class="mb-8 text-xs text-zinc-500 hover:text-white flex items-center gap-2 transition">
-      <i class="fa-solid fa-arrow-left text-[10px]"></i> Volver al calendario
-    </button>
     <div class="bg-card rounded-2xl p-8 border border-subtle" id="albumPageContent"></div>
   </main>
 
@@ -532,7 +529,6 @@
     async function renderIsolatedDayView(fecha) {
       isIsolatedMode = true;
       document.getElementById('mainView').classList.add('hidden');
-      document.getElementById('backToCalendarBtn').style.display = 'none';
       document.getElementById('brandLogo').onclick = null;
       document.getElementById('brandLogo').classList.remove('cursor-pointer');
 
