@@ -89,7 +89,6 @@
   </div>
 
   <script>
-    // Base de datos completa integrada con toda tu lista
     const fullMusicData = {
       "01-01": [{ id: "e1", title: "Aquí vamos otra vez", artist: "1280 Almas", note: "" }],
       "01-15": [{ id: "e15", title: "Almendra", artist: "Almendra", note: "POR FIN" }],
@@ -211,10 +210,13 @@
     let isAdmin = false;
     let adminPassword = localStorage.getItem('adminPass') || '1234';
 
-    let db = JSON.parse(localStorage.getItem('musicCalendarDB_v2')) || fullMusicData;
+    // Fuerza a cargar la base de datos completa de todos los meses
+    localStorage.removeItem('musicCalendarDB');
+    localStorage.removeItem('musicCalendarDB_v2');
+    let db = JSON.parse(localStorage.getItem('musicCalendarDB_v3')) || fullMusicData;
 
     function saveDB() {
-      localStorage.setItem('musicCalendarDB_v2', JSON.stringify(db));
+      localStorage.setItem('musicCalendarDB_v3', JSON.stringify(db));
       renderCalendar(currentMonth);
     }
 
@@ -247,7 +249,6 @@
       img.src = 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
     }
 
-    // Busca la portada automáticamente en Apple Music de forma 100% confiable
     async function getAppleCoverUrl(title, artist) {
       if (!title) return '';
       const query = encodeURIComponent(`${title} ${artist || ''}`);
@@ -322,7 +323,7 @@
           let coverUrl = item.cover;
           if (!coverUrl) {
             coverUrl = await getAppleCoverUrl(item.title, item.artist);
-            item.cover = coverUrl; // Cachear portada obtenida
+            item.cover = coverUrl;
           }
 
           html += `
@@ -379,7 +380,7 @@
             <input type="url" id="formApple" value="${item.apple}" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
-            <label class="text-[10px] text-zinc-500 uppercase">URL Portada Imagen (Opcional / Automático)</label>
+            <label class="text-[10px] text-zinc-500 uppercase">URL Portada Imagen (Opcional)</label>
             <input type="url" id="formCover" value="${item.cover}" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
