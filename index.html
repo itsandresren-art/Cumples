@@ -7,36 +7,19 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body {
-      background-color: #0f172a;
-      color: #f8fafc;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    .vinyl-spin {
-      animation: spin 10s linear infinite;
-    }
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    .glass-panel {
-      background: rgba(30, 41, 59, 0.7);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .calendar-day {
-      transition: all 0.2s ease;
-    }
-    .calendar-day:hover {
-      transform: translateY(-2px);
-    }
+    body { background-color: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+    .vinyl-spin { animation: spin 10s linear infinite; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    .calendar-day { transition: all 0.2s ease; }
+    .calendar-day:hover { transform: translateY(-2px); }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between p-4 md:p-8">
 
   <!-- Encabezado -->
   <header class="max-w-6xl mx-auto w-full flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-3 cursor-pointer" onclick="goHome()">
       <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center shadow-lg">
         <i class="fa-solid fa-compact-disc text-2xl text-white vinyl-spin"></i>
       </div>
@@ -46,188 +29,112 @@
       </div>
     </div>
 
-    <!-- Controles superiores -->
+    <!-- Controles -->
     <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
       <div class="relative flex-1 md:w-64">
-        <input type="text" id="searchInput" placeholder="Buscar artista, canción..." 
+        <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Buscar artista, canción..." 
                class="w-full bg-slate-800 border border-slate-700 rounded-full py-2 px-4 pl-10 text-sm focus:outline-none focus:border-purple-500">
         <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-sm"></i>
       </div>
 
-      <button id="randomBtn" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full px-4 py-2 text-sm flex items-center gap-2 transition">
+      <button onclick="openRandomAlbum()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full px-4 py-2 text-sm flex items-center gap-2 transition">
         <i class="fa-solid fa-shuffle text-purple-400"></i> Aleatorio
       </button>
 
-      <button id="adminBtn" class="bg-purple-600 hover:bg-purple-500 text-white rounded-full px-4 py-2 text-sm flex items-center gap-2 transition font-medium shadow-md">
-        <i class="fa-solid fa-lock" id="adminIcon"></i> Modo Admin
+      <button id="adminBtn" onclick="toggleAdmin()" class="bg-purple-600 hover:bg-purple-500 text-white rounded-full px-4 py-2 text-sm flex items-center gap-2 transition font-medium shadow-md">
+        <i class="fa-solid fa-lock" id="adminIcon"></i> <span id="adminText">Modo Admin</span>
       </button>
     </div>
   </header>
 
-  <!-- Navegación de Meses -->
-  <main class="max-w-6xl mx-auto w-full flex-1">
+  <!-- Vista Principal: Calendario -->
+  <main id="mainView" class="max-w-6xl mx-auto w-full flex-1">
     <div class="glass-panel rounded-2xl p-6 mb-8 shadow-2xl">
       <div class="flex justify-between items-center mb-6">
-        <button id="prevMonth" class="p-2 rounded-full hover:bg-slate-700 text-slate-300 transition">
+        <button onclick="changeMonth(-1)" class="p-2 rounded-full hover:bg-slate-700 text-slate-300 transition">
           <i class="fa-solid fa-chevron-left text-xl"></i>
         </button>
         <h2 id="monthTitle" class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 uppercase tracking-wider">
           Enero
         </h2>
-        <button id="nextMonth" class="p-2 rounded-full hover:bg-slate-700 text-slate-300 transition">
+        <button onclick="changeMonth(1)" class="p-2 rounded-full hover:bg-slate-700 text-slate-300 transition">
           <i class="fa-solid fa-chevron-right text-xl"></i>
         </button>
       </div>
 
-      <!-- Días de la semana -->
       <div class="grid grid-cols-7 gap-2 mb-2 text-center font-semibold text-xs text-slate-400 uppercase tracking-wider">
         <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
       </div>
 
-      <!-- Rejilla del Calendario -->
       <div id="calendarGrid" class="grid grid-cols-7 gap-2 md:gap-3"></div>
     </div>
   </main>
 
-  <!-- Modal de Detalle / Edición de Canción -->
+  <!-- Vista Individual del Álbum -->
+  <main id="albumPage" class="max-w-4xl mx-auto w-full flex-1 hidden">
+    <button onclick="goHome()" class="mb-6 bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-full border border-slate-700 text-sm flex items-center gap-2 transition">
+      <i class="fa-solid fa-arrow-left"></i> Volver al Calendario
+    </button>
+    
+    <div class="glass-panel rounded-2xl p-8 border border-slate-700 shadow-2xl relative" id="albumPageContent"></div>
+  </main>
+
+  <!-- Modal para Agregar/Editar -->
   <div id="modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
     <div class="glass-panel max-w-lg w-full rounded-2xl p-6 relative shadow-2xl border border-slate-700 max-h-[90vh] overflow-y-auto">
-      <button id="closeModal" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">
+      <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">
         <i class="fa-solid fa-xmark"></i>
       </button>
-
-      <div id="modalContent">
-        <!-- Generado dinámicamente -->
-      </div>
+      <div id="modalContent"></div>
     </div>
   </div>
 
   <script>
-    // Base de datos inicial con lanzamientos
-    const musicData = {
-      "01-01": [{ title: "Aquí vamos otra vez", artist: "1280 Almas", note: "" }],
-      "01-15": [{ title: "Almendra", artist: "Almendra", note: "POR FIN", cover: "https://upload.wikimedia.org/wikipedia/en/a/a2/Almendra_%28album%29.jpg", spotify: "https://open.spotify.com/album/3UaBOn4I1j9vKxR0U7mO13", apple: "" }],
-      "01-17": [{ title: "Circles", artist: "Mac Miller", note: "", cover: "https://upload.wikimedia.org/wikipedia/en/1/15/Mac_Miller_-_Circles.png", spotify: "https://open.spotify.com/album/51R5933C397ThA2S2L9A35", apple: "https://music.apple.com/us/album/circles/1494022631" }],
-      "01-27": [{ title: "Let’s Start Here", artist: "Lil Yachty", note: "", cover: "https://upload.wikimedia.org/wikipedia/en/d/df/Lil_Yachty_-_Let%27s_Start_Here.png", spotify: "https://open.spotify.com/album/6AeeE3R9338J4yL3fN819y", apple: "" }],
-      "02-14": [{ title: "The Life of Pablo", artist: "Kanye West", note: "", cover: "https://upload.wikimedia.org/wikipedia/en/4/4d/The_life_of_pablo_alternate.jpg", spotify: "https://open.spotify.com/album/7222133791e84a28b08709", apple: "" }],
-      "02-19": [{ title: "Por si mañana no estoy", artist: "", note: "" }],
-      "02-24": [{ title: "Todavía No", artist: "La Paloma", note: "" }],
-      "02-25": [{ title: "Dios y la Mata de Lulo", artist: "Nicolas y los Fumadores", note: "" }],
-      "02-26": [{ title: "El Madrileño", artist: "C. Tangana", note: "", cover: "https://upload.wikimedia.org/wikipedia/en/3/3b/C._Tangana_-_El_Madrile%C3%B1o.png", spotify: "https://open.spotify.com/album/32L34898144933", apple: "" }],
-      "02-27": [{ title: "David Ruffin", artist: "David Ruffin", note: "no realmente pero lo es en mi corazón" }],
-      "02-28": [{ title: "CHASE", artist: "AARON MAY", note: "" }],
-      "03-03": [{ title: "American Teen", artist: "Khalid", note: "" }],
-      "03-09": [{ title: "Como Pez en el Hielo", artist: "Nicolás y los Fumadores", note: "" }],
-      "03-16": [{ title: "Gran Santiago", artist: "Teleradio Donoso", note: "" }],
-      "03-18": [{ title: "Cara y Cruz", artist: "Ayax y Prok", note: "" }],
-      "03-22": [{ title: "Mika’s Laundry", artist: "Matt Champion", note: "" }],
-      "03-24": [{ title: "Películas", artist: "La máquina de hacer pájaros", note: "" }],
-      "03-25": [{ title: "Casiopea", artist: "Casiopea", note: "" }],
-      "03-26": [{ title: "Comedown Machine", artist: "The Strokes", note: "", cover: "https://upload.wikimedia.org/wikipedia/en/0/09/The_Strokes_-_Comedown_Machine.png", spotify: "", apple: "" }],
-      "03-28": [{ title: "The Dude", artist: "Quincy Jones", note: "" }, { title: "10 Songs", artist: "Q", note: "" }],
-      "03-31": [{ title: "JúJú & The Flowerbug", artist: "Sunny Colon", note: "" }],
-      "04-02": [{ title: "Starry Cat", artist: "Starry Cat", note: "" }],
-      "04-10": [{ title: "The New Abnormal", artist: "The Strokes", note: "" }, { title: "QNEPT", artist: "JAZE", note: "" }],
-      "04-14": [{ title: "Damn", artist: "Kendrick Lamar", note: "", cover: "https://upload.wikimedia.org/wikipedia/en/5/51/Kendrick_Lamar_-_Damn.png", spotify: "", apple: "" }],
-      "04-18": [{ title: "Cripta y vida", artist: "Pedropiedra", note: "" }, { title: "I Heard That Noise", artist: "quickly, quickly", note: "" }],
-      "04-23": [{ title: "FERXXO (VOL 1: MOR)", artist: "Feid", note: "" }],
-      "04-26": [{ title: "Apricot Princess", artist: "Rex Orange County", note: "" }, { title: "Por Cesarea", artist: "DILLOM", note: "" }],
-      "05-05": [{ title: "Soul, PRESENT", artist: "Q", note: "" }],
-      "05-06": [{ title: "Melanchole", artist: "Salvia Palth", note: "" }],
-      "05-08": [{ title: "Pedropiedra", artist: "Pedropiedra", note: "" }],
-      "05-10": [{ title: "Hopes and Fears", artist: "Keane", note: "" }],
-      "05-13": [{ title: "Mr Morale & the Big Steppers", artist: "Kendrick Lamar", note: "" }],
-      "05-17": [{ title: "IGOR", artist: "TYLER, THE CREATOR", note: "", cover: "https://upload.wikimedia.org/wikipedia/en/5/51/Igor_-_Tyler%2C_the_Creator.png", spotify: "", apple: "" }, { title: "Sayonara", artist: "Alvaro Diaz", note: "" }, { title: "Hit Me Hard and Soft", artist: "Billie Eilish", note: "" }],
-      "05-22": [{ title: "Omakase", artist: "Alvaro Diaz", note: "" }],
-      "05-23": [{ title: "Goodbye and good Riddance", artist: "Juice Wrld", note: "" }],
-      "06-05": [{ title: "The Shave Experiment (Director's Cut)", artist: "Q", note: "" }],
-      "06-06": [{ title: "Les Étolies Vagabondes", artist: "Nekfeu", note: "" }],
-      "06-08": [{ title: "Kids See Ghost", artist: "Kanye West & Kid Cudi", note: "" }],
-      "06-10": [{ title: "Channel Orange", artist: "Frank Ocean", note: "" }],
-      "06-16": [{ title: "Inefable", artist: "Micro Tdh", note: "" }, { title: "Abysmal Thoughts", artist: "The Drums", note: "" }],
-      "06-20": [{ title: "RANDOM ACCESS MEMORIES", artist: "DAFT PUNK", note: "", cover: "https://upload.wikimedia.org/wikipedia/en/a/a7/Random_Access_Memories.jpg", spotify: "", apple: "" }],
-      "06-25": [{ title: "Vice Versa", artist: "Rauw Alejandro", note: "" }],
-      "06-26": [{ title: "El Retorno", artist: "Santiago Motorizado", note: "" }],
-      "06-29": [{ title: "DATA", artist: "Tainy", note: "" }],
-      "07-08": [{ title: "Introducción a los Fother Muckers: Menudencias (Sólo para fanáticos)", artist: "Fother Muckers", note: "" }],
-      "07-11": [{ title: "166", artist: "Milo J", note: "" }],
-      "07-15": [{ title: "Gemini Rights", artist: "Steve Lacy", note: "" }],
-      "07-16": [{ title: "Oh yeah?", artist: "Steve Lacy", note: "" }],
-      "07-17": [{ title: "Kill the Lights", artist: "Tony Molina", note: "" }],
-      "07-28": [{ title: "Utopia", artist: "Travis Scott", note: "" }],
-      "07-30": [{ title: "Is This It", artist: "The Strokes", note: "" }],
-      "08-03": [{ title: "Swimming", artist: "Mac Miller", note: "" }],
-      "08-08": [{ title: "Coastal Grooves", artist: "Blood Orange", note: "" }],
-      "08-10": [{ title: "Off The Wall", artist: "Michael Jackson", note: "" }, { title: "Life is a Trip", artist: "Trippie Redd", note: "" }],
-      "08-14": [{ title: "ATP", artist: "Nsqk", note: "" }],
-      "08-15": [{ title: "Baby", artist: "Dijon", note: "" }],
-      "08-20": [{ title: "Blonde", artist: "Frank Ocean", note: "" }, { title: "Intershibuya La Mafia", artist: "Feid", note: "" }],
-      "08-25": [{ title: "17", artist: "Xxxtentacion", note: "" }],
-      "08-26": [{ title: "All The Topings", artist: "Panuccis Pizza", note: "" }],
-      "08-28": [{ title: "CTV3 Cool Tape Vol.3", artist: "Jaden Smith", note: "" }, { title: "Lets get it on", artist: "Marvin Gaye", note: "" }],
-      "08-29": [{ title: "Donda", artist: "Kanye West", note: "" }],
-      "08-31": [{ title: "Peperina", artist: "Serú Girán", note: "" }],
-      "09-02": [{ title: "Portamento", artist: "The Drums", note: "" }],
-      "09-03": [{ title: "Juventud Americana", artist: "Ases Falsos", note: "" }],
-      "09-04": [{ title: "Rodeo", artist: "Travis Scott", note: "" }, { title: "Bcos U Will Never B Free", artist: "Rex Orange County", note: "" }],
-      "09-05": [{ title: "Mourn", artist: "Corbin", note: "" }, { title: "Absolutely", artist: "Dijon", note: "" }],
-      "09-06": [{ title: "Inútil Corazón", artist: "Axel Catalán", note: "" }],
-      "09-07": [{ title: "Siembra", artist: "Rubén Blades & Willy Colón", note: "" }, { title: "Para Hondo", artist: "Cristobal Briceño", note: "" }],
-      "09-09": [{ title: "ALTA SUCIEDAD", artist: "ANDRES CALAMARO", note: "" }],
-      "09-11": [{ title: "Graduation", artist: "Kanye West", note: "" }],
-      "09-12": [{ title: "Bailar y llorar", artist: "teleradio donoso", note: "" }],
-      "09-13": [{ title: "Heaven Surrounds You", artist: "Surf Curse", note: "" }],
-      "09-14": [{ title: "Feliz Cumpleaños FERXXO te pirateamos el álbum", artist: "Feid", note: "" }],
-      "09-15": [{ title: "I will be on my one because there is a devil inside my body", artist: "Teen Suicide", note: "" }, { title: "SUPERNOVA", artist: "Ralphie Choo", note: "" }],
-      "09-20": [{ title: "El jardin de los presentes", artist: "Invisible", note: "" }],
-      "09-23": [{ title: "El Círculo", artist: "Kase.O", note: "" }],
-      "09-24": [{ title: "Nothing Was The Same", artist: "Drake", note: "" }, { title: "Nectar", artist: "Joji", note: "" }],
-      "09-25": [{ title: "De la Linea Diez al Sol", artist: "Niña Polaca", note: "" }],
-      "09-28": [{ title: "Songs In The Key of Life", artist: "Stevie Wonder", note: "" }],
-      "09-29": [{ title: "The Stranger", artist: "Billy Joel", note: "" }, { title: "Salvavidas(O de las balas perdidas)", artist: "La Maravillosa Orquesta del Alcohol", note: "" }],
-      "10-03": [{ title: "Un Golpe de Suerte", artist: "La Paloma", note: "" }],
-      "10-06": [{ title: "Artaud", artist: "Pescado Rabioso", note: "" }, { title: "Así se hace", artist: "Fother Muckers", note: "" }],
-      "10-08": [{ title: "Melophobia", artist: "Cage the Elephant", note: "" }],
-      "10-11": [{ title: "Emanuel", artist: "Pedro Piedra", note: "" }],
-      "10-18": [{ title: "Reconoceronte", artist: "Los Mil Jinetes", note: "" }, { title: "Salen otras diez", artist: "Las Chaquetas Amarillas", note: "" }, { title: "Glimmer od God", artist: "Jean Dawson", note: "" }],
-      "10-21": [{ title: "Durazno Sangrando", artist: "Invisible", note: "" }],
-      "10-26": [{ title: "Ballads 1", artist: "Joji", note: "" }],
-      "10-28": [{ title: "Chromakopia", artist: "Tyler the Creator", note: "" }, { title: "Room in Fire", artist: "The Strokes", note: "" }, { title: "Dúo Niagara", artist: "Dúo Niagara", note: "" }],
-      "10-29": [{ title: "Felicilandia", artist: "Alvaro Diaz", note: "" }, { title: "No soy uno", artist: "Fother Muckers", note: "" }],
-      "10-31": [{ title: "Ghost with Skin", artist: "Corbin", note: "" }],
-      "11-04": [{ title: "Her Loss", artist: "Drake & 21 Savage", note: "" }],
-      "11-08": [{ title: "Mal que bien", artist: "Nicolas y los fumadores", note: "" }],
-      "11-11": [{ title: "No", artist: "Pánico", note: "" }, { title: "Espejo", artist: "ZPU", note: "" }, { title: "Modal Soul", artist: "Mojabes", note: "" }],
-      "11-15": [{ title: "Cosa Nuestra", artist: "Rauw Alejando", note: "" }],
-      "11-17": [{ title: "Syre", artist: "Jaden Smith", note: "" }],
-      "11-18": [{ title: "Harmless Melodies", artist: "Yellow Days", note: "" }],
-      "11-21": [{ title: "Justo y necesario", artist: "Fother Muckers", note: "" }, { title: "You", artist: "Larry Lovestein & The Velvet Revival", note: "" }],
-      "11-23": [{ title: "Roy", artist: "NSQK", note: "" }],
-      "11-26": [{ title: "Una idea, pero es triste", artist: "La Paloma", note: "" }],
-      "12-02": [{ title: "Awaken, My Love!", artist: "Childish Gambino", note: "" }],
-      "12-04": [{ title: "The Lo-Fis", artist: "Steve Lacy", note: "" }],
-      "12-06": [{ title: "Perro Viejo", artist: "Axel Catalán", note: "" }],
-      "12-09": [{ title: "Stoney", artist: "Post Malone", note: "" }, { title: "Lift Your Skinny Fists like Antennas to Heaven", artist: "Godspeed You! Black Emperor", note: "" }],
-      "12-10": [{ title: "Because the Internet", artist: "Childish Gambino", note: "" }],
-      "12-11": [{ title: "Man On The Moon lll", artist: "Kid Cudi", note: "" }],
-      "12-14": [{ title: "Spiderman Into the Spiderverse", artist: "Muchos", note: "" }],
-      "12-17": [{ title: "El Paisaje Salvaje", artist: "Fother Muckers", note: "" }],
-      "12-20": [{ title: "La Grasa de Las Capitales", artist: "Serú Giran", note: "" }],
-      "12-21": [{ title: "Sin Futuro", artist: "Axel Catalán", note: "" }],
-      "12-24": [{ title: "X100PRE", artist: "Bad Bunny", note: "" }, { title: "Andate Cabrita", artist: "Los Mil Jinetes", note: "" }],
-      "12-25": [{ title: "Una Navidad con los Fother Muckers", artist: "Fother Muckers", note: "" }],
-      "12-30": [{ title: "Diaz Antes", artist: "Alvaro Diaz", note: "" }],
-      "12-31": [{ title: "Si No Tienes Nada Que Decir Entonces Calla", artist: "Fother Muckers", note: "" }]
+    const initialData = {
+      "01-15": [{ id: "1", title: "Almendra", artist: "Almendra", note: "POR FIN", cover: "https://i.scdn.co/image/ab67616d0000b27341ea22e69777df5a2307ef02", spotify: "https://open.spotify.com/album/3UaBOn4I1j9vKxR0U7mO13", apple: "" }],
+      "01-17": [{ id: "2", title: "Circles", artist: "Mac Miller", note: "", cover: "https://i.scdn.co/image/ab67616d0000b2736cb203799633e56843478951", spotify: "https://open.spotify.com/album/51R5933C397ThA2S2L9A35", apple: "https://music.apple.com/us/album/circles/1494022631" }],
+      "01-27": [{ id: "3", title: "Let’s Start Here", artist: "Lil Yachty", note: "", cover: "https://i.scdn.co/image/ab67616d0000b27343e0d869a8e03403a48e772b", spotify: "https://open.spotify.com/album/6AeeE3R9338J4yL3fN819y", apple: "" }],
+      "02-14": [{ id: "4", title: "The Life of Pablo", artist: "Kanye West", note: "", cover: "https://i.scdn.co/image/ab67616d0000b2732a038d3bf875d23e4aeaa84e", spotify: "https://open.spotify.com/album/7222133791e84a28b08709", apple: "" }],
+      "02-26": [{ id: "5", title: "El Madrileño", artist: "C. Tangana", note: "", cover: "https://i.scdn.co/image/ab67616d0000b2733b86ae94ebf3d2f9762df2f8", spotify: "https://open.spotify.com/album/32L34898144933", apple: "" }],
+      "05-17": [{ id: "6", title: "IGOR", artist: "TYLER, THE CREATOR", note: "", cover: "https://i.scdn.co/image/ab67616d0000b27370ba0d6e33516e771af2b575", spotify: "https://open.spotify.com/album/53932133791e84a28b08709", apple: "" }]
     };
 
-    // Meses
     const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-    let currentMonth = 0; // Enero
+    let currentMonth = 0;
     let isAdmin = false;
+    let adminPassword = localStorage.getItem('adminPass') || '1234';
 
-    // Cargar datos locales guardados
-    const savedData = localStorage.getItem('musicCalendarData');
-    const db = savedData ? JSON.parse(savedData) : musicData;
+    let db = JSON.parse(localStorage.getItem('musicCalendarDB')) || initialData;
+
+    function saveDB() {
+      localStorage.setItem('musicCalendarDB', JSON.stringify(db));
+      renderCalendar(currentMonth);
+    }
+
+    function toggleAdmin() {
+      if (!isAdmin) {
+        const pass = prompt("Ingrese la contraseña de Administrador:");
+        if (pass === adminPassword) {
+          isAdmin = true;
+          document.getElementById('adminIcon').className = "fa-solid fa-lock-open text-emerald-300";
+          document.getElementById('adminText').innerText = "Admin Activo";
+          alert("¡Modo Administrador Activado!");
+          renderCalendar(currentMonth);
+        } else if (pass !== null) {
+          alert("Contraseña incorrecta.");
+        }
+      } else {
+        isAdmin = false;
+        document.getElementById('adminIcon').className = "fa-solid fa-lock";
+        document.getElementById('adminText').innerText = "Modo Admin";
+        renderCalendar(currentMonth);
+      }
+    }
+
+    function changeMonth(delta) {
+      currentMonth = (currentMonth + delta + 12) % 12;
+      renderCalendar(currentMonth);
+    }
 
     function renderCalendar(month) {
       const grid = document.getElementById('calendarGrid');
@@ -237,18 +144,12 @@
       const daysInMonth = new Date(2026, month + 1, 0).getDate();
       const firstDay = new Date(2026, month, 1).getDay();
 
-      // Espacios vacíos
       for (let i = 0; i < firstDay; i++) {
-        const emptyCell = document.createElement('div');
-        emptyCell.className = "h-20 md:h-24 rounded-xl bg-slate-900/40 opacity-30";
-        grid.appendChild(emptyCell);
+        grid.appendChild(Object.assign(document.createElement('div'), { className: "h-20 md:h-24 rounded-xl bg-slate-900/40 opacity-30" }));
       }
 
-      // Días
       for (let day = 1; day <= daysInMonth; day++) {
-        const monthKey = String(month + 1).padStart(2, '0');
-        const dayKey = String(day).padStart(2, '0');
-        const key = `${monthKey}-${dayKey}`;
+        const key = `${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         const releases = db[key] || [];
 
         const dayCell = document.createElement('div');
@@ -256,69 +157,195 @@
           releases.length > 0 ? 'bg-slate-800/80 border-purple-500/40 hover:border-purple-400' : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
         }`;
 
-        let contentHtml = `<span class="text-xs font-bold ${releases.length > 0 ? 'text-purple-400' : 'text-slate-500'}">${day}</span>`;
+        let html = `<div class="flex justify-between items-center"><span class="text-xs font-bold ${releases.length > 0 ? 'text-purple-400' : 'text-slate-500'}">${day}</span>`;
+        if (isAdmin) {
+          html += `<button onclick="event.stopPropagation(); openEditForm('${key}')" class="text-[10px] bg-purple-600 hover:bg-purple-500 text-white px-1.5 py-0.5 rounded"><i class="fa-solid fa-plus"></i></button>`;
+        }
+        html += `</div>`;
 
         if (releases.length > 0) {
-          contentHtml += `
+          html += `
             <div class="truncate text-[10px] font-medium text-slate-200 bg-purple-950/60 p-1 rounded border border-purple-800/40">
               <i class="fa-solid fa-music text-[9px] text-pink-400 mr-1"></i>${releases[0].title}
               ${releases.length > 1 ? `<span class="text-pink-400 font-bold ml-1">+${releases.length - 1}</span>` : ''}
             </div>
           `;
-        } else {
-          contentHtml += `<div class="text-[9px] text-slate-600 italic">Sin registros</div>`;
         }
-
-        dayCell.innerHTML = contentHtml;
+        dayCell.innerHTML = html;
         dayCell.onclick = () => openDayModal(key, day, monthNames[month]);
         grid.appendChild(dayCell);
       }
     }
 
     function openDayModal(key, day, monthName) {
-      const modal = document.getElementById('modal');
-      const container = document.getElementById('modalContent');
       const items = db[key] || [];
-
       let html = `
         <div class="mb-4 flex justify-between items-center border-b border-slate-700 pb-3">
-          <div>
-            <h3 class="text-xl font-bold text-purple-300">${day} de ${monthName}</h3>
-            <p class="text-xs text-slate-400">${items.length} lanzamiento(s) registrado(s)</p>
-          </div>
-          <button onclick="copyDayLink('${key}')" class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1.5 transition">
-            <i class="fa-solid fa-share-nodes text-purple-400"></i> Compartir Día
+          <h3 class="text-xl font-bold text-purple-300">${day} de ${monthName}</h3>
+          <button onclick="copyDayLink('${key}')" class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1.5">
+            <i class="fa-solid fa-share-nodes text-purple-400"></i> Compartir
           </button>
         </div>
       `;
 
       if (items.length === 0) {
-        html += `<p class="text-sm text-slate-400 italic py-6 text-center">No hay canciones registradas para este día.</p>`;
+        html += `<p class="text-sm text-slate-400 italic py-6 text-center">No hay álbumes registrados este día.</p>`;
       } else {
-        items.forEach((item, index) => {
+        items.forEach((item) => {
           html += `
             <div class="mb-4 p-4 rounded-xl bg-slate-800/60 border border-slate-700 flex flex-col sm:flex-row gap-4 items-center">
-              <div class="w-24 h-24 rounded-lg bg-slate-900 border border-slate-700 overflow-hidden flex-shrink-0 flex items-center justify-center relative shadow-md">
-                ${item.cover ? `<img src="${item.cover}" alt="Portada" class="w-full h-full object-cover">` : '<i class="fa-solid fa-compact-disc text-3xl text-slate-600"></i>'}
-              </div>
+              <img src="${item.cover || 'https://i.imgur.com/3n0K9y8.png'}" referrerpolicy="no-referrer" class="w-20 h-20 rounded-lg object-cover shadow-md">
               <div class="flex-1 text-center sm:text-left">
-                <h4 class="font-bold text-base text-white">${item.title}</h4>
-                <p class="text-sm text-purple-300">${item.artist || 'Artista no especificado'}</p>
-                ${item.note ? `<p class="text-xs text-slate-400 italic mt-1 bg-slate-900/50 p-1.5 rounded border border-slate-800">"${item.note}"</p>` : ''}
-
-                <div class="flex flex-wrap gap-2 mt-3 justify-center sm:justify-start">
-                  ${item.spotify ? `<a href="${item.spotify}" target="_blank" class="text-xs bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 px-2.5 py-1 rounded-md flex items-center gap-1 border border-emerald-500/30"><i class="fa-brands fa-spotify"></i> Spotify</a>` : ''}
-                  ${item.apple ? `<a href="${item.apple}" target="_blank" class="text-xs bg-pink-600/20 text-pink-400 hover:bg-pink-600/30 px-2.5 py-1 rounded-md flex items-center gap-1 border border-pink-500/30"><i class="fa-brands fa-apple"></i> Apple Music</a>` : ''}
+                <h4 class="font-bold text-white cursor-pointer hover:text-purple-400" onclick="showAlbumPage('${key}', '${item.id}')">${item.title}</h4>
+                <p class="text-xs text-purple-300">${item.artist || 'Artista no especificado'}</p>
+                <div class="flex gap-2 mt-2 justify-center sm:justify-start">
+                  ${item.spotify ? `<a href="${item.spotify}" target="_blank" class="text-[11px] bg-emerald-600/20 text-emerald-400 px-2 py-0.5 rounded"><i class="fa-brands fa-spotify"></i> Spotify</a>` : ''}
+                  ${item.apple ? `<a href="${item.apple}" target="_blank" class="text-[11px] bg-pink-600/20 text-pink-400 px-2 py-0.5 rounded"><i class="fa-brands fa-apple"></i> Apple</a>` : ''}
                 </div>
               </div>
+              ${isAdmin ? `
+                <div class="flex sm:flex-col gap-2">
+                  <button onclick="openEditForm('${key}', '${item.id}')" class="text-xs bg-amber-600 hover:bg-amber-500 text-white px-2 py-1 rounded"><i class="fa-solid fa-pen"></i></button>
+                  <button onclick="deleteAlbum('${key}', '${item.id}')" class="text-xs bg-rose-600 hover:bg-rose-500 text-white px-2 py-1 rounded"><i class="fa-solid fa-trash"></i></button>
+                </div>
+              ` : ''}
             </div>
           `;
         });
       }
 
-      container.innerHTML = html;
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      if (isAdmin) {
+        html += `<button onclick="openEditForm('${key}')" class="w-full mt-2 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs rounded-lg font-bold"><i class="fa-solid fa-plus"></i> Agregar Nuevo Álbum</button>`;
+      }
+
+      document.getElementById('modalContent').innerHTML = html;
+      document.getElementById('modal').classList.remove('hidden');
+      document.getElementById('modal').classList.add('flex');
+    }
+
+    function openEditForm(key, albumId = null) {
+      const item = albumId && db[key] ? db[key].find(a => a.id === albumId) : { title: '', artist: '', note: '', cover: '', spotify: '', apple: '' };
+      
+      let html = `
+        <h3 class="text-lg font-bold text-white mb-4">${albumId ? 'Editar Álbum' : 'Agregar Álbum'}</h3>
+        <form onsubmit="saveAlbumForm(event, '${key}', '${albumId || ''}')" class="space-y-3">
+          <div>
+            <label class="text-xs text-slate-400">Álbum / Canción</label>
+            <input type="text" id="formTitle" value="${item.title}" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white">
+          </div>
+          <div>
+            <label class="text-xs text-slate-400">Artista</label>
+            <input type="text" id="formArtist" value="${item.artist}" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white">
+          </div>
+          <div>
+            <label class="text-xs text-slate-400">Link Spotify (Auto-extrae la portada)</label>
+            <input type="url" id="formSpotify" value="${item.spotify}" onchange="autoFetchCover()" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white">
+          </div>
+          <div>
+            <label class="text-xs text-slate-400">Link Apple Music</label>
+            <input type="url" id="formApple" value="${item.apple}" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white">
+          </div>
+          <div>
+            <label class="text-xs text-slate-400">URL Portada Imagen (Opcional/Manual)</label>
+            <input type="url" id="formCover" value="${item.cover}" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white">
+          </div>
+          <div>
+            <label class="text-xs text-slate-400">Nota / Reseña</label>
+            <textarea id="formNote" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white">${item.note}</textarea>
+          </div>
+          <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2 rounded font-bold text-sm">Guardar Cambios</button>
+        </form>
+      `;
+
+      document.getElementById('modalContent').innerHTML = html;
+      document.getElementById('modal').classList.remove('hidden');
+      document.getElementById('modal').classList.add('flex');
+    }
+
+    async function autoFetchCover() {
+      const spotifyUrl = document.getElementById('formSpotify').value;
+      if (spotifyUrl.includes('open.spotify.com/album/')) {
+        const albumId = spotifyUrl.split('album/')[1].split('?')[0];
+        try {
+          const res = await fetch(`https://open.spotify.com/oembed?url=${spotifyUrl}`);
+          const data = await res.json();
+          if (data.thumbnail_url) {
+            document.getElementById('formCover').value = data.thumbnail_url;
+          }
+        } catch (e) {
+          console.log("Auto fetch cover fallback");
+        }
+      }
+    }
+
+    function saveAlbumForm(e, key, albumId) {
+      e.preventDefault();
+      if (!db[key]) db[key] = [];
+
+      const newAlbum = {
+        id: albumId || String(Date.now()),
+        title: document.getElementById('formTitle').value,
+        artist: document.getElementById('formArtist').value,
+        spotify: document.getElementById('formSpotify').value,
+        apple: document.getElementById('formApple').value,
+        cover: document.getElementById('formCover').value,
+        note: document.getElementById('formNote').value
+      };
+
+      if (albumId) {
+        const idx = db[key].findIndex(a => a.id === albumId);
+        if (idx !== -1) db[key][idx] = newAlbum;
+      } else {
+        db[key].push(newAlbum);
+      }
+
+      saveDB();
+      closeModal();
+      alert("¡Guardado con éxito!");
+    }
+
+    function deleteAlbum(key, albumId) {
+      if (confirm("¿Estás seguro de eliminar este álbum?")) {
+        db[key] = db[key].filter(a => a.id !== albumId);
+        saveDB();
+        closeModal();
+      }
+    }
+
+    function showAlbumPage(key, albumId) {
+      const album = db[key].find(a => a.id === albumId);
+      closeModal();
+      document.getElementById('mainView').classList.add('hidden');
+      const albumPage = document.getElementById('albumPage');
+      
+      document.getElementById('albumPageContent').innerHTML = `
+        <div class="flex flex-col md:flex-row gap-8 items-center">
+          <div class="relative w-64 h-64 flex-shrink-0">
+            <img src="${album.cover || 'https://i.imgur.com/3n0K9y8.png'}" class="w-full h-full object-cover rounded-2xl shadow-2xl z-10 relative">
+            <div class="absolute inset-0 rounded-full bg-black border-4 border-slate-700 vinyl-spin -right-8 opacity-60"></div>
+          </div>
+          <div class="flex-1 text-center md:text-left">
+            <h1 class="text-3xl font-extrabold text-white mb-2">${album.title}</h1>
+            <h3 class="text-xl text-purple-400 font-semibold mb-4">${album.artist}</h3>
+            ${album.note ? `<p class="text-sm text-slate-300 italic mb-6 bg-slate-900/60 p-4 rounded-xl border border-slate-800">"${album.note}"</p>` : ''}
+            <div class="flex flex-wrap gap-4 justify-center md:justify-start">
+              ${album.spotify ? `<a href="${album.spotify}" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-full flex items-center gap-2"><i class="fa-brands fa-spotify text-lg"></i> Abrir en Spotify</a>` : ''}
+              ${album.apple ? `<a href="${album.apple}" target="_blank" class="bg-pink-600 hover:bg-pink-500 text-white font-bold px-5 py-2.5 rounded-full flex items-center gap-2"><i class="fa-brands fa-apple text-lg"></i> Apple Music</a>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+      albumPage.classList.remove('hidden');
+    }
+
+    function goHome() {
+      document.getElementById('albumPage').classList.add('hidden');
+      document.getElementById('mainView').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+      document.getElementById('modal').classList.remove('flex');
     }
 
     function copyDayLink(key) {
@@ -327,23 +354,6 @@
       alert('¡Enlace copiado al portapapeles!\n' + url);
     }
 
-    // Inicializar navegación de meses
-    document.getElementById('prevMonth').onclick = () => {
-      currentMonth = (currentMonth - 1 + 12) % 12;
-      renderCalendar(currentMonth);
-    };
-
-    document.getElementById('nextMonth').onclick = () => {
-      currentMonth = (currentMonth + 1) % 12;
-      renderCalendar(currentMonth);
-    };
-
-    document.getElementById('closeModal').onclick = () => {
-      document.getElementById('modal').classList.add('hidden');
-      document.getElementById('modal').classList.remove('flex');
-    };
-
-    // Verificar si viene una fecha en la URL (?fecha=MM-DD)
     window.onload = () => {
       renderCalendar(currentMonth);
       const urlParams = new URLSearchParams(window.location.search);
