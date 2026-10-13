@@ -16,13 +16,8 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    .border-subtle {
-      border-color: #1a1a1a;
-    }
-
-    .bg-card {
-      background-color: #0a0a0a;
-    }
+    .border-subtle { border-color: #1a1a1a; }
+    .bg-card { background-color: #0a0a0a; }
 
     .calendar-day {
       transition: border-color 0.15s ease, background-color 0.15s ease;
@@ -94,13 +89,14 @@
   </div>
 
   <script>
+    // Usamos imágenes obtenidas directamente del CDN de Apple Music (sin bloqueos CORS)
     const initialData = {
-      "01-15": [{ id: "1", title: "Almendra", artist: "Almendra", note: "POR FIN", cover: "https://i.scdn.co/image/ab67616d0000b27341ea22e69777df5a2307ef02", spotify: "https://open.spotify.com/album/3UaBOn4I1j9vKxR0U7mO13", apple: "" }],
-      "01-17": [{ id: "2", title: "Circles", artist: "Mac Miller", note: "", cover: "https://i.scdn.co/image/ab67616d0000b2736cb203799633e56843478951", spotify: "https://open.spotify.com/album/51R5933C397ThA2S2L9A35", apple: "https://music.apple.com/us/album/circles/1494022631" }],
-      "01-27": [{ id: "3", title: "Let’s Start Here", artist: "Lil Yachty", note: "", cover: "https://i.scdn.co/image/ab67616d0000b27343e0d869a8e03403a48e772b", spotify: "https://open.spotify.com/album/6AeeE3R9338J4yL3fN819y", apple: "" }],
-      "02-14": [{ id: "4", title: "The Life of Pablo", artist: "Kanye West", note: "", cover: "https://i.scdn.co/image/ab67616d0000b2732a038d3bf875d23e4aeaa84e", spotify: "https://open.spotify.com/album/7222133791e84a28b08709", apple: "" }],
-      "02-26": [{ id: "5", title: "El Madrileño", artist: "C. Tangana", note: "", cover: "https://i.scdn.co/image/ab67616d0000b2733b86ae94ebf3d2f9762df2f8", spotify: "https://open.spotify.com/album/32L34898144933", apple: "" }],
-      "05-17": [{ id: "6", title: "IGOR", artist: "TYLER, THE CREATOR", note: "", cover: "https://i.scdn.co/image/ab67616d0000b27370ba0d6e33516e771af2b575", spotify: "https://open.spotify.com/album/53932133791e84a28b08709", apple: "" }]
+      "01-15": [{ id: "1", title: "Almendra", artist: "Almendra", note: "POR FIN", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/31/3d/8c/313d8c1c-3224-2c40-1092-d6f7a63445cd/886443428987.jpg/400x400bb.jpg", spotify: "https://open.spotify.com/album/3UaBOn4I1j9vKxR0U7mO13", apple: "" }],
+      "01-17": [{ id: "2", title: "Circles", artist: "Mac Miller", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/f5/63/87/f5638706-5389-9b98-1e42-7efc90a18413/054391925344.jpg/400x400bb.jpg", spotify: "https://open.spotify.com/album/51R5933C397ThA2S2L9A35", apple: "https://music.apple.com/us/album/circles/1494022631" }],
+      "01-27": [{ id: "3", title: "Let’s Start Here", artist: "Lil Yachty", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music113/v4/4a/1c/fb/4a1cfb36-7d6f-fa8a-21e1-e1f44e83f5c9/23UMGIM08226.rgb.jpg/400x400bb.jpg", spotify: "https://open.spotify.com/album/6AeeE3R9338J4yL3fN819y", apple: "" }],
+      "02-14": [{ id: "4", title: "The Life of Pablo", artist: "Kanye West", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/09/a6/5e/09a65e90-c1dd-5f72-bd03-ef04bc1ec9ad/16UMGIM13926.jpg/400x400bb.jpg", spotify: "https://open.spotify.com/album/7222133791e84a28b08709", apple: "" }],
+      "02-26": [{ id: "5", title: "El Madrileño", artist: "C. Tangana", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/cb/7d/53/cb7d5329-8f3a-18e4-b778-900224d4554b/190296716039.jpg/400x400bb.jpg", spotify: "https://open.spotify.com/album/32L34898144933", apple: "" }],
+      "05-17": [{ id: "6", title: "IGOR", artist: "TYLER, THE CREATOR", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music123/v4/3d/8c/10/3d8c1055-fa6e-2144-8849-c1196ff31526/886447738204.jpg/400x400bb.jpg", spotify: "https://open.spotify.com/album/53932133791e84a28b08709", apple: "" }]
     };
 
     const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -203,7 +199,7 @@
           const coverUrl = item.cover || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
           html += `
             <div class="mb-4 p-3 rounded-xl border border-subtle bg-black flex items-center gap-3">
-              <img src="${coverUrl}" onerror="handleImageError(this)" class="w-12 h-12 rounded-lg object-cover">
+              <img src="${coverUrl}" onerror="handleImageError(this)" class="w-12 h-12 rounded-lg object-cover bg-zinc-900">
               <div class="flex-1 min-w-0">
                 <h4 class="font-medium text-xs text-white truncate cursor-pointer hover:text-purple-400 transition" onclick="showAlbumPage('${key}', '${item.id}')">${item.title}</h4>
                 <p class="text-[11px] text-zinc-500 truncate">${item.artist || 'Artista'}</p>
@@ -240,22 +236,22 @@
         <form onsubmit="saveAlbumForm(event, '${key}', '${albumId || ''}')" class="space-y-3">
           <div>
             <label class="text-[10px] text-zinc-500 uppercase">Álbum / Canción</label>
-            <input type="text" id="formTitle" value="${item.title}" required class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
+            <input type="text" id="formTitle" value="${item.title}" onblur="fetchAppleCover()" required class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
             <label class="text-[10px] text-zinc-500 uppercase">Artista</label>
-            <input type="text" id="formArtist" value="${item.artist}" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
+            <input type="text" id="formArtist" value="${item.artist}" onblur="fetchAppleCover()" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
             <label class="text-[10px] text-zinc-500 uppercase">Spotify Link</label>
-            <input type="url" id="formSpotify" value="${item.spotify}" onchange="autoFetchCover()" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
+            <input type="url" id="formSpotify" value="${item.spotify}" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
             <label class="text-[10px] text-zinc-500 uppercase">Apple Music Link</label>
             <input type="url" id="formApple" value="${item.apple}" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
-            <label class="text-[10px] text-zinc-500 uppercase">URL Portada Imagen</label>
+            <label class="text-[10px] text-zinc-500 uppercase">URL Portada (Auto-buscada de Apple Music)</label>
             <input type="url" id="formCover" value="${item.cover}" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
@@ -271,17 +267,24 @@
       document.getElementById('modal').classList.add('flex');
     }
 
-    async function autoFetchCover() {
-      const spotifyUrl = document.getElementById('formSpotify').value;
-      if (spotifyUrl.includes('open.spotify.com/album/')) {
+    // Busca automáticamente la portada limpia en la API pública de Apple Music/iTunes
+    async function fetchAppleCover() {
+      const title = document.getElementById('formTitle').value;
+      const artist = document.getElementById('formArtist').value;
+      const coverInput = document.getElementById('formCover');
+
+      if (title && !coverInput.value) {
+        const query = encodeURIComponent(`${title} ${artist}`);
         try {
-          const res = await fetch(`https://open.spotify.com/oembed?url=${spotifyUrl}`);
+          const res = await fetch(`https://itunes.apple.com/search?term=${query}&entity=album&limit=1`);
           const data = await res.json();
-          if (data.thumbnail_url) {
-            document.getElementById('formCover').value = data.thumbnail_url;
+          if (data.results && data.results.length > 0) {
+            // Reemplaza tamaño a 600x600 para máxima resolución
+            const artworkUrl = data.results[0].artworkUrl100.replace('100x100bb', '600x600bb');
+            coverInput.value = artworkUrl;
           }
         } catch (e) {
-          console.log("Cover fallback");
+          console.log("No se encontró portada en iTunes");
         }
       }
     }
@@ -324,10 +327,11 @@
       closeModal();
       document.getElementById('mainView').classList.add('hidden');
       const albumPage = document.getElementById('albumPage');
+      const coverUrl = album.cover || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
       
       document.getElementById('albumPageContent').innerHTML = `
         <div class="flex flex-col sm:flex-row gap-6 items-center">
-          <img src="${album.cover || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777'}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded-xl border border-subtle">
+          <img src="${coverUrl}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded-xl border border-subtle bg-zinc-900 shadow-xl">
           <div class="flex-1 text-center sm:text-left">
             <h1 class="text-xl font-medium text-white mb-1">${album.title}</h1>
             <h3 class="text-sm text-zinc-400 mb-4">${album.artist}</h3>
