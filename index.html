@@ -174,6 +174,7 @@
       "10-06": [{ id: "o6_1", title: "Artaud", artist: "Pescado Rabioso", note: "" }, { id: "o6_2", title: "Así se hace", artist: "Fother Muckers", note: "" }],
       "10-08": [{ id: "o8", title: "Melophobia", artist: "Cage the Elephant", note: "" }],
       "10-11": [{ id: "o11", title: "Emanuel", artist: "Pedro Piedra", note: "" }],
+      "10-13": [{ id: "o13", title: "52nd Street", artist: "Billy Joel", note: "" }],
       "10-18": [{ id: "o18_1", title: "Reconoceronte", artist: "Los Mil Jinetes", note: "" }, { id: "o18_2", title: "Salen otras diez", artist: "Las Chaquetas Amarillas", note: "" }, { id: "o18_3", title: "Glimmer od God", artist: "Jean Dawson", note: "" }],
       "10-21": [{ id: "o21", title: "Durazno Sangrando", artist: "Invisible", note: "" }],
       "10-26": [{ id: "o26", title: "Ballads 1", artist: "Joji", note: "" }],
@@ -209,10 +210,6 @@
     let currentMonth = new Date().getMonth();
     let isAdmin = false;
     let isIsolatedMode = false;
-    
-    // Asignar contraseña roxin
-    let adminPassword = 'roxin';
-    localStorage.setItem('adminPass', 'roxin');
 
     let db = JSON.parse(localStorage.getItem('musicCalendarDB_v3')) || fullMusicData;
 
@@ -229,6 +226,7 @@
     }
 
     function toggleAdmin() {
+      const adminPassword = 'roxin';
       if (!isAdmin) {
         const pass = prompt("Contraseña de administrador:");
         if (pass === adminPassword) {
@@ -517,7 +515,7 @@
         <div class="flex flex-col sm:flex-row gap-6 items-center">
           <img src="${coverUrl || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777'}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded-xl border border-subtle bg-zinc-900 shadow-xl">
           <div class="flex-1 text-center sm:text-left">
-            ${isToday ? `<p class="text-xs text-purple-400 font-medium tracking-wide mb-1">🎉 ¡Feliz Cumpleaños!</p>` : ''}
+            ${isToday ? `<p class="text-xs text-purple-400 font-medium tracking-wide mb-2">🎉 ¡Feliz Cumpleaños!</p>` : ''}
             <h1 class="text-xl font-medium text-white mb-1">${album ? album.title : ''}</h1>
             <h3 class="text-sm text-zinc-400 mb-4">${album ? album.artist : ''}</h3>
             ${album && album.note ? `<p class="text-xs text-zinc-400 italic mb-6 bg-black p-3 rounded-lg border border-subtle">"${album.note}"</p>` : ''}
@@ -555,7 +553,7 @@
             <div class="flex flex-col sm:flex-row gap-6 items-center border-b border-subtle/50 pb-6 mb-6 last:border-none last:pb-0 last:mb-0">
               <img src="${coverUrl}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded-xl border border-subtle bg-zinc-900 shadow-xl">
               <div class="flex-1 text-center sm:text-left">
-                ${isToday ? `<p class="text-xs text-purple-400 font-medium tracking-wide mb-1">🎉 ¡Feliz Cumpleaños!</p>` : ''}
+                ${isToday ? `<p class="text-xs text-purple-400 font-medium tracking-wide mb-2">🎉 ¡Feliz Cumpleaños!</p>` : ''}
                 <h1 class="text-xl font-medium text-white mb-1">${album.title}</h1>
                 <h3 class="text-sm text-zinc-400 mb-4">${album.artist || ''}</h3>
                 ${album.note ? `<p class="text-xs text-zinc-400 italic mb-6 bg-black p-3 rounded-lg border border-subtle">"${album.note}"</p>` : ''}
