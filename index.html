@@ -248,6 +248,44 @@
       img.src = 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
     }
 
+    // Extrae automáticamente la portada original desde el link de Spotify o Apple Music
+    async function extractCoverFromUrl(url) {
+      if (!url) return '';
+      
+      // Si es un link de Spotify
+      if (url.includes('spotify.com')) {
+        try {
+          const res = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`);
+          const data = await res.json();
+          if (data.thumbnail_url) return data.thumbnail_url;
+        } catch (e) {
+          console.log("Error leyendo link de Spotify");
+        }
+      }
+      
+      // Si es un link de Apple Music
+      if (url.includes('apple.com')) {
+        try {
+          const res = await fetch(`https://wsrv.nl/?url=${encodeURIComponent(url)}`);
+          if (res.ok) {
+            // Intentar buscar vía API pública de iTunes
+            const match = url.match(/\/album\/[^\/]+\/([0-9]+)/) || url.match(/i=([0-9]+)/);
+            if (match) {
+              const resApi = await fetch(`https://itunes.apple.com/lookup?id=${match[1]}`);
+              const dataApi = await resApi.json();
+              if (dataApi.results && dataApi.results[0].artworkUrl100) {
+                return dataApi.results[0].artworkUrl100.replace('100x100bb', '600x600bb');
+              }
+            }
+          }
+        } catch (e) {
+          console.log("Error leyendo link de Apple Music");
+        }
+      }
+
+      return '';
+    }
+
     async function getAppleCoverUrl(title, artist) {
       if (!title) return '';
       const query = encodeURIComponent(`${title} ${artist || ''}`);
@@ -379,7 +417,7 @@
             <input type="url" id="formApple" value="${item.apple}" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
-            <label class="text-[10px] text-zinc-500 uppercase">URL Portada Imagen (Pega aquí el link correcto o déjalo vacío para auto-buscar)</label>
+            <label class="text-[10px] text-zinc-500 uppercase">URL Portada Imagen (Directa o pegada manualmente)</label>
             <input type="url" id="formCover" value="${item.cover || ''}" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
@@ -401,8 +439,22 @@
 
       const title = document.getElementById('formTitle').value;
       const artist = document.getElementById('formArtist').value;
+      const spotify = document.getElementById('formSpotify').value;
+      const apple = document.getElementById('formApple').value;
       let cover = document.getElementById('formCover').value;
 
+      // 1. Extraer portada directamente desde el link de Spotify o Apple Music si se proporcionó
+      if (spotify) {
+        const extractedCover = await extractCoverFromUrl(spotify);
+        if (extractedCover) cover = extractedCover;
+      }
+      
+      if (!cover && apple) {
+        const extractedCover = await extractCoverFromUrl(apple);
+        if (extractedCover) cover = extractedCover;
+      }
+
+      // 2. Si sigue estando vacío, buscar por Título + Artista
       if (!cover) {
         cover = await getAppleCoverUrl(title, artist);
       }
@@ -411,8 +463,8 @@
         id: albumId || String(Date.now()),
         title: title,
         artist: artist,
-        spotify: document.getElementById('formSpotify').value,
-        apple: document.getElementById('formApple').value,
+        spotify: spotify,
+        apple: apple,
         cover: cover,
         note: document.getElementById('formNote').value
       };
