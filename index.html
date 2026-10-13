@@ -66,7 +66,7 @@
       <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
     </div>
 
-    <!-- Grid -->
+    <!-- Grid del Calendario -->
     <div id="calendarGrid" class="grid grid-cols-7 gap-2"></div>
   </main>
 
@@ -89,14 +89,121 @@
   </div>
 
   <script>
-    // Usamos imágenes obtenidas directamente del CDN de Apple Music (sin bloqueos CORS)
-    const initialData = {
-      "01-15": [{ id: "1", title: "Almendra", artist: "Almendra", note: "POR FIN", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/31/3d/8c/313d8c1c-3224-2c40-1092-d6f7a63445cd/886443428987.jpg/400x400bb.jpg", spotify: "https://open.spotify.com/album/3UaBOn4I1j9vKxR0U7mO13", apple: "" }],
-      "01-17": [{ id: "2", title: "Circles", artist: "Mac Miller", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/f5/63/87/f5638706-5389-9b98-1e42-7efc90a18413/054391925344.jpg/400x400bb.jpg", spotify: "https://open.spotify.com/album/51R5933C397ThA2S2L9A35", apple: "https://music.apple.com/us/album/circles/1494022631" }],
-      "01-27": [{ id: "3", title: "Let’s Start Here", artist: "Lil Yachty", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music113/v4/4a/1c/fb/4a1cfb36-7d6f-fa8a-21e1-e1f44e83f5c9/23UMGIM08226.rgb.jpg/400x400bb.jpg", spotify: "https://open.spotify.com/album/6AeeE3R9338J4yL3fN819y", apple: "" }],
-      "02-14": [{ id: "4", title: "The Life of Pablo", artist: "Kanye West", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/09/a6/5e/09a65e90-c1dd-5f72-bd03-ef04bc1ec9ad/16UMGIM13926.jpg/400x400bb.jpg", spotify: "https://open.spotify.com/album/7222133791e84a28b08709", apple: "" }],
-      "02-26": [{ id: "5", title: "El Madrileño", artist: "C. Tangana", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/cb/7d/53/cb7d5329-8f3a-18e4-b778-900224d4554b/190296716039.jpg/400x400bb.jpg", spotify: "https://open.spotify.com/album/32L34898144933", apple: "" }],
-      "05-17": [{ id: "6", title: "IGOR", artist: "TYLER, THE CREATOR", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music123/v4/3d/8c/10/3d8c1055-fa6e-2144-8849-c1196ff31526/886447738204.jpg/400x400bb.jpg", spotify: "https://open.spotify.com/album/53932133791e84a28b08709", apple: "" }]
+    // Base de datos completa integrada con toda tu lista
+    const fullMusicData = {
+      "01-01": [{ id: "e1", title: "Aquí vamos otra vez", artist: "1280 Almas", note: "" }],
+      "01-15": [{ id: "e15", title: "Almendra", artist: "Almendra", note: "POR FIN" }],
+      "01-17": [{ id: "e17", title: "Circles", artist: "Mac Miller", note: "" }],
+      "01-27": [{ id: "e27", title: "Let’s Start Here", artist: "Lil Yachty", note: "" }],
+      "02-14": [{ id: "f14", title: "The Life of Pablo", artist: "Kanye West", note: "" }],
+      "02-19": [{ id: "f19", title: "Por si mañana no estoy", artist: "", note: "" }],
+      "02-24": [{ id: "f24", title: "Todavía No", artist: "La Paloma", note: "" }],
+      "02-25": [{ id: "f25", title: "Dios y la Mata de Lulo", artist: "Nicolas y los Fumadores", note: "" }],
+      "02-26": [{ id: "f26", title: "El Madrileño", artist: "C. Tangana", note: "" }],
+      "02-27": [{ id: "f27", title: "David Ruffin", artist: "David Ruffin", note: "no realmente pero lo es en mi corazón" }],
+      "02-28": [{ id: "f28", title: "CHASE", artist: "AARON MAY", note: "" }],
+      "03-03": [{ id: "m3", title: "American Teen", artist: "Khalid", note: "" }],
+      "03-09": [{ id: "m9", title: "Como Pez en el Hielo", artist: "Nicolás y los Fumadores", note: "" }],
+      "03-16": [{ id: "m16", title: "Gran Santiago", artist: "Teleradio Donoso", note: "" }],
+      "03-18": [{ id: "m18", title: "Cara y Cruz", artist: "Ayax y Prok", note: "" }],
+      "03-22": [{ id: "m22", title: "Mika’s Laundry", artist: "Matt Champion", note: "" }],
+      "03-24": [{ id: "m24", title: "Películas", artist: "La máquina de hacer pájaros", note: "" }],
+      "03-25": [{ id: "m25", title: "Casiopea", artist: "Casiopea", note: "" }],
+      "03-26": [{ id: "m26", title: "Comedown Machine", artist: "The Strokes", note: "" }],
+      "03-28": [{ id: "m28_1", title: "The Dude", artist: "Quincy Jones", note: "" }, { id: "m28_2", title: "10 Songs", artist: "Q", note: "" }],
+      "03-31": [{ id: "m31", title: "JúJú & The Flowerbug", artist: "Sunny Colon", note: "" }],
+      "04-02": [{ id: "a2", title: "Starry Cat", artist: "Starry Cat", note: "" }],
+      "04-10": [{ id: "a10_1", title: "The New Abnormal", artist: "The Strokes", note: "" }, { id: "a10_2", title: "QNEPT", artist: "JAZE", note: "" }],
+      "04-14": [{ id: "a14", title: "Damn", artist: "Kendrick Lamar", note: "" }],
+      "04-18": [{ id: "a18_1", title: "Cripta y vida", artist: "Pedropiedra", note: "" }, { id: "a18_2", title: "I Heard That Noise", artist: "quickly, quickly", note: "" }],
+      "04-23": [{ id: "a23", title: "FERXXO (VOL 1: MOR)", artist: "Feid", note: "" }],
+      "04-26": [{ id: "a26_1", title: "Apricot Princess", artist: "Rex Orange County", note: "" }, { id: "a26_2", title: "Por Cesarea", artist: "DILLOM", note: "" }],
+      "05-05": [{ id: "may5", title: "Soul, PRESENT", artist: "Q", note: "" }],
+      "05-06": [{ id: "may6", title: "Melanchole", artist: "Salvia Palth", note: "" }],
+      "05-08": [{ id: "may8", title: "Pedropiedra", artist: "Pedropiedra", note: "" }],
+      "05-10": [{ id: "may10", title: "Hopes and Fears", artist: "Keane", note: "" }],
+      "05-13": [{ id: "may13", title: "Mr Morale & the Big Steppers", artist: "Kendrick Lamar", note: "" }],
+      "05-17": [{ id: "may17_1", title: "IGOR", artist: "TYLER, THE CREATOR", note: "" }, { id: "may17_2", title: "Sayonara", artist: "Alvaro Diaz", note: "" }, { id: "may17_3", title: "Hit Me Hard and Soft", artist: "Billie Eilish", note: "" }],
+      "05-22": [{ id: "may22", title: "Omakase", artist: "Alvaro Diaz", note: "" }],
+      "05-23": [{ id: "may23", title: "Goodbye and good Riddance", artist: "Juice Wrld", note: "" }],
+      "06-05": [{ id: "j5", title: "The Shave Experiment (Director's Cut)", artist: "Q", note: "" }],
+      "06-06": [{ id: "j6", title: "Les Étolies Vagabondes", artist: "Nekfeu", note: "" }],
+      "06-08": [{ id: "j8", title: "Kids See Ghost", artist: "Kanye West & Kid Cudi", note: "" }],
+      "06-10": [{ id: "j10", title: "Channel Orange", artist: "Frank Ocean", note: "" }],
+      "06-16": [{ id: "j16_1", title: "Inefable", artist: "Micro Tdh", note: "" }, { id: "j16_2", title: "Abysmal Thoughts", artist: "The Drums", note: "" }],
+      "06-20": [{ id: "j20", title: "RANDOM ACCESS MEMORIES", artist: "DAFT PUNK", note: "" }],
+      "06-25": [{ id: "j25", title: "Vice Versa", artist: "Rauw Alejandro", note: "" }],
+      "06-26": [{ id: "j26", title: "El Retorno", artist: "Santiago Motorizado", note: "" }],
+      "06-29": [{ id: "j29", title: "DATA", artist: "Tainy", note: "" }],
+      "07-08": [{ id: "jul8", title: "Introducción a los Fother Muckers: Menudencias (Sólo para fanáticos)", artist: "Fother Muckers", note: "" }],
+      "07-11": [{ id: "jul11", title: "166", artist: "Milo J", note: "" }],
+      "07-15": [{ id: "jul15", title: "Gemini Rights", artist: "Steve Lacy", note: "" }],
+      "07-16": [{ id: "jul16", title: "Oh yeah?", artist: "Steve Lacy", note: "" }],
+      "07-17": [{ id: "jul17", title: "Kill the Lights", artist: "Tony Molina", note: "" }],
+      "07-28": [{ id: "jul28", title: "Utopia", artist: "Travis Scott", note: "" }],
+      "07-30": [{ id: "jul30", title: "Is This It", artist: "The Strokes", note: "" }],
+      "08-03": [{ id: "ag3", title: "Swimming", artist: "Mac Miller", note: "" }],
+      "08-08": [{ id: "ag8", title: "Coastal Grooves", artist: "Blood Orange", note: "" }],
+      "08-10": [{ id: "ag10_1", title: "Off The Wall", artist: "Michael Jackson", note: "" }, { id: "ag10_2", title: "Life is a Trip", artist: "Trippie Redd", note: "" }],
+      "08-14": [{ id: "ag14", title: "ATP", artist: "Nsqk", note: "" }],
+      "08-15": [{ id: "ag15", title: "Baby", artist: "Dijon", note: "" }],
+      "08-20": [{ id: "ag20_1", title: "Blonde", artist: "Frank Ocean", note: "" }, { id: "ag20_2", title: "Intershibuya La Mafia", artist: "Feid", note: "" }],
+      "08-25": [{ id: "ag25", title: "17", artist: "Xxxtentacion", note: "" }],
+      "08-26": [{ id: "ag26", title: "All The Topings", artist: "Panuccis Pizza", note: "" }],
+      "08-28": [{ id: "ag28_1", title: "CTV3 Cool Tape Vol.3", artist: "Jaden Smith", note: "" }, { id: "ag28_2", title: "Lets get it on", artist: "Marvin Gaye", note: "" }],
+      "08-29": [{ id: "ag29", title: "Donda", artist: "Kanye West", note: "" }],
+      "08-31": [{ id: "ag31", title: "Peperina", artist: "Serú Girán", note: "" }],
+      "09-02": [{ id: "s2", title: "Portamento", artist: "The Drums", note: "" }],
+      "09-03": [{ id: "s3", title: "Juventud Americana", artist: "Ases Falsos", note: "" }],
+      "09-04": [{ id: "s4_1", title: "Rodeo", artist: "Travis Scott", note: "" }, { id: "s4_2", title: "Bcos U Will Never B Free", artist: "Rex Orange County", note: "" }],
+      "09-05": [{ id: "s5_1", title: "Mourn", artist: "Corbin", note: "" }, { id: "s5_2", title: "Absolutely", artist: "Dijon", note: "" }],
+      "09-06": [{ id: "s6", title: "Inútil Corazón", artist: "Axel Catalán", note: "" }],
+      "09-07": [{ id: "s7_1", title: "Siembra", artist: "Rubén Blades & Willy Colón", note: "" }, { id: "s7_2", title: "Para Hondo", artist: "Cristobal Briceño", note: "" }],
+      "09-09": [{ id: "s9", title: "ALTA SUCIEDAD", artist: "ANDRES CALAMARO", note: "" }],
+      "09-11": [{ id: "s11", title: "Graduation", artist: "Kanye West", note: "" }],
+      "09-12": [{ id: "s12", title: "Bailar y llorar", artist: "teleradio donoso", note: "" }],
+      "09-13": [{ id: "s13", title: "Heaven Surrounds You", artist: "Surf Curse", note: "" }],
+      "09-14": [{ id: "s14", title: "Feliz Cumpleaños FERXXO te pirateamos el álbum", artist: "Feid", note: "" }],
+      "09-15": [{ id: "s15_1", title: "I will be on my one because there is a devil inside my body", artist: "Teen Suicide", note: "" }, { id: "s15_2", title: "SUPERNOVA", artist: "Ralphie Choo", note: "" }],
+      "09-20": [{ id: "s20", title: "El jardin de los presentes", artist: "Invisible", note: "" }],
+      "09-23": [{ id: "s23", title: "El Círculo", artist: "Kase.O", note: "" }],
+      "09-24": [{ id: "s24_1", title: "Nothing Was The Same", artist: "Drake", note: "" }, { id: "s24_2", title: "Nectar", artist: "Joji", note: "" }],
+      "09-25": [{ id: "s25", title: "De la Linea Diez al Sol", artist: "Niña Polaca", note: "" }],
+      "09-28": [{ id: "s28", title: "Songs In The Key of Life", artist: "Stevie Wonder", note: "" }],
+      "09-29": [{ id: "s29_1", title: "The Stranger", artist: "Billy Joel", note: "" }, { id: "s29_2", title: "Salvavidas(O de las balas perdidas)", artist: "La Maravillosa Orquesta del Alcohol", note: "" }],
+      "10-03": [{ id: "o3", title: "Un Golpe de Suerte", artist: "La Paloma", note: "" }],
+      "10-06": [{ id: "o6_1", title: "Artaud", artist: "Pescado Rabioso", note: "" }, { id: "o6_2", title: "Así se hace", artist: "Fother Muckers", note: "" }],
+      "10-08": [{ id: "o8", title: "Melophobia", artist: "Cage the Elephant", note: "" }],
+      "10-11": [{ id: "o11", title: "Emanuel", artist: "Pedro Piedra", note: "" }],
+      "10-18": [{ id: "o18_1", title: "Reconoceronte", artist: "Los Mil Jinetes", note: "" }, { id: "o18_2", title: "Salen otras diez", artist: "Las Chaquetas Amarillas", note: "" }, { id: "o18_3", title: "Glimmer od God", artist: "Jean Dawson", note: "" }],
+      "10-21": [{ id: "o21", title: "Durazno Sangrando", artist: "Invisible", note: "" }],
+      "10-26": [{ id: "o26", title: "Ballads 1", artist: "Joji", note: "" }],
+      "10-28": [{ id: "o28_1", title: "Chromakopia", artist: "Tyler the Creator", note: "" }, { id: "o28_2", title: "Room in Fire", artist: "The Strokes", note: "" }, { id: "o28_3", title: "Dúo Niagara", artist: "Dúo Niagara", note: "" }],
+      "10-29": [{ id: "o29_1", title: "Felicilandia", artist: "Alvaro Diaz", note: "" }, { id: "o29_2", title: "No soy uno", artist: "Fother Muckers", note: "" }],
+      "10-31": [{ id: "o31", title: "Ghost with Skin", artist: "Corbin", note: "" }],
+      "11-04": [{ id: "n4", title: "Her Loss", artist: "Drake & 21 Savage", note: "" }],
+      "11-08": [{ id: "n8", title: "Mal que bien", artist: "Nicolas y los fumadores", note: "" }],
+      "11-11": [{ id: "n11_1", title: "No", artist: "Pánico", note: "" }, { id: "n11_2", title: "Espejo", artist: "ZPU", note: "" }, { id: "n11_3", title: "Modal Soul", artist: "Mojabes", note: "" }],
+      "11-15": [{ id: "n15", title: "Cosa Nuestra", artist: "Rauw Alejando", note: "" }],
+      "11-17": [{ id: "n17", title: "Syre", artist: "Jaden Smith", note: "" }],
+      "11-18": [{ id: "n18", title: "Harmless Melodies", artist: "Yellow Days", note: "" }],
+      "11-21": [{ id: "n21_1", title: "Justo y necesario", artist: "Fother Muckers", note: "" }, { id: "n21_2", title: "You", artist: "Larry Lovestein & The Velvet Revival", note: "" }],
+      "11-23": [{ id: "n23", title: "Roy", artist: "NSQK", note: "" }],
+      "11-26": [{ id: "n26", title: "Una idea, pero es triste", artist: "La Paloma", note: "" }],
+      "12-02": [{ id: "d2", title: "Awaken, My Love!", artist: "Childish Gambino", note: "" }],
+      "12-04": [{ id: "d4", title: "The Lo-Fis", artist: "Steve Lacy", note: "" }],
+      "12-06": [{ id: "d6", title: "Perro Viejo", artist: "Axel Catalán", note: "" }],
+      "12-09": [{ id: "d9_1", title: "Stoney", artist: "Post Malone", note: "" }, { id: "d9_2", title: "Lift Your Skinny Fists like Antennas to Heaven", artist: "Godspeed You! Black Emperor", note: "" }],
+      "12-10": [{ id: "d10", title: "Because the Internet", artist: "Childish Gambino", note: "" }],
+      "12-11": [{ id: "d11", title: "Man On The Moon lll", artist: "Kid Cudi", note: "" }],
+      "12-14": [{ id: "d14", title: "Spiderman Into the Spiderverse", artist: "Muchos", note: "" }],
+      "12-17": [{ id: "d17", title: "El Paisaje Salvaje", artist: "Fother Muckers", note: "" }],
+      "12-20": [{ id: "d20", title: "La Grasa de Las Capitales", artist: "Serú Giran", note: "" }],
+      "12-21": [{ id: "d21", title: "Sin Futuro", artist: "Axel Catalán?", note: "" }],
+      "12-24": [{ id: "d24_1", title: "X100PRE", artist: "Bad Bunny", note: "" }, { id: "d24_2", title: "Andate Cabrita", artist: "Los Mil Jinetes", note: "" }],
+      "12-25": [{ id: "d25", title: "Una Navidad con los Fother Muckers", artist: "Fother Muckers", note: "" }],
+      "12-30": [{ id: "d30", title: "Diaz Antes", artist: "Alvaro Diaz", note: "" }],
+      "12-31": [{ id: "d31", title: "Si No Tienes Nada Que Decir Entonces Calla", artist: "Fother Muckers", note: "" }]
     };
 
     const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -104,10 +211,10 @@
     let isAdmin = false;
     let adminPassword = localStorage.getItem('adminPass') || '1234';
 
-    let db = JSON.parse(localStorage.getItem('musicCalendarDB')) || initialData;
+    let db = JSON.parse(localStorage.getItem('musicCalendarDB_v2')) || fullMusicData;
 
     function saveDB() {
-      localStorage.setItem('musicCalendarDB', JSON.stringify(db));
+      localStorage.setItem('musicCalendarDB_v2', JSON.stringify(db));
       renderCalendar(currentMonth);
     }
 
@@ -138,6 +245,22 @@
     function handleImageError(img) {
       img.onerror = null;
       img.src = 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
+    }
+
+    // Busca la portada automáticamente en Apple Music de forma 100% confiable
+    async function getAppleCoverUrl(title, artist) {
+      if (!title) return '';
+      const query = encodeURIComponent(`${title} ${artist || ''}`);
+      try {
+        const res = await fetch(`https://itunes.apple.com/search?term=${query}&entity=album&limit=1`);
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+          return data.results[0].artworkUrl100.replace('100x100bb', '400x400bb');
+        }
+      } catch (e) {
+        console.log("Cover fetch fallback");
+      }
+      return 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
     }
 
     function renderCalendar(month) {
@@ -181,7 +304,7 @@
       }
     }
 
-    function openDayModal(key, day, monthName) {
+    async function openDayModal(key, day, monthName) {
       const items = db[key] || [];
       let html = `
         <div class="mb-6 flex justify-between items-center border-b border-subtle pb-4">
@@ -195,11 +318,16 @@
       if (items.length === 0) {
         html += `<p class="text-xs text-zinc-600 italic py-6 text-center">Sin lanzamientos.</p>`;
       } else {
-        items.forEach((item) => {
-          const coverUrl = item.cover || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
+        for (const item of items) {
+          let coverUrl = item.cover;
+          if (!coverUrl) {
+            coverUrl = await getAppleCoverUrl(item.title, item.artist);
+            item.cover = coverUrl; // Cachear portada obtenida
+          }
+
           html += `
             <div class="mb-4 p-3 rounded-xl border border-subtle bg-black flex items-center gap-3">
-              <img src="${coverUrl}" onerror="handleImageError(this)" class="w-12 h-12 rounded-lg object-cover bg-zinc-900">
+              <img src="${coverUrl}" onerror="handleImageError(this)" class="w-12 h-12 rounded-lg object-cover bg-zinc-900 shadow-md">
               <div class="flex-1 min-w-0">
                 <h4 class="font-medium text-xs text-white truncate cursor-pointer hover:text-purple-400 transition" onclick="showAlbumPage('${key}', '${item.id}')">${item.title}</h4>
                 <p class="text-[11px] text-zinc-500 truncate">${item.artist || 'Artista'}</p>
@@ -216,7 +344,7 @@
               ` : ''}
             </div>
           `;
-        });
+        }
       }
 
       if (isAdmin) {
@@ -236,11 +364,11 @@
         <form onsubmit="saveAlbumForm(event, '${key}', '${albumId || ''}')" class="space-y-3">
           <div>
             <label class="text-[10px] text-zinc-500 uppercase">Álbum / Canción</label>
-            <input type="text" id="formTitle" value="${item.title}" onblur="fetchAppleCover()" required class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
+            <input type="text" id="formTitle" value="${item.title}" required class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
             <label class="text-[10px] text-zinc-500 uppercase">Artista</label>
-            <input type="text" id="formArtist" value="${item.artist}" onblur="fetchAppleCover()" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
+            <input type="text" id="formArtist" value="${item.artist}" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
             <label class="text-[10px] text-zinc-500 uppercase">Spotify Link</label>
@@ -251,7 +379,7 @@
             <input type="url" id="formApple" value="${item.apple}" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
-            <label class="text-[10px] text-zinc-500 uppercase">URL Portada (Auto-buscada de Apple Music)</label>
+            <label class="text-[10px] text-zinc-500 uppercase">URL Portada Imagen (Opcional / Automático)</label>
             <input type="url" id="formCover" value="${item.cover}" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
@@ -267,39 +395,25 @@
       document.getElementById('modal').classList.add('flex');
     }
 
-    // Busca automáticamente la portada limpia en la API pública de Apple Music/iTunes
-    async function fetchAppleCover() {
-      const title = document.getElementById('formTitle').value;
-      const artist = document.getElementById('formArtist').value;
-      const coverInput = document.getElementById('formCover');
-
-      if (title && !coverInput.value) {
-        const query = encodeURIComponent(`${title} ${artist}`);
-        try {
-          const res = await fetch(`https://itunes.apple.com/search?term=${query}&entity=album&limit=1`);
-          const data = await res.json();
-          if (data.results && data.results.length > 0) {
-            // Reemplaza tamaño a 600x600 para máxima resolución
-            const artworkUrl = data.results[0].artworkUrl100.replace('100x100bb', '600x600bb');
-            coverInput.value = artworkUrl;
-          }
-        } catch (e) {
-          console.log("No se encontró portada en iTunes");
-        }
-      }
-    }
-
-    function saveAlbumForm(e, key, albumId) {
+    async function saveAlbumForm(e, key, albumId) {
       e.preventDefault();
       if (!db[key]) db[key] = [];
 
+      const title = document.getElementById('formTitle').value;
+      const artist = document.getElementById('formArtist').value;
+      let cover = document.getElementById('formCover').value;
+
+      if (!cover) {
+        cover = await getAppleCoverUrl(title, artist);
+      }
+
       const newAlbum = {
         id: albumId || String(Date.now()),
-        title: document.getElementById('formTitle').value,
-        artist: document.getElementById('formArtist').value,
+        title: title,
+        artist: artist,
         spotify: document.getElementById('formSpotify').value,
         apple: document.getElementById('formApple').value,
-        cover: document.getElementById('formCover').value,
+        cover: cover,
         note: document.getElementById('formNote').value
       };
 
@@ -322,12 +436,16 @@
       }
     }
 
-    function showAlbumPage(key, albumId) {
+    async function showAlbumPage(key, albumId) {
       const album = db[key].find(a => a.id === albumId);
       closeModal();
       document.getElementById('mainView').classList.add('hidden');
       const albumPage = document.getElementById('albumPage');
-      const coverUrl = album.cover || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
+
+      let coverUrl = album.cover;
+      if (!coverUrl) {
+        coverUrl = await getAppleCoverUrl(album.title, album.artist);
+      }
       
       document.getElementById('albumPageContent').innerHTML = `
         <div class="flex flex-col sm:flex-row gap-6 items-center">
