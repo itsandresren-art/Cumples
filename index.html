@@ -206,12 +206,22 @@
     };
 
     const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-    let currentMonth = 0;
+    let currentMonth = new Date().getMonth();
     let isAdmin = false;
     let isIsolatedMode = false;
-    let adminPassword = localStorage.getItem('adminPass') || '1234';
+    
+    // Asignar contraseña roxin
+    let adminPassword = 'roxin';
+    localStorage.setItem('adminPass', 'roxin');
 
     let db = JSON.parse(localStorage.getItem('musicCalendarDB_v3')) || fullMusicData;
+
+    function getTodayKey() {
+      const today = new Date();
+      const m = String(today.getMonth() + 1).padStart(2, '0');
+      const d = String(today.getDate()).padStart(2, '0');
+      return `${m}-${d}`;
+    }
 
     function saveDB() {
       localStorage.setItem('musicCalendarDB_v3', JSON.stringify(db));
@@ -248,11 +258,8 @@
       img.src = 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
     }
 
-    // Extrae automáticamente la portada original desde el link de Spotify o Apple Music
     async function extractCoverFromUrl(url) {
       if (!url) return '';
-      
-      // Si es un link de Spotify
       if (url.includes('spotify.com')) {
         try {
           const res = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`);
@@ -262,27 +269,20 @@
           console.log("Error leyendo link de Spotify");
         }
       }
-      
-      // Si es un link de Apple Music
       if (url.includes('apple.com')) {
         try {
-          const res = await fetch(`https://wsrv.nl/?url=${encodeURIComponent(url)}`);
-          if (res.ok) {
-            // Intentar buscar vía API pública de iTunes
-            const match = url.match(/\/album\/[^\/]+\/([0-9]+)/) || url.match(/i=([0-9]+)/);
-            if (match) {
-              const resApi = await fetch(`https://itunes.apple.com/lookup?id=${match[1]}`);
-              const dataApi = await resApi.json();
-              if (dataApi.results && dataApi.results[0].artworkUrl100) {
-                return dataApi.results[0].artworkUrl100.replace('100x100bb', '600x600bb');
-              }
+          const match = url.match(/\/album\/[^\/]+\/([0-9]+)/) || url.match(/i=([0-9]+)/) || url.match(/id=([0-9]+)/);
+          if (match) {
+            const resApi = await fetch(`https://itunes.apple.com/lookup?id=${match[1]}`);
+            const dataApi = await resApi.json();
+            if (dataApi.results && dataApi.results[0].artworkUrl100) {
+              return dataApi.results[0].artworkUrl100.replace('100x100bb', '600x600bb');
             }
           }
         } catch (e) {
           console.log("Error leyendo link de Apple Music");
         }
       }
-
       return '';
     }
 
@@ -308,6 +308,7 @@
 
       const daysInMonth = new Date(2026, month + 1, 0).getDate();
       const firstDay = new Date(2026, month, 1).getDay();
+      const todayKey = getTodayKey();
 
       for (let i = 0; i < firstDay; i++) {
         grid.appendChild(Object.assign(document.createElement('div'), { className: "h-20 rounded-xl bg-zinc-950/40" }));
@@ -316,13 +317,14 @@
       for (let day = 1; day <= daysInMonth; day++) {
         const key = `${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         const releases = db[key] || [];
+        const isToday = key === todayKey;
 
         const dayCell = document.createElement('div');
         dayCell.className = `calendar-day h-20 rounded-xl p-2.5 cursor-pointer flex flex-col justify-between border ${
-          releases.length > 0 ? 'bg-card border-zinc-800' : 'bg-black border-subtle'
+          isToday ? 'border-purple-500/80 bg-zinc-950' : (releases.length > 0 ? 'bg-card border-zinc-800' : 'bg-black border-subtle')
         }`;
 
-        let html = `<div class="flex justify-between items-center"><span class="text-xs font-normal ${releases.length > 0 ? 'text-white' : 'text-zinc-600'}">${day}</span>`;
+        let html = `<div class="flex justify-between items-center"><span class="text-xs font-normal ${isToday ? 'text-purple-400 font-medium' : (releases.length > 0 ? 'text-white' : 'text-zinc-600')}">${day}</span>`;
         if (isAdmin) {
           html += `<button onclick="event.stopPropagation(); openEditForm('${key}')" class="text-[9px] text-zinc-400 hover:text-white"><i class="fa-solid fa-plus"></i></button>`;
         }
@@ -331,8 +333,8 @@
         if (releases.length > 0) {
           html += `
             <div class="truncate text-[10px] text-zinc-400 flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-purple-500 shrink-0"></span>
-              <span class="truncate">${releases[0].title}</span>
+              <span class="w-1.5 h-1.5 rounded-full ${isToday ? 'bg-purple-400 animate-pulse' : 'bg-purple-500'} shrink-0"></span>
+              <span class="truncate ${isToday ? 'text-purple-300 font-medium' : ''}">${releases[0].title}</span>
             </div>
           `;
         }
@@ -344,9 +346,14 @@
 
     async function openDayModal(key, day, monthName) {
       const items = db[key] || [];
+      const isToday = key === getTodayKey();
+
       let html = `
         <div class="mb-6 flex justify-between items-center border-b border-subtle pb-4">
-          <h3 class="text-base font-medium text-white">${day} de ${monthName}</h3>
+          <div>
+            <h3 class="text-base font-medium text-white">${day} de ${monthName}</h3>
+            ${isToday ? `<p class="text-[11px] text-purple-400 font-medium mt-0.5">🎉 ¡Feliz Cumpleaños!</p>` : ''}
+          </div>
           <button onclick="copyDayLink('${key}')" class="text-xs text-zinc-500 hover:text-zinc-300 transition">
             <i class="fa-solid fa-share-nodes"></i> Compartir
           </button>
@@ -417,14 +424,14 @@
             <input type="url" id="formApple" value="${item.apple}" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
-            <label class="text-[10px] text-zinc-500 uppercase">URL Portada Imagen (Directa o pegada manualmente)</label>
+            <label class="text-[10px] text-zinc-500 uppercase">URL Portada Imagen (Opcional)</label>
             <input type="url" id="formCover" value="${item.cover || ''}" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
             <label class="text-[10px] text-zinc-500 uppercase">Nota</label>
             <textarea id="formNote" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">${item.note}</textarea>
           </div>
-          <button type="submit" class="w-full bg-white text-black py-2 rounded-lg font-medium text-xs transition hover:bg-zinc-200">Guardar</button>
+          <button type="submit" id="saveSubmitBtn" class="w-full bg-white text-black py-2 rounded-lg font-medium text-xs transition hover:bg-zinc-200">Guardar</button>
         </form>
       `;
 
@@ -435,6 +442,13 @@
 
     async function saveAlbumForm(e, key, albumId) {
       e.preventDefault();
+      
+      const submitBtn = document.getElementById('saveSubmitBtn');
+      if (submitBtn) {
+        submitBtn.innerText = "Guardando...";
+        submitBtn.disabled = true;
+      }
+
       if (!db[key]) db[key] = [];
 
       const title = document.getElementById('formTitle').value;
@@ -443,19 +457,14 @@
       const apple = document.getElementById('formApple').value;
       let cover = document.getElementById('formCover').value;
 
-      // 1. Extraer portada directamente desde el link de Spotify o Apple Music si se proporcionó
-      if (spotify) {
-        const extractedCover = await extractCoverFromUrl(spotify);
-        if (extractedCover) cover = extractedCover;
-      }
-      
-      if (!cover && apple) {
-        const extractedCover = await extractCoverFromUrl(apple);
-        if (extractedCover) cover = extractedCover;
+      let extracted = await extractCoverFromUrl(spotify);
+      if (!extracted) {
+        extracted = await extractCoverFromUrl(apple);
       }
 
-      // 2. Si sigue estando vacío, buscar por Título + Artista
-      if (!cover) {
+      if (extracted) {
+        cover = extracted;
+      } else if (!cover) {
         cover = await getAppleCoverUrl(title, artist);
       }
 
@@ -497,6 +506,7 @@
       closeModal();
       document.getElementById('mainView').classList.add('hidden');
       const albumPage = document.getElementById('albumPage');
+      const isToday = key === getTodayKey();
 
       let coverUrl = album ? album.cover : '';
       if (album && !coverUrl) {
@@ -507,6 +517,7 @@
         <div class="flex flex-col sm:flex-row gap-6 items-center">
           <img src="${coverUrl || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777'}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded-xl border border-subtle bg-zinc-900 shadow-xl">
           <div class="flex-1 text-center sm:text-left">
+            ${isToday ? `<p class="text-xs text-purple-400 font-medium tracking-wide mb-1">🎉 ¡Feliz Cumpleaños!</p>` : ''}
             <h1 class="text-xl font-medium text-white mb-1">${album ? album.title : ''}</h1>
             <h3 class="text-sm text-zinc-400 mb-4">${album ? album.artist : ''}</h3>
             ${album && album.note ? `<p class="text-xs text-zinc-400 italic mb-6 bg-black p-3 rounded-lg border border-subtle">"${album.note}"</p>` : ''}
@@ -528,6 +539,7 @@
       document.getElementById('brandLogo').classList.remove('cursor-pointer');
 
       const albums = db[fecha] || [];
+      const isToday = fecha === getTodayKey();
 
       if (albums.length === 0) {
         document.getElementById('albumPageContent').innerHTML = `<p class="text-xs text-zinc-500 italic text-center py-8">No hay lanzamientos registrados para esta fecha.</p>`;
@@ -543,6 +555,7 @@
             <div class="flex flex-col sm:flex-row gap-6 items-center border-b border-subtle/50 pb-6 mb-6 last:border-none last:pb-0 last:mb-0">
               <img src="${coverUrl}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded-xl border border-subtle bg-zinc-900 shadow-xl">
               <div class="flex-1 text-center sm:text-left">
+                ${isToday ? `<p class="text-xs text-purple-400 font-medium tracking-wide mb-1">🎉 ¡Feliz Cumpleaños!</p>` : ''}
                 <h1 class="text-xl font-medium text-white mb-1">${album.title}</h1>
                 <h3 class="text-sm text-zinc-400 mb-4">${album.artist || ''}</h3>
                 ${album.note ? `<p class="text-xs text-zinc-400 italic mb-6 bg-black p-3 rounded-lg border border-subtle">"${album.note}"</p>` : ''}
