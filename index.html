@@ -7,82 +7,86 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { background-color: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
-    .vinyl-spin { animation: spin 10s linear infinite; }
-    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-    .calendar-day { transition: all 0.2s ease; }
-    .calendar-day:hover { transform: translateY(-2px); }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+    
+    body { 
+      background-color: #000000; 
+      color: #ededed; 
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .border-subtle {
+      border-color: #1a1a1a;
+    }
+
+    .bg-card {
+      background-color: #0a0a0a;
+    }
+
+    .calendar-day {
+      transition: border-color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .calendar-day:hover {
+      border-color: #333333;
+      background-color: #111111;
+    }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between p-4 md:p-8">
+<body class="min-h-screen flex flex-col justify-between p-6 md:p-12">
 
-  <!-- Encabezado -->
-  <header class="max-w-6xl mx-auto w-full flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
-    <div class="flex items-center gap-3 cursor-pointer" onclick="goHome()">
-      <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center shadow-lg">
-        <i class="fa-solid fa-compact-disc text-2xl text-white vinyl-spin"></i>
-      </div>
-      <div>
-        <h1 class="text-2xl font-bold tracking-tight">Calendario Musical</h1>
-        <p class="text-xs text-slate-400">Descubre los álbumes lanzados cada día del año</p>
-      </div>
+  <!-- Header Minimalista -->
+  <header class="max-w-4xl mx-auto w-full flex justify-between items-center mb-12">
+    <div class="cursor-pointer" onclick="goHome()">
+      <h1 class="text-lg font-medium tracking-tight text-white">Calendario Musical</h1>
+      <p class="text-xs text-zinc-500 font-light mt-0.5">Lanzamientos de álbumes</p>
     </div>
 
-    <!-- Controles -->
-    <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-      <div class="relative flex-1 md:w-64">
-        <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Buscar artista, canción..." 
-               class="w-full bg-slate-800 border border-slate-700 rounded-full py-2 px-4 pl-10 text-sm focus:outline-none focus:border-purple-500">
-        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-sm"></i>
-      </div>
-
-      <button onclick="openRandomAlbum()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full px-4 py-2 text-sm flex items-center gap-2 transition">
-        <i class="fa-solid fa-shuffle text-purple-400"></i> Aleatorio
-      </button>
-
-      <button id="adminBtn" onclick="toggleAdmin()" class="bg-purple-600 hover:bg-purple-500 text-white rounded-full px-4 py-2 text-sm flex items-center gap-2 transition font-medium shadow-md">
-        <i class="fa-solid fa-lock" id="adminIcon"></i> <span id="adminText">Modo Admin</span>
-      </button>
-    </div>
+    <button id="adminBtn" onclick="toggleAdmin()" class="text-xs text-zinc-400 hover:text-white border border-subtle hover:border-zinc-700 rounded-full px-3.5 py-1.5 transition flex items-center gap-2">
+      <i class="fa-solid fa-lock text-[10px]" id="adminIcon"></i> <span id="adminText">Admin</span>
+    </button>
   </header>
 
   <!-- Vista Principal: Calendario -->
-  <main id="mainView" class="max-w-6xl mx-auto w-full flex-1">
-    <div class="glass-panel rounded-2xl p-6 mb-8 shadow-2xl">
-      <div class="flex justify-between items-center mb-6">
-        <button onclick="changeMonth(-1)" class="p-2 rounded-full hover:bg-slate-700 text-slate-300 transition">
-          <i class="fa-solid fa-chevron-left text-xl"></i>
-        </button>
-        <h2 id="monthTitle" class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 uppercase tracking-wider">
-          Enero
-        </h2>
-        <button onclick="changeMonth(1)" class="p-2 rounded-full hover:bg-slate-700 text-slate-300 transition">
-          <i class="fa-solid fa-chevron-right text-xl"></i>
-        </button>
-      </div>
-
-      <div class="grid grid-cols-7 gap-2 mb-2 text-center font-semibold text-xs text-slate-400 uppercase tracking-wider">
-        <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
-      </div>
-
-      <div id="calendarGrid" class="grid grid-cols-7 gap-2 md:gap-3"></div>
-    </div>
-  </main>
-
-  <!-- Vista Individual del Álbum -->
-  <main id="albumPage" class="max-w-4xl mx-auto w-full flex-1 hidden">
-    <button onclick="goHome()" class="mb-6 bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-full border border-slate-700 text-sm flex items-center gap-2 transition">
-      <i class="fa-solid fa-arrow-left"></i> Volver al Calendario
-    </button>
+  <main id="mainView" class="max-w-4xl mx-auto w-full flex-1">
     
-    <div class="glass-panel rounded-2xl p-8 border border-slate-700 shadow-2xl relative" id="albumPageContent"></div>
+    <!-- Controles de Mes -->
+    <div class="flex justify-between items-center mb-8">
+      <h2 id="monthTitle" class="text-2xl font-light tracking-tight text-white">
+        Enero
+      </h2>
+      <div class="flex items-center gap-1">
+        <button onclick="changeMonth(-1)" class="w-8 h-8 rounded-lg border border-subtle hover:border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-white transition">
+          <i class="fa-solid fa-chevron-left text-xs"></i>
+        </button>
+        <button onclick="changeMonth(1)" class="w-8 h-8 rounded-lg border border-subtle hover:border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-white transition">
+          <i class="fa-solid fa-chevron-right text-xs"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Encabezado de Días -->
+    <div class="grid grid-cols-7 gap-2 mb-2 text-center text-[11px] text-zinc-600 font-medium uppercase tracking-wider">
+      <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
+    </div>
+
+    <!-- Grid -->
+    <div id="calendarGrid" class="grid grid-cols-7 gap-2"></div>
   </main>
 
-  <!-- Modal para Agregar/Editar -->
+  <!-- Vista Álbum en Pantalla Completa -->
+  <main id="albumPage" class="max-w-2xl mx-auto w-full flex-1 hidden">
+    <button onclick="goHome()" class="mb-8 text-xs text-zinc-500 hover:text-white flex items-center gap-2 transition">
+      <i class="fa-solid fa-arrow-left text-[10px]"></i> Volver al calendario
+    </button>
+    <div class="bg-card rounded-2xl p-8 border border-subtle" id="albumPageContent"></div>
+  </main>
+
+  <!-- Modal para Día / Formulario -->
   <div id="modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-    <div class="glass-panel max-w-lg w-full rounded-2xl p-6 relative shadow-2xl border border-slate-700 max-h-[90vh] overflow-y-auto">
-      <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">
+    <div class="bg-card max-w-md w-full rounded-2xl p-6 relative border border-subtle max-h-[85vh] overflow-y-auto">
+      <button onclick="closeModal()" class="absolute top-5 right-5 text-zinc-500 hover:text-white text-sm">
         <i class="fa-solid fa-xmark"></i>
       </button>
       <div id="modalContent"></div>
@@ -113,12 +117,11 @@
 
     function toggleAdmin() {
       if (!isAdmin) {
-        const pass = prompt("Ingrese la contraseña de Administrador:");
+        const pass = prompt("Contraseña de administrador:");
         if (pass === adminPassword) {
           isAdmin = true;
-          document.getElementById('adminIcon').className = "fa-solid fa-lock-open text-emerald-300";
+          document.getElementById('adminIcon').className = "fa-solid fa-lock-open text-emerald-400";
           document.getElementById('adminText').innerText = "Admin Activo";
-          alert("¡Modo Administrador Activado!");
           renderCalendar(currentMonth);
         } else if (pass !== null) {
           alert("Contraseña incorrecta.");
@@ -126,7 +129,7 @@
       } else {
         isAdmin = false;
         document.getElementById('adminIcon').className = "fa-solid fa-lock";
-        document.getElementById('adminText').innerText = "Modo Admin";
+        document.getElementById('adminText').innerText = "Admin";
         renderCalendar(currentMonth);
       }
     }
@@ -134,6 +137,11 @@
     function changeMonth(delta) {
       currentMonth = (currentMonth + delta + 12) % 12;
       renderCalendar(currentMonth);
+    }
+
+    function handleImageError(img) {
+      img.onerror = null;
+      img.src = 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
     }
 
     function renderCalendar(month) {
@@ -145,7 +153,7 @@
       const firstDay = new Date(2026, month, 1).getDay();
 
       for (let i = 0; i < firstDay; i++) {
-        grid.appendChild(Object.assign(document.createElement('div'), { className: "h-20 md:h-24 rounded-xl bg-slate-900/40 opacity-30" }));
+        grid.appendChild(Object.assign(document.createElement('div'), { className: "h-20 rounded-xl bg-zinc-950/40" }));
       }
 
       for (let day = 1; day <= daysInMonth; day++) {
@@ -153,21 +161,21 @@
         const releases = db[key] || [];
 
         const dayCell = document.createElement('div');
-        dayCell.className = `calendar-day h-20 md:h-24 rounded-xl p-2 cursor-pointer flex flex-col justify-between border ${
-          releases.length > 0 ? 'bg-slate-800/80 border-purple-500/40 hover:border-purple-400' : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
+        dayCell.className = `calendar-day h-20 rounded-xl p-2.5 cursor-pointer flex flex-col justify-between border ${
+          releases.length > 0 ? 'bg-card border-zinc-800' : 'bg-black border-subtle'
         }`;
 
-        let html = `<div class="flex justify-between items-center"><span class="text-xs font-bold ${releases.length > 0 ? 'text-purple-400' : 'text-slate-500'}">${day}</span>`;
+        let html = `<div class="flex justify-between items-center"><span class="text-xs font-normal ${releases.length > 0 ? 'text-white' : 'text-zinc-600'}">${day}</span>`;
         if (isAdmin) {
-          html += `<button onclick="event.stopPropagation(); openEditForm('${key}')" class="text-[10px] bg-purple-600 hover:bg-purple-500 text-white px-1.5 py-0.5 rounded"><i class="fa-solid fa-plus"></i></button>`;
+          html += `<button onclick="event.stopPropagation(); openEditForm('${key}')" class="text-[9px] text-zinc-400 hover:text-white"><i class="fa-solid fa-plus"></i></button>`;
         }
         html += `</div>`;
 
         if (releases.length > 0) {
           html += `
-            <div class="truncate text-[10px] font-medium text-slate-200 bg-purple-950/60 p-1 rounded border border-purple-800/40">
-              <i class="fa-solid fa-music text-[9px] text-pink-400 mr-1"></i>${releases[0].title}
-              ${releases.length > 1 ? `<span class="text-pink-400 font-bold ml-1">+${releases.length - 1}</span>` : ''}
+            <div class="truncate text-[10px] text-zinc-400 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-purple-500 shrink-0"></span>
+              <span class="truncate">${releases[0].title}</span>
             </div>
           `;
         }
@@ -180,33 +188,34 @@
     function openDayModal(key, day, monthName) {
       const items = db[key] || [];
       let html = `
-        <div class="mb-4 flex justify-between items-center border-b border-slate-700 pb-3">
-          <h3 class="text-xl font-bold text-purple-300">${day} de ${monthName}</h3>
-          <button onclick="copyDayLink('${key}')" class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1.5">
-            <i class="fa-solid fa-share-nodes text-purple-400"></i> Compartir
+        <div class="mb-6 flex justify-between items-center border-b border-subtle pb-4">
+          <h3 class="text-base font-medium text-white">${day} de ${monthName}</h3>
+          <button onclick="copyDayLink('${key}')" class="text-xs text-zinc-500 hover:text-zinc-300 transition">
+            <i class="fa-solid fa-share-nodes"></i> Compartir
           </button>
         </div>
       `;
 
       if (items.length === 0) {
-        html += `<p class="text-sm text-slate-400 italic py-6 text-center">No hay álbumes registrados este día.</p>`;
+        html += `<p class="text-xs text-zinc-600 italic py-6 text-center">Sin lanzamientos.</p>`;
       } else {
         items.forEach((item) => {
+          const coverUrl = item.cover || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
           html += `
-            <div class="mb-4 p-4 rounded-xl bg-slate-800/60 border border-slate-700 flex flex-col sm:flex-row gap-4 items-center">
-              <img src="${item.cover || 'https://i.imgur.com/3n0K9y8.png'}" referrerpolicy="no-referrer" class="w-20 h-20 rounded-lg object-cover shadow-md">
-              <div class="flex-1 text-center sm:text-left">
-                <h4 class="font-bold text-white cursor-pointer hover:text-purple-400" onclick="showAlbumPage('${key}', '${item.id}')">${item.title}</h4>
-                <p class="text-xs text-purple-300">${item.artist || 'Artista no especificado'}</p>
-                <div class="flex gap-2 mt-2 justify-center sm:justify-start">
-                  ${item.spotify ? `<a href="${item.spotify}" target="_blank" class="text-[11px] bg-emerald-600/20 text-emerald-400 px-2 py-0.5 rounded"><i class="fa-brands fa-spotify"></i> Spotify</a>` : ''}
-                  ${item.apple ? `<a href="${item.apple}" target="_blank" class="text-[11px] bg-pink-600/20 text-pink-400 px-2 py-0.5 rounded"><i class="fa-brands fa-apple"></i> Apple</a>` : ''}
+            <div class="mb-4 p-3 rounded-xl border border-subtle bg-black flex items-center gap-3">
+              <img src="${coverUrl}" onerror="handleImageError(this)" class="w-12 h-12 rounded-lg object-cover">
+              <div class="flex-1 min-w-0">
+                <h4 class="font-medium text-xs text-white truncate cursor-pointer hover:text-purple-400 transition" onclick="showAlbumPage('${key}', '${item.id}')">${item.title}</h4>
+                <p class="text-[11px] text-zinc-500 truncate">${item.artist || 'Artista'}</p>
+                <div class="flex gap-2 mt-1">
+                  ${item.spotify ? `<a href="${item.spotify}" target="_blank" class="text-[10px] text-zinc-400 hover:text-emerald-400"><i class="fa-brands fa-spotify"></i> Spotify</a>` : ''}
+                  ${item.apple ? `<a href="${item.apple}" target="_blank" class="text-[10px] text-zinc-400 hover:text-pink-400"><i class="fa-brands fa-apple"></i> Apple</a>` : ''}
                 </div>
               </div>
               ${isAdmin ? `
-                <div class="flex sm:flex-col gap-2">
-                  <button onclick="openEditForm('${key}', '${item.id}')" class="text-xs bg-amber-600 hover:bg-amber-500 text-white px-2 py-1 rounded"><i class="fa-solid fa-pen"></i></button>
-                  <button onclick="deleteAlbum('${key}', '${item.id}')" class="text-xs bg-rose-600 hover:bg-rose-500 text-white px-2 py-1 rounded"><i class="fa-solid fa-trash"></i></button>
+                <div class="flex gap-2">
+                  <button onclick="openEditForm('${key}', '${item.id}')" class="text-xs text-zinc-500 hover:text-amber-400"><i class="fa-solid fa-pen"></i></button>
+                  <button onclick="deleteAlbum('${key}', '${item.id}')" class="text-xs text-zinc-500 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button>
                 </div>
               ` : ''}
             </div>
@@ -215,7 +224,7 @@
       }
 
       if (isAdmin) {
-        html += `<button onclick="openEditForm('${key}')" class="w-full mt-2 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs rounded-lg font-bold"><i class="fa-solid fa-plus"></i> Agregar Nuevo Álbum</button>`;
+        html += `<button onclick="openEditForm('${key}')" class="w-full mt-2 py-2 border border-subtle hover:border-zinc-700 text-zinc-300 text-xs rounded-xl transition">+ Agregar Álbum</button>`;
       }
 
       document.getElementById('modalContent').innerHTML = html;
@@ -227,33 +236,33 @@
       const item = albumId && db[key] ? db[key].find(a => a.id === albumId) : { title: '', artist: '', note: '', cover: '', spotify: '', apple: '' };
       
       let html = `
-        <h3 class="text-lg font-bold text-white mb-4">${albumId ? 'Editar Álbum' : 'Agregar Álbum'}</h3>
+        <h3 class="text-sm font-medium text-white mb-4">${albumId ? 'Editar Álbum' : 'Agregar Álbum'}</h3>
         <form onsubmit="saveAlbumForm(event, '${key}', '${albumId || ''}')" class="space-y-3">
           <div>
-            <label class="text-xs text-slate-400">Álbum / Canción</label>
-            <input type="text" id="formTitle" value="${item.title}" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white">
+            <label class="text-[10px] text-zinc-500 uppercase">Álbum / Canción</label>
+            <input type="text" id="formTitle" value="${item.title}" required class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
-            <label class="text-xs text-slate-400">Artista</label>
-            <input type="text" id="formArtist" value="${item.artist}" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white">
+            <label class="text-[10px] text-zinc-500 uppercase">Artista</label>
+            <input type="text" id="formArtist" value="${item.artist}" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
-            <label class="text-xs text-slate-400">Link Spotify (Auto-extrae la portada)</label>
-            <input type="url" id="formSpotify" value="${item.spotify}" onchange="autoFetchCover()" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white">
+            <label class="text-[10px] text-zinc-500 uppercase">Spotify Link</label>
+            <input type="url" id="formSpotify" value="${item.spotify}" onchange="autoFetchCover()" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
-            <label class="text-xs text-slate-400">Link Apple Music</label>
-            <input type="url" id="formApple" value="${item.apple}" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white">
+            <label class="text-[10px] text-zinc-500 uppercase">Apple Music Link</label>
+            <input type="url" id="formApple" value="${item.apple}" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
-            <label class="text-xs text-slate-400">URL Portada Imagen (Opcional/Manual)</label>
-            <input type="url" id="formCover" value="${item.cover}" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white">
+            <label class="text-[10px] text-zinc-500 uppercase">URL Portada Imagen</label>
+            <input type="url" id="formCover" value="${item.cover}" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
-            <label class="text-xs text-slate-400">Nota / Reseña</label>
-            <textarea id="formNote" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white">${item.note}</textarea>
+            <label class="text-[10px] text-zinc-500 uppercase">Nota</label>
+            <textarea id="formNote" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">${item.note}</textarea>
           </div>
-          <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2 rounded font-bold text-sm">Guardar Cambios</button>
+          <button type="submit" class="w-full bg-white text-black py-2 rounded-lg font-medium text-xs transition hover:bg-zinc-200">Guardar</button>
         </form>
       `;
 
@@ -265,7 +274,6 @@
     async function autoFetchCover() {
       const spotifyUrl = document.getElementById('formSpotify').value;
       if (spotifyUrl.includes('open.spotify.com/album/')) {
-        const albumId = spotifyUrl.split('album/')[1].split('?')[0];
         try {
           const res = await fetch(`https://open.spotify.com/oembed?url=${spotifyUrl}`);
           const data = await res.json();
@@ -273,7 +281,7 @@
             document.getElementById('formCover').value = data.thumbnail_url;
           }
         } catch (e) {
-          console.log("Auto fetch cover fallback");
+          console.log("Cover fallback");
         }
       }
     }
@@ -301,11 +309,10 @@
 
       saveDB();
       closeModal();
-      alert("¡Guardado con éxito!");
     }
 
     function deleteAlbum(key, albumId) {
-      if (confirm("¿Estás seguro de eliminar este álbum?")) {
+      if (confirm("¿Eliminar este álbum?")) {
         db[key] = db[key].filter(a => a.id !== albumId);
         saveDB();
         closeModal();
@@ -319,18 +326,15 @@
       const albumPage = document.getElementById('albumPage');
       
       document.getElementById('albumPageContent').innerHTML = `
-        <div class="flex flex-col md:flex-row gap-8 items-center">
-          <div class="relative w-64 h-64 flex-shrink-0">
-            <img src="${album.cover || 'https://i.imgur.com/3n0K9y8.png'}" class="w-full h-full object-cover rounded-2xl shadow-2xl z-10 relative">
-            <div class="absolute inset-0 rounded-full bg-black border-4 border-slate-700 vinyl-spin -right-8 opacity-60"></div>
-          </div>
-          <div class="flex-1 text-center md:text-left">
-            <h1 class="text-3xl font-extrabold text-white mb-2">${album.title}</h1>
-            <h3 class="text-xl text-purple-400 font-semibold mb-4">${album.artist}</h3>
-            ${album.note ? `<p class="text-sm text-slate-300 italic mb-6 bg-slate-900/60 p-4 rounded-xl border border-slate-800">"${album.note}"</p>` : ''}
-            <div class="flex flex-wrap gap-4 justify-center md:justify-start">
-              ${album.spotify ? `<a href="${album.spotify}" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-full flex items-center gap-2"><i class="fa-brands fa-spotify text-lg"></i> Abrir en Spotify</a>` : ''}
-              ${album.apple ? `<a href="${album.apple}" target="_blank" class="bg-pink-600 hover:bg-pink-500 text-white font-bold px-5 py-2.5 rounded-full flex items-center gap-2"><i class="fa-brands fa-apple text-lg"></i> Apple Music</a>` : ''}
+        <div class="flex flex-col sm:flex-row gap-6 items-center">
+          <img src="${album.cover || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777'}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded-xl border border-subtle">
+          <div class="flex-1 text-center sm:text-left">
+            <h1 class="text-xl font-medium text-white mb-1">${album.title}</h1>
+            <h3 class="text-sm text-zinc-400 mb-4">${album.artist}</h3>
+            ${album.note ? `<p class="text-xs text-zinc-400 italic mb-6 bg-black p-3 rounded-lg border border-subtle">"${album.note}"</p>` : ''}
+            <div class="flex gap-3 justify-center sm:justify-start">
+              ${album.spotify ? `<a href="${album.spotify}" target="_blank" class="border border-subtle text-zinc-300 hover:text-white text-xs px-3.5 py-1.5 rounded-lg flex items-center gap-2 transition"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify</a>` : ''}
+              ${album.apple ? `<a href="${album.apple}" target="_blank" class="border border-subtle text-zinc-300 hover:text-white text-xs px-3.5 py-1.5 rounded-lg flex items-center gap-2 transition"><i class="fa-brands fa-apple text-pink-400"></i> Apple Music</a>` : ''}
             </div>
           </div>
         </div>
