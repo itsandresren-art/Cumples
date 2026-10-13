@@ -70,7 +70,7 @@
     <div id="calendarGrid" class="grid grid-cols-7 gap-2"></div>
   </main>
 
-  <!-- Vista Álbum / Día Compartido Aislado -->
+  <!-- Vista Álbum en Pantalla Completa / Vista Compartida -->
   <main id="albumPage" class="max-w-2xl mx-auto w-full flex-1 hidden">
     <button id="backToCalendarBtn" onclick="goHome()" class="mb-8 text-xs text-zinc-500 hover:text-white flex items-center gap-2 transition">
       <i class="fa-solid fa-arrow-left text-[10px]"></i> Volver al calendario
@@ -464,28 +464,20 @@
       albumPage.classList.remove('hidden');
     }
 
-    // Renderiza una tarjeta única bloqueando la vista principal para enlaces compartidos
+    // Renderiza la vista dedicada idéntica a la segunda imagen sin botón de retorno
     async function renderIsolatedDayView(fecha) {
       isIsolatedMode = true;
       document.getElementById('mainView').classList.add('hidden');
-      document.getElementById('backToCalendarBtn').classList.add('hidden');
+      document.getElementById('backToCalendarBtn').style.display = 'none'; // Elimina el botón "Volver al calendario"
       document.getElementById('brandLogo').onclick = null;
       document.getElementById('brandLogo').classList.remove('cursor-pointer');
 
       const albums = db[fecha] || [];
-      const [m, d] = fecha.split('-');
-      const monthName = monthNames[parseInt(m) - 1];
-
-      let htmlContent = `
-        <div class="mb-6 border-b border-subtle pb-4 text-center sm:text-left">
-          <p class="text-[11px] text-purple-400 uppercase tracking-widest font-medium">Lanzamiento Musical</p>
-          <h2 class="text-xl font-medium text-white">${parseInt(d)} de ${monthName}</h2>
-        </div>
-      `;
 
       if (albums.length === 0) {
-        htmlContent += `<p class="text-xs text-zinc-500 italic text-center py-8">No hay lanzamientos registrados para esta fecha.</p>`;
+        document.getElementById('albumPageContent').innerHTML = `<p class="text-xs text-zinc-500 italic text-center py-8">No hay lanzamientos registrados para esta fecha.</p>`;
       } else {
+        let htmlContent = '';
         for (const album of albums) {
           let coverUrl = album.cover;
           if (!coverUrl) {
@@ -493,22 +485,22 @@
           }
           htmlContent += `
             <div class="flex flex-col sm:flex-row gap-6 items-center border-b border-subtle/50 pb-6 mb-6 last:border-none last:pb-0 last:mb-0">
-              <img src="${coverUrl}" onerror="handleImageError(this)" class="w-40 h-40 object-cover rounded-xl border border-subtle bg-zinc-900 shadow-xl">
+              <img src="${coverUrl}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded-xl border border-subtle bg-zinc-900 shadow-xl">
               <div class="flex-1 text-center sm:text-left">
-                <h1 class="text-lg font-medium text-white mb-1">${album.title}</h1>
-                <h3 class="text-sm text-zinc-400 mb-3">${album.artist || 'Artista no especificado'}</h3>
-                ${album.note ? `<p class="text-xs text-zinc-400 italic mb-4 bg-black p-3 rounded-lg border border-subtle">"${album.note}"</p>` : ''}
-                <div class="flex gap-2 justify-center sm:justify-start">
-                  ${album.spotify ? `<a href="${album.spotify}" target="_blank" class="border border-subtle text-zinc-300 hover:text-white text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify</a>` : ''}
-                  ${album.apple ? `<a href="${album.apple}" target="_blank" class="border border-subtle text-zinc-300 hover:text-white text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition"><i class="fa-brands fa-apple text-pink-400"></i> Apple Music</a>` : ''}
+                <h1 class="text-xl font-medium text-white mb-1">${album.title}</h1>
+                <h3 class="text-sm text-zinc-400 mb-4">${album.artist || ''}</h3>
+                ${album.note ? `<p class="text-xs text-zinc-400 italic mb-6 bg-black p-3 rounded-lg border border-subtle">"${album.note}"</p>` : ''}
+                <div class="flex gap-3 justify-center sm:justify-start">
+                  ${album.spotify ? `<a href="${album.spotify}" target="_blank" class="border border-subtle text-zinc-300 hover:text-white text-xs px-3.5 py-1.5 rounded-lg flex items-center gap-2 transition"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify</a>` : ''}
+                  ${album.apple ? `<a href="${album.apple}" target="_blank" class="border border-subtle text-zinc-300 hover:text-white text-xs px-3.5 py-1.5 rounded-lg flex items-center gap-2 transition"><i class="fa-brands fa-apple text-pink-400"></i> Apple Music</a>` : ''}
                 </div>
               </div>
             </div>
           `;
         }
+        document.getElementById('albumPageContent').innerHTML = htmlContent;
       }
 
-      document.getElementById('albumPageContent').innerHTML = htmlContent;
       document.getElementById('albumPage').classList.remove('hidden');
     }
 
