@@ -379,8 +379,8 @@
             <input type="url" id="formApple" value="${item.apple}" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
-            <label class="text-[10px] text-zinc-500 uppercase">URL Portada Imagen (Opcional)</label>
-            <input type="url" id="formCover" value="${item.cover}" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
+            <label class="text-[10px] text-zinc-500 uppercase">URL Portada Imagen (Pega aquí el link correcto o déjalo vacío para auto-buscar)</label>
+            <input type="url" id="formCover" value="${item.cover || ''}" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
             <label class="text-[10px] text-zinc-500 uppercase">Nota</label>
@@ -426,6 +426,10 @@
 
       saveDB();
       closeModal();
+
+      if (isIsolatedMode) {
+        renderIsolatedDayView(key);
+      }
     }
 
     function deleteAlbum(key, albumId) {
@@ -464,11 +468,10 @@
       albumPage.classList.remove('hidden');
     }
 
-    // Renderiza la vista dedicada idéntica a la segunda imagen sin botón de retorno
     async function renderIsolatedDayView(fecha) {
       isIsolatedMode = true;
       document.getElementById('mainView').classList.add('hidden');
-      document.getElementById('backToCalendarBtn').style.display = 'none'; // Elimina el botón "Volver al calendario"
+      document.getElementById('backToCalendarBtn').style.display = 'none';
       document.getElementById('brandLogo').onclick = null;
       document.getElementById('brandLogo').classList.remove('cursor-pointer');
 
@@ -482,6 +485,7 @@
           let coverUrl = album.cover;
           if (!coverUrl) {
             coverUrl = await getAppleCoverUrl(album.title, album.artist);
+            album.cover = coverUrl;
           }
           htmlContent += `
             <div class="flex flex-col sm:flex-row gap-6 items-center border-b border-subtle/50 pb-6 mb-6 last:border-none last:pb-0 last:mb-0">
