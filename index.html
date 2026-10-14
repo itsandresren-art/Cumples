@@ -306,12 +306,21 @@
     let isAdmin = false;
     let isIsolatedMode = false;
 
+    // Función de ayuda para desproteger URLs de Apple y sobrepasar bloqueos de CORS
+    function getSafeImageUrl(url) {
+      if (!url) return 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
+      if (url.includes('mzstatic.com')) {
+        return `https://images.weserv.nl/?url=${encodeURIComponent(url)}`;
+      }
+      return url;
+    }
+
     // Borrado forzado de bases de datos antiguas
-    for (let i = 1; i <= 24; i++) {
+    for (let i = 1; i <= 29; i++) {
       localStorage.removeItem(`musicCalendarDB_v${i}`);
     }
 
-    let db = JSON.parse(localStorage.getItem('musicCalendarDB_v25')) || fullMusicData;
+    let db = JSON.parse(localStorage.getItem('musicCalendarDB_v30')) || fullMusicData;
 
     function getTodayKey() {
       const today = new Date();
@@ -321,7 +330,7 @@
     }
 
     function saveDB() {
-      localStorage.setItem('musicCalendarDB_v25', JSON.stringify(db));
+      localStorage.setItem('musicCalendarDB_v30', JSON.stringify(db));
       renderCalendar(currentMonth);
     }
 
@@ -382,7 +391,8 @@
         if (releases.length > 0) {
           let mainAlbum = releases.find(a => a.isMainCover) || releases[0];
           if (mainAlbum && mainAlbum.cover) {
-            dayCell.style.backgroundImage = `linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.3)), url("${mainAlbum.cover}")`;
+            const safeBgUrl = getSafeImageUrl(mainAlbum.cover);
+            dayCell.style.backgroundImage = `linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.3)), url("${safeBgUrl}")`;
           }
         }
 
@@ -438,10 +448,11 @@
       } else {
         for (let i = 0; i < items.length; i++) {
           const item = items[i];
+          const safeCover = getSafeImageUrl(item.cover);
 
           html += `
             <div class="mb-4 p-3 rounded-xl border border-subtle bg-black flex items-center gap-3">
-              <img src="${item.cover || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777'}" onerror="handleImageError(this)" class="w-12 h-12 rounded-lg object-cover bg-zinc-900 shadow-md">
+              <img src="${safeCover}" onerror="handleImageError(this)" class="w-12 h-12 rounded-lg object-cover bg-zinc-900 shadow-md">
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2">
                   <h4 class="font-medium text-xs text-white truncate cursor-pointer hover:text-purple-400 transition" onclick="showAlbumPage('${key}', '${item.id}')">${item.title}</h4>
@@ -594,7 +605,7 @@
       const albumPage = document.getElementById('albumPage');
       const isToday = key === getTodayKey();
 
-      let coverUrl = album ? album.cover : '';
+      let coverUrl = album ? getSafeImageUrl(album.cover) : '';
 
       const glowBg = document.getElementById('albumGlowBg');
       if (coverUrl) {
@@ -603,7 +614,7 @@
       
       document.getElementById('albumPageContent').innerHTML = `
         <div class="flex flex-col sm:flex-row gap-6 items-center">
-          <img src="${coverUrl || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777'}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded-xl border border-subtle bg-zinc-900 shadow-2xl">
+          <img src="${coverUrl}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded-xl border border-subtle bg-zinc-900 shadow-2xl">
           <div class="flex-1 text-center sm:text-left">
             ${isToday ? `<p class="text-xs text-purple-400 font-medium tracking-wide mb-2">🎉 ¡Feliz Cumpleaños!</p>` : ''}
             <h1 class="text-xl font-medium text-white mb-1">${album ? album.title : ''}</h1>
@@ -633,7 +644,7 @@
       } else {
         let htmlContent = '';
         for (const album of albums) {
-          let coverUrl = album.cover;
+          let coverUrl = getSafeImageUrl(album.cover);
           htmlContent += `
             <div class="flex flex-col sm:flex-row gap-6 items-center border-b border-subtle/50 pb-6 mb-6 last:border-none last:pb-0 last:mb-0">
               <img src="${coverUrl}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded-xl border border-subtle bg-zinc-900 shadow-xl">
