@@ -20,12 +20,14 @@
     .bg-card { background-color: #0a0a0a; }
 
     .calendar-day {
-      transition: border-color 0.15s ease, background-color 0.15s ease;
+      transition: border-color 0.15s ease, transform 0.15s ease;
+      background-size: cover;
+      background-position: center;
     }
 
     .calendar-day:hover {
-      border-color: #333333;
-      background-color: #111111;
+      border-color: #444444;
+      transform: scale(1.02);
     }
   </style>
 </head>
@@ -296,7 +298,7 @@
       return 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
     }
 
-    function renderCalendar(month) {
+    async function renderCalendar(month) {
       const grid = document.getElementById('calendarGrid');
       grid.innerHTML = '';
       document.getElementById('monthTitle').innerText = monthNames[month];
@@ -306,7 +308,7 @@
       const todayKey = getTodayKey();
 
       for (let i = 0; i < firstDay; i++) {
-        grid.appendChild(Object.assign(document.createElement('div'), { className: "h-20 rounded-xl bg-zinc-950/40" }));
+        grid.appendChild(Object.assign(document.createElement('div'), { className: "h-24 rounded-xl bg-zinc-950/40" }));
       }
 
       for (let day = 1; day <= daysInMonth; day++) {
@@ -315,21 +317,39 @@
         const isToday = key === todayKey;
 
         const dayCell = document.createElement('div');
-        dayCell.className = `calendar-day h-20 rounded-xl p-2.5 cursor-pointer flex flex-col justify-between border ${
-          isToday ? 'border-purple-500/80 bg-zinc-950' : (releases.length > 0 ? 'bg-card border-zinc-800' : 'bg-black border-subtle')
+        dayCell.className = `calendar-day h-24 rounded-xl p-2.5 cursor-pointer flex flex-col justify-between border overflow-hidden relative ${
+          isToday ? 'border-purple-500 shadow-lg shadow-purple-500/10' : (releases.length > 0 ? 'border-zinc-800' : 'bg-black border-subtle')
         }`;
 
-        let html = `<div class="flex justify-between items-center"><span class="text-xs font-normal ${isToday ? 'text-purple-400 font-medium' : (releases.length > 0 ? 'text-white' : 'text-zinc-600')}">${day}</span>`;
+        let coverStyle = '';
+        if (releases.length > 0) {
+          // Buscar si alguno está marcado específicamente como portada, si no, usar el primero
+          let mainAlbum = releases.find(a => a.isMainCover) || releases[0];
+          let coverUrl = mainAlbum.cover;
+          if (!coverUrl) {
+            coverUrl = await getAppleCoverUrl(mainAlbum.title, mainAlbum.artist);
+            mainAlbum.cover = coverUrl;
+          }
+          if (coverUrl) {
+            coverStyle = `background-image: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.4)), url('${coverUrl}');`;
+          }
+        }
+
+        if (coverStyle) {
+          dayCell.setAttribute('style', coverStyle);
+        }
+
+        let html = `<div class="flex justify-between items-center relative z-10"><span class="text-xs ${isToday ? 'text-purple-400 font-bold' : (releases.length > 0 ? 'text-white font-medium' : 'text-zinc-600')}">${day}</span>`;
         if (isAdmin) {
-          html += `<button onclick="event.stopPropagation(); openEditForm('${key}')" class="text-[9px] text-zinc-400 hover:text-white"><i class="fa-solid fa-plus"></i></button>`;
+          html += `<button onclick="event.stopPropagation(); openEditForm('${key}')" class="text-[9px] text-zinc-300 hover:text-white bg-black/60 px-1.5 py-0.5 rounded"><i class="fa-solid fa-plus"></i></button>`;
         }
         html += `</div>`;
 
         if (releases.length > 0) {
           html += `
-            <div class="truncate text-[10px] text-zinc-400 flex items-center gap-1.5">
+            <div class="truncate text-[10px] text-zinc-200 flex items-center gap-1 relative z-10 font-medium">
               <span class="w-1.5 h-1.5 rounded-full ${isToday ? 'bg-purple-400 animate-pulse' : 'bg-purple-500'} shrink-0"></span>
-              <span class="truncate ${isToday ? 'text-purple-300 font-medium' : ''}">${releases[0].title}</span>
+              <span class="truncate">${releases[0].title}</span>
             </div>
           `;
         }
@@ -358,7 +378,8 @@
       if (items.length === 0) {
         html += `<p class="text-xs text-zinc-600 italic py-6 text-center">Sin lanzamientos.</p>`;
       } else {
-        for (const item of items) {
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
           let coverUrl = item.cover;
           if (!coverUrl) {
             coverUrl = await getAppleCoverUrl(item.title, item.artist);
@@ -369,7 +390,10 @@
             <div class="mb-4 p-3 rounded-xl border border-subtle bg-black flex items-center gap-3">
               <img src="${coverUrl}" onerror="handleImageError(this)" class="w-12 h-12 rounded-lg object-cover bg-zinc-900 shadow-md">
               <div class="flex-1 min-w-0">
-                <h4 class="font-medium text-xs text-white truncate cursor-pointer hover:text-purple-400 transition" onclick="showAlbumPage('${key}', '${item.id}')">${item.title}</h4>
+                <div class="flex items-center gap-2">
+                  <h4 class="font-medium text-xs text-white truncate cursor-pointer hover:text-purple-400 transition" onclick="showAlbumPage('${key}', '${item.id}')">${item.title}</h4>
+                  ${item.isMainCover ? `<span class="text-[9px] bg-purple-900/50 text-purple-300 border border-purple-700/50 px-1.5 py-0.5 rounded">Portada</span>` : ''}
+                </div>
                 <p class="text-[11px] text-zinc-500 truncate">${item.artist || 'Artista'}</p>
                 <div class="flex gap-2 mt-1">
                   ${item.spotify ? `<a href="${item.spotify}" target="_blank" class="text-[10px] text-zinc-400 hover:text-emerald-400"><i class="fa-brands fa-spotify"></i> Spotify</a>` : ''}
@@ -377,8 +401,10 @@
                 </div>
               </div>
               ${isAdmin ? `
-                <div class="flex gap-2">
-                  <button onclick="openEditForm('${key}', '${item.id}')" class="text-xs text-zinc-500 hover:text-amber-400"><i class="fa-solid fa-pen"></i></button>
+                <div class="flex items-center gap-1.5">
+                  ${i > 0 ? `<button onclick="moveAlbumOrder('${key}', ${i}, -1)" class="text-xs text-zinc-500 hover:text-white"><i class="fa-solid fa-arrow-up"></i></button>` : ''}
+                  ${i < items.length - 1 ? `<button onclick="moveAlbumOrder('${key}', ${i}, 1)" class="text-xs text-zinc-500 hover:text-white"><i class="fa-solid fa-arrow-down"></i></button>` : ''}
+                  <button onclick="openEditForm('${key}', '${item.id}')" class="text-xs text-zinc-500 hover:text-amber-400 ml-1"><i class="fa-solid fa-pen"></i></button>
                   <button onclick="deleteAlbum('${key}', '${item.id}')" class="text-xs text-zinc-500 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button>
                 </div>
               ` : ''}
@@ -397,7 +423,7 @@
     }
 
     function openEditForm(key, albumId = null) {
-      const item = albumId && db[key] ? db[key].find(a => a.id === albumId) : { title: '', artist: '', note: '', cover: '', spotify: '', apple: '' };
+      const item = albumId && db[key] ? db[key].find(a => a.id === albumId) : { title: '', artist: '', note: '', cover: '', spotify: '', apple: '', isMainCover: false };
       
       let html = `
         <h3 class="text-sm font-medium text-white mb-4">${albumId ? 'Editar Álbum' : 'Agregar Álbum'}</h3>
@@ -426,7 +452,11 @@
             <label class="text-[10px] text-zinc-500 uppercase">Nota</label>
             <textarea id="formNote" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">${item.note}</textarea>
           </div>
-          <button type="submit" id="saveSubmitBtn" class="w-full bg-white text-black py-2 rounded-lg font-medium text-xs transition hover:bg-zinc-200">Guardar</button>
+          <div class="flex items-center gap-2 pt-1">
+            <input type="checkbox" id="formIsMainCover" ${item.isMainCover ? 'checked' : ''} class="rounded bg-black border-subtle text-purple-600 focus:ring-0">
+            <label for="formIsMainCover" class="text-xs text-zinc-300">Usar de portada de fondo para este día</label>
+          </div>
+          <button type="submit" id="saveSubmitBtn" class="w-full bg-white text-black py-2 rounded-lg font-medium text-xs transition hover:bg-zinc-200 mt-2">Guardar</button>
         </form>
       `;
 
@@ -451,6 +481,7 @@
       const spotify = document.getElementById('formSpotify').value;
       const apple = document.getElementById('formApple').value;
       let cover = document.getElementById('formCover').value;
+      const isMainCover = document.getElementById('formIsMainCover').checked;
 
       let extracted = await extractCoverFromUrl(spotify);
       if (!extracted) {
@@ -463,6 +494,11 @@
         cover = await getAppleCoverUrl(title, artist);
       }
 
+      // Si marcamos este álbum como portada principal del día, quitamos la marca de otros álbumes de esa misma fecha
+      if (isMainCover) {
+        db[key].forEach(a => a.isMainCover = false);
+      }
+
       const newAlbum = {
         id: albumId || String(Date.now()),
         title: title,
@@ -470,6 +506,7 @@
         spotify: spotify,
         apple: apple,
         cover: cover,
+        isMainCover: isMainCover,
         note: document.getElementById('formNote').value
       };
 
@@ -485,6 +522,19 @@
 
       if (isIsolatedMode) {
         renderIsolatedDayView(key);
+      }
+    }
+
+    function moveAlbumOrder(key, index, direction) {
+      const items = db[key];
+      const targetIndex = index + direction;
+      if (targetIndex >= 0 && targetIndex < items.length) {
+        const temp = items[index];
+        items[index] = items[targetIndex];
+        items[targetIndex] = temp;
+        saveDB();
+        const dateObj = new Date(2026, parseInt(key.split('-')[0]) - 1, parseInt(key.split('-')[1]));
+        openDayModal(key, dateObj.getDate(), monthNames[dateObj.getMonth()]);
       }
     }
 
