@@ -37,9 +37,10 @@
       z-index: 10;
     }
 
-    .star-rating i {
+    .star-container {
+      position: relative;
+      display: inline-block;
       cursor: pointer;
-      transition: color 0.1s ease;
     }
   </style>
 </head>
@@ -222,7 +223,7 @@
     let isAdmin = false;
     let isIsolatedMode = false;
 
-    let db = JSON.parse(localStorage.getItem('musicCalendarDB_vRate')) || fullMusicData;
+    let db = JSON.parse(localStorage.getItem('musicCalendarDB_vRateHalf')) || fullMusicData;
 
     function getTodayKey() {
       const today = new Date();
@@ -232,7 +233,7 @@
     }
 
     function saveDB() {
-      localStorage.setItem('musicCalendarDB_vRate', JSON.stringify(db));
+      localStorage.setItem('musicCalendarDB_vRateHalf', JSON.stringify(db));
       renderCalendar(currentMonth);
     }
 
@@ -316,7 +317,7 @@
           }
         }
       }
-      localStorage.setItem('musicCalendarDB_vRate', JSON.stringify(db));
+      localStorage.setItem('musicCalendarDB_vRateHalf', JSON.stringify(db));
       renderCalendar(currentMonth);
     }
 
@@ -326,14 +327,35 @@
       if (album) {
         album.rating = rating;
         saveDB();
-        // Actualizar visualmente las estrellas si estamos en el modal o página de álbum
         if (isIsolatedMode) {
-          renderIsolatedDayView(key);
+          renderIsolatedDayView(key, albumId);
         } else {
           const dateObj = new Date(2026, parseInt(key.split('-')[0]) - 1, parseInt(key.split('-')[1]));
           openDayModal(key, dateObj.getDate(), monthNames[dateObj.getMonth()]);
         }
       }
+    }
+
+    function handleStarClick(e, key, albumId, starIndex) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const isHalf = clickX < rect.width / 2;
+      const rating = isHalf ? starIndex - 0.5 : starIndex;
+      setRating(key, albumId, rating);
+    }
+
+    function generateStarsHtml(key, albumId, currentRating) {
+      let starsHtml = '';
+      for (let s = 1; s <= 5; s++) {
+        let iconClass = 'fa-regular fa-star';
+        if (currentRating >= s) {
+          iconClass = 'fa-solid fa-star';
+        } else if (currentRating >= s - 0.5) {
+          iconClass = 'fa-solid fa-star-half-stroke';
+        }
+        starsHtml += `<span class="star-container px-0.5 text-amber-400 text-sm" onclick="handleStarClick(event, '${key}', '${albumId}', ${s})"><i class="${iconClass}"></i></span>`;
+      }
+      return starsHtml;
     }
 
     function renderCalendar(month) {
@@ -397,9 +419,7 @@
             <h3 class="text-base font-bold text-white uppercase">${day} de ${monthName}</h3>
             ${isToday ? `<p class="text-[11px] text-amber-400 font-bold mt-0.5 uppercase tracking-wide">🎉 ¡Feliz Cumpleaños!</p>` : ''}
           </div>
-          <button onclick="copyDayLink('${key}')" class="text-xs font-bold text-zinc-400 hover:text-white transition uppercase">
-            <i class="fa-solid fa-share-nodes"></i> Compartir
-          </button>
+          <span class="text-xs text-zinc-500 font-mono">Lanzamientos</span>
         </div>
       `;
 
@@ -413,10 +433,7 @@
           }
 
           let currentRating = item.rating || 0;
-          let starsHtml = '';
-          for (let s = 1; s <= 5; s++) {
-            starsHtml += `<i class="fa-${s <= currentRating ? 'solid' : 'regular'} fa-star text-amber-400 text-xs" onclick="setRating('${key}', '${item.id}', ${s})"></i>`;
-          }
+          let starsHtml = generateStarsHtml(key, item.id, currentRating);
 
           html += `
             <div class="mb-4 p-3 rounded-lg border-2 border-subtle bg-black flex flex-col gap-2">
@@ -428,9 +445,10 @@
                     ${item.isMainCover ? `<span class="text-[9px] zombie-font bg-amber-400 text-black px-1.5 py-0.2 uppercase font-bold">Portada</span>` : ''}
                   </div>
                   <p class="text-[11px] text-zinc-400 truncate">${item.artist || 'Artista'}${item.year ? ` • ${item.year}` : ''}</p>
-                  <div class="flex gap-2 mt-1">
+                  <div class="flex gap-2 mt-1 items-center">
                     ${item.spotify ? `<a href="${item.spotify}" target="_blank" class="text-[10px] font-bold text-zinc-300 hover:text-emerald-400"><i class="fa-brands fa-spotify"></i> Spotify</a>` : ''}
                     ${item.apple ? `<a href="${item.apple}" target="_blank" class="text-[10px] font-bold text-zinc-300 hover:text-pink-400"><i class="fa-brands fa-apple"></i> Apple</a>` : ''}
+                    <button onclick="copyAlbumLink('${key}', '${item.id}')" class="text-[10px] font-bold text-zinc-400 hover:text-white ml-auto transition uppercase"><i class="fa-solid fa-share-nodes"></i> Compartir</button>
                   </div>
                 </div>
                 ${isAdmin ? `
@@ -444,8 +462,8 @@
               </div>
               <!-- Espacio de calificación para el cumpleañero -->
               <div class="border-t border-subtle/60 pt-2 flex items-center justify-between text-xs">
-                <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-mono">Calificación:</span>
-                <div class="star-rating flex gap-1">${starsHtml}</div>
+                <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-mono">Calificación (${currentRating}/5):</span>
+                <div class="flex">${starsHtml}</div>
               </div>
             </div>
           `;
@@ -568,7 +586,8 @@
       closeModal();
 
       if (isIsolatedMode) {
-        renderIsolatedDayView(key);
+        const urlParams = new URLSearchParams(window.location.search);
+        renderIsolatedDayView(key, urlParams.get('album'));
       }
     }
 
@@ -606,10 +625,7 @@
       }
 
       let currentRating = album ? (album.rating || 0) : 0;
-      let starsHtml = '';
-      for (let s = 1; s <= 5; s++) {
-        starsHtml += `<i class="fa-${s <= currentRating ? 'solid' : 'regular'} fa-star text-amber-400 text-sm" onclick="setRating('${key}', '${albumId}', ${s})"></i>`;
-      }
+      let starsHtml = generateStarsHtml(key, albumId, currentRating);
       
       document.getElementById('albumPageContent').innerHTML = `
         <div class="flex flex-col sm:flex-row gap-6 items-center">
@@ -620,14 +636,15 @@
             <h3 class="text-sm text-zinc-400 font-mono mb-4">${album ? album.artist || '' : ''}${album && album.year ? ` // ${album.year}` : ''}</h3>
             ${album && album.note ? `<p class="text-xs text-zinc-300 italic mb-4 bg-black p-3 rounded border-2 border-subtle">"${album.note}"</p>` : ''}
             
-            <div class="mb-5 flex items-center justify-center sm:justify-start gap-3 bg-black p-3 rounded border-2 border-subtle">
-              <span class="text-xs text-zinc-400 uppercase tracking-widest font-mono">Tu Calificación:</span>
-              <div class="star-rating flex gap-1.5">${starsHtml}</div>
+            <div class="mb-5 flex items-center justify-between sm:justify-start gap-3 bg-black p-3 rounded border-2 border-subtle">
+              <span class="text-xs text-zinc-400 uppercase tracking-widest font-mono">Calificación (${currentRating}/5):</span>
+              <div class="flex">${starsHtml}</div>
             </div>
 
-            <div class="flex gap-3 justify-center sm:justify-start">
+            <div class="flex flex-wrap gap-3 justify-center sm:justify-start items-center">
               ${album && album.spotify ? `<a href="${album.spotify}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 transition hover:border-white bg-black shadow-[2px_2px_0px_#333]"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify</a>` : ''}
               ${album && album.apple ? `<a href="${album.apple}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 transition hover:border-white bg-black shadow-[2px_2px_0px_#333]"><i class="fa-brands fa-apple text-pink-400"></i> Apple Music</a>` : ''}
+              <button onclick="copyAlbumLink('${key}', '${albumId}')" class="border-2 border-subtle text-zinc-300 hover:text-white font-bold text-xs px-3 py-2 rounded flex items-center gap-2 transition bg-black shadow-[2px_2px_0px_#333] uppercase"><i class="fa-solid fa-share-nodes"></i> Compartir</button>
             </div>
           </div>
         </div>
@@ -635,17 +652,20 @@
       albumPage.classList.remove('hidden');
     }
 
-    async function renderIsolatedDayView(fecha) {
+    async function renderIsolatedDayView(fecha, targetAlbumId = null) {
       isIsolatedMode = true;
       document.getElementById('mainView').classList.add('hidden');
       document.getElementById('brandLogo').onclick = null;
       document.getElementById('brandLogo').classList.remove('cursor-pointer');
 
-      const albums = db[fecha] || [];
+      let albums = db[fecha] || [];
+      if (targetAlbumId) {
+        albums = albums.filter(a => a.id === targetAlbumId);
+      }
       const isToday = fecha === getTodayKey();
 
       if (albums.length === 0) {
-        document.getElementById('albumPageContent').innerHTML = `<p class="text-xs text-zinc-500 italic text-center py-8">No hay lanzamientos registrados para esta fecha.</p>`;
+        document.getElementById('albumPageContent').innerHTML = `<p class="text-xs text-zinc-500 italic text-center py-8">No hay lanzamientos registrados para esta fecha o enlace.</p>`;
       } else {
         let htmlContent = '';
         for (const album of albums) {
@@ -656,10 +676,7 @@
           }
 
           let currentRating = album.rating || 0;
-          let starsHtml = '';
-          for (let s = 1; s <= 5; s++) {
-            starsHtml += `<i class="fa-${s <= currentRating ? 'solid' : 'regular'} fa-star text-amber-400 text-sm" onclick="setRating('${fecha}', '${album.id}', ${s})"></i>`;
-          }
+          let starsHtml = generateStarsHtml(fecha, album.id, currentRating);
 
           htmlContent += `
             <div class="flex flex-col sm:flex-row gap-6 items-center border-b-2 border-subtle pb-6 mb-6 last:border-none last:pb-0 last:mb-0">
@@ -670,14 +687,15 @@
                 <h3 class="text-sm text-zinc-400 font-mono mb-4">${album.artist || ''}${album.year ? ` // ${album.year}` : ''}</h3>
                 ${album.note ? `<p class="text-xs text-zinc-300 italic mb-4 bg-black p-3 rounded border-2 border-subtle">"${album.note}"</p>` : ''}
                 
-                <div class="mb-5 flex items-center justify-center sm:justify-start gap-3 bg-black p-3 rounded border-2 border-subtle">
-                  <span class="text-xs text-zinc-400 uppercase tracking-widest font-mono">Tu Calificación:</span>
-                  <div class="star-rating flex gap-1.5">${starsHtml}</div>
+                <div class="mb-5 flex items-center justify-between sm:justify-start gap-3 bg-black p-3 rounded border-2 border-subtle">
+                  <span class="text-xs text-zinc-400 uppercase tracking-widest font-mono">Calificación (${currentRating}/5):</span>
+                  <div class="flex">${starsHtml}</div>
                 </div>
 
-                <div class="flex gap-3 justify-center sm:justify-start">
+                <div class="flex flex-wrap gap-3 justify-center sm:justify-start items-center">
                   ${album.spotify ? `<a href="${album.spotify}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 transition hover:border-white bg-black shadow-[2px_2px_0px_#333]"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify</a>` : ''}
                   ${album.apple ? `<a href="${album.apple}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 transition hover:border-white bg-black shadow-[2px_2px_0px_#333]"><i class="fa-brands fa-apple text-pink-400"></i> Apple Music</a>` : ''}
+                  <button onclick="copyAlbumLink('${fecha}', '${album.id}')" class="border-2 border-subtle text-zinc-300 hover:text-white font-bold text-xs px-3 py-2 rounded flex items-center gap-2 transition bg-black shadow-[2px_2px_0px_#333] uppercase"><i class="fa-solid fa-share-nodes"></i> Compartir</button>
                 </div>
               </div>
             </div>
@@ -700,18 +718,19 @@
       document.getElementById('modal').classList.remove('flex');
     }
 
-    function copyDayLink(key) {
-      const url = `${window.location.origin}${window.location.pathname}?fecha=${key}`;
+    function copyAlbumLink(key, albumId) {
+      const url = `${window.location.origin}${window.location.pathname}?fecha=${key}&album=${albumId}`;
       navigator.clipboard.writeText(url);
-      alert('¡Enlace único del día copiado!\n' + url);
+      alert('¡Enlace único del álbum copiado!\n' + url);
     }
 
     window.onload = () => {
       const urlParams = new URLSearchParams(window.location.search);
       const fecha = urlParams.get('fecha');
+      const albumId = urlParams.get('album');
 
       if (fecha && db[fecha]) {
-        renderIsolatedDayView(fecha);
+        renderIsolatedDayView(fecha, albumId);
       } else {
         renderCalendar(currentMonth);
         preloadCovers();
