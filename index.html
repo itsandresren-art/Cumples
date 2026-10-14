@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
   <title>Calendario Musical</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -300,7 +301,7 @@
     let isAdmin = false;
     let isIsolatedMode = false;
 
-    let db = JSON.parse(localStorage.getItem('musicCalendarDB_v100')) || fullMusicData;
+    let db = JSON.parse(localStorage.getItem('musicCalendarDB_v101')) || fullMusicData;
 
     function getTodayKey() {
       const today = new Date();
@@ -310,7 +311,7 @@
     }
 
     function saveDB() {
-      localStorage.setItem('musicCalendarDB_v100', JSON.stringify(db));
+      localStorage.setItem('musicCalendarDB_v101', JSON.stringify(db));
       renderCalendar(currentMonth);
     }
 
