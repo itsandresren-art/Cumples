@@ -3,8 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- LA SOLUCIÓN MAGICA: Oculta a Apple que estamos en GitHub para que no bloquee las imágenes -->
-  <meta name="referrer" content="no-referrer">
   <title>Calendario Musical</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -302,12 +300,7 @@
     let isAdmin = false;
     let isIsolatedMode = false;
 
-    // Borrado forzado de bases de datos fallidas anteriores
-    for (let i = 1; i <= 59; i++) {
-      localStorage.removeItem(`musicCalendarDB_v${i}`);
-    }
-
-    let db = JSON.parse(localStorage.getItem('musicCalendarDB_v60')) || fullMusicData;
+    let db = JSON.parse(localStorage.getItem('musicCalendarDB_v100')) || fullMusicData;
 
     function getTodayKey() {
       const today = new Date();
@@ -317,7 +310,7 @@
     }
 
     function saveDB() {
-      localStorage.setItem('musicCalendarDB_v60', JSON.stringify(db));
+      localStorage.setItem('musicCalendarDB_v100', JSON.stringify(db));
       renderCalendar(currentMonth);
     }
 
@@ -437,7 +430,7 @@
 
           html += `
             <div class="mb-4 p-3 rounded-xl border border-subtle bg-black flex items-center gap-3">
-              <img src="${item.cover}" onerror="handleImageError(this)" loading="lazy" class="w-12 h-12 rounded-lg object-cover bg-zinc-900 shadow-md">
+              <img src="${item.cover}" onerror="handleImageError(this)" class="w-12 h-12 rounded-lg object-cover bg-zinc-900 shadow-md">
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2">
                   <h4 class="font-medium text-xs text-white truncate cursor-pointer hover:text-purple-400 transition" onclick="showAlbumPage('${key}', '${item.id}')">${item.title}</h4>
@@ -631,7 +624,7 @@
         for (const album of albums) {
           htmlContent += `
             <div class="flex flex-col sm:flex-row gap-6 items-center border-b border-subtle/50 pb-6 mb-6 last:border-none last:pb-0 last:mb-0">
-              <img src="${album.cover}" onerror="handleImageError(this)" loading="lazy" class="w-48 h-48 object-cover rounded-xl border border-subtle bg-zinc-900 shadow-xl">
+              <img src="${album.cover}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded-xl border border-subtle bg-zinc-900 shadow-xl">
               <div class="flex-1 text-center sm:text-left">
                 ${isToday ? `<p class="text-xs text-purple-400 font-medium tracking-wide mb-2">🎉 ¡Feliz Cumpleaños!</p>` : ''}
                 <h1 class="text-xl font-medium text-white mb-1">${album.title}</h1>
