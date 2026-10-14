@@ -28,6 +28,13 @@
       background-size: cover;
       background-position: center;
       border: 2px solid #222222;
+      min-height: 80px;
+    }
+
+    @media (min-width: 768px) {
+      .calendar-day {
+        min-height: 96px;
+      }
     }
 
     .calendar-day:hover {
@@ -44,16 +51,16 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between p-6 md:p-12">
+<body class="min-h-screen flex flex-col justify-between p-4 md:p-12">
 
   <!-- Header Estilo Zine -->
-  <header class="max-w-4xl mx-auto w-full flex justify-between items-center mb-12 border-b-2 border-subtle pb-6">
+  <header class="max-w-4xl mx-auto w-full flex justify-between items-center mb-8 md:mb-12 border-b-2 border-subtle pb-6">
     <div id="brandLogo" class="cursor-pointer" onclick="goHome()">
-      <h1 class="text-xl font-bold tracking-tight text-white uppercase">Calendario Musical</h1>
-      <p class="text-xs text-zinc-400 font-mono mt-0.5 tracking-wider">// ARCHIVO DE CUMPLEAÑOS</p>
+      <h1 class="text-lg md:text-xl font-bold tracking-tight text-white uppercase">Calendario Musical</h1>
+      <p class="text-[10px] md:text-xs text-zinc-400 font-mono mt-0.5 tracking-wider">// ARCHIVO DE CUMPLEAÑOS</p>
     </div>
 
-    <button id="adminBtn" onclick="toggleAdmin()" class="text-xs font-bold uppercase tracking-wider text-black bg-[#f4f4f0] hover:bg-white px-4 py-2 transition flex items-center gap-2 shadow-[2px_2px_0px_#555]">
+    <button id="adminBtn" onclick="toggleAdmin()" class="text-xs font-bold uppercase tracking-wider text-black bg-[#f4f4f0] hover:bg-white px-3 md:px-4 py-2 transition flex items-center gap-2 shadow-[2px_2px_0px_#555]">
       <i class="fa-solid fa-lock text-[10px]" id="adminIcon"></i> <span id="adminText">Admin</span>
     </button>
   </header>
@@ -62,38 +69,38 @@
   <main id="mainView" class="max-w-4xl mx-auto w-full flex-1">
     
     <!-- Controles de Mes -->
-    <div class="flex justify-between items-center mb-8">
-      <h2 id="monthTitle" class="text-3xl font-bold tracking-tight text-white uppercase underline decoration-2 underline-offset-8">
+    <div class="flex justify-between items-center mb-6 md:mb-8">
+      <h2 id="monthTitle" class="text-2xl md:text-3xl font-bold tracking-tight text-white uppercase underline decoration-2 underline-offset-8">
         Enero
       </h2>
       <div class="flex items-center gap-2">
-        <button onclick="changeMonth(-1)" class="w-10 h-10 rounded border-2 border-subtle hover:border-white bg-card flex items-center justify-center text-zinc-300 hover:text-white transition shadow-[2px_2px_0px_#222]">
+        <button onclick="changeMonth(-1)" class="w-9 h-9 md:w-10 md:h-10 rounded border-2 border-subtle hover:border-white bg-card flex items-center justify-center text-zinc-300 hover:text-white transition shadow-[2px_2px_0px_#222]">
           <i class="fa-solid fa-chevron-left text-xs"></i>
         </button>
-        <button onclick="changeMonth(1)" class="w-10 h-10 rounded border-2 border-subtle hover:border-white bg-card flex items-center justify-center text-zinc-300 hover:text-white transition shadow-[2px_2px_0px_#222]">
+        <button onclick="changeMonth(1)" class="w-9 h-9 md:w-10 md:h-10 rounded border-2 border-subtle hover:border-white bg-card flex items-center justify-center text-zinc-300 hover:text-white transition shadow-[2px_2px_0px_#222]">
           <i class="fa-solid fa-chevron-right text-xs"></i>
         </button>
       </div>
     </div>
 
     <!-- Encabezado de Días -->
-    <div class="grid grid-cols-7 gap-2 mb-2 text-center text-xs text-zinc-500 font-bold uppercase tracking-widest">
+    <div class="grid grid-cols-7 gap-1.5 md:gap-2 mb-2 text-center text-[10px] md:text-xs text-zinc-500 font-bold uppercase tracking-widest">
       <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
     </div>
 
     <!-- Grid del Calendario -->
-    <div id="calendarGrid" class="grid grid-cols-7 gap-2.5"></div>
+    <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 md:gap-2.5"></div>
   </main>
 
   <!-- Vista Álbum en Pantalla Completa / Vista Compartida -->
   <main id="albumPage" class="max-w-2xl mx-auto w-full flex-1 hidden">
-    <div class="bg-card rounded-xl p-8 border-2 border-subtle shadow-[6px_6px_0px_#222]" id="albumPageContent"></div>
+    <div class="bg-card rounded-xl p-6 md:p-8 border-2 border-subtle shadow-[6px_6px_0px_#222]" id="albumPageContent"></div>
   </main>
 
   <!-- Modal para Día / Formulario -->
   <div id="modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-    <div class="bg-card max-w-md w-full rounded-xl p-6 relative border-2 border-subtle max-h-[85vh] overflow-y-auto shadow-[8px_8px_0px_#111]">
-      <button onclick="closeModal()" class="absolute top-5 right-5 text-zinc-400 hover:text-white text-base">
+    <div class="bg-card max-w-md w-full rounded-xl p-5 md:p-6 relative border-2 border-subtle max-h-[85vh] overflow-y-auto shadow-[8px_8px_0px_#111]">
+      <button onclick="closeModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white text-base">
         <i class="fa-solid fa-xmark"></i>
       </button>
       <div id="modalContent"></div>
@@ -223,7 +230,7 @@
     let isAdmin = false;
     let isIsolatedMode = false;
 
-    let db = JSON.parse(localStorage.getItem('musicCalendarDB_vRateHalf')) || fullMusicData;
+    let db = JSON.parse(localStorage.getItem('musicCalendarDB_vResponsive')) || fullMusicData;
 
     function getTodayKey() {
       const today = new Date();
@@ -233,7 +240,7 @@
     }
 
     function saveDB() {
-      localStorage.setItem('musicCalendarDB_vRateHalf', JSON.stringify(db));
+      localStorage.setItem('musicCalendarDB_vResponsive', JSON.stringify(db));
       renderCalendar(currentMonth);
     }
 
@@ -317,7 +324,7 @@
           }
         }
       }
-      localStorage.setItem('musicCalendarDB_vRateHalf', JSON.stringify(db));
+      localStorage.setItem('musicCalendarDB_vResponsive', JSON.stringify(db));
       renderCalendar(currentMonth);
     }
 
@@ -328,7 +335,8 @@
         album.rating = rating;
         saveDB();
         if (isIsolatedMode) {
-          renderIsolatedDayView(key, albumId);
+          const urlParams = new URLSearchParams(window.location.search);
+          renderIsolatedDayView(key, urlParams.get('album'));
         } else {
           const dateObj = new Date(2026, parseInt(key.split('-')[0]) - 1, parseInt(key.split('-')[1]));
           openDayModal(key, dateObj.getDate(), monthNames[dateObj.getMonth()]);
@@ -368,7 +376,7 @@
       const todayKey = getTodayKey();
 
       for (let i = 0; i < firstDay; i++) {
-        grid.appendChild(Object.assign(document.createElement('div'), { className: "h-24 rounded bg-[#101010]/40 border-2 border-transparent" }));
+        grid.appendChild(Object.assign(document.createElement('div'), { className: "calendar-day rounded bg-[#101010]/40 border-2 border-transparent" }));
       }
 
       for (let day = 1; day <= daysInMonth; day++) {
@@ -377,7 +385,7 @@
         const isToday = key === todayKey;
 
         const dayCell = document.createElement('div');
-        dayCell.className = `calendar-day h-24 rounded-lg p-2.5 cursor-pointer flex flex-col justify-between overflow-hidden relative ${
+        dayCell.className = `calendar-day rounded-lg p-1.5 md:p-2.5 cursor-pointer flex flex-col justify-between overflow-hidden relative ${
           isToday ? 'border-amber-400 shadow-[3px_3px_0px_#fbbf24]' : (releases.length > 0 ? 'border-subtle bg-card' : 'bg-[#111] border-subtle')
         }`;
 
@@ -385,7 +393,7 @@
           let mainAlbum = releases.find(a => a.isMainCover) || releases[0];
           let coverUrl = mainAlbum.cover || '';
           if (coverUrl) {
-            dayCell.style.backgroundImage = `linear-gradient(to top, rgba(12, 12, 12, 0.92), rgba(12, 12, 12, 0.5)), url('${coverUrl}')`;
+            dayCell.style.backgroundImage = `linear-gradient(to top, rgba(12, 12, 12, 0.94), rgba(12, 12, 12, 0.6)), url('${coverUrl}')`;
           }
         }
 
@@ -397,8 +405,8 @@
 
         if (releases.length > 0) {
           html += `
-            <div class="truncate text-[10px] text-zinc-200 flex items-center gap-1.5 relative z-10 font-semibold">
-              <span class="w-2 h-2 rounded-none ${isToday ? 'bg-amber-400' : 'bg-white'} shrink-0"></span>
+            <div class="truncate text-[9px] md:text-[10px] text-zinc-200 flex items-center gap-1 relative z-10 font-semibold">
+              <span class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-none ${isToday ? 'bg-amber-400' : 'bg-white'} shrink-0"></span>
               <span class="truncate">${releases[0].title}</span>
             </div>
           `;
@@ -438,14 +446,14 @@
           html += `
             <div class="mb-4 p-3 rounded-lg border-2 border-subtle bg-black flex flex-col gap-2">
               <div class="flex items-center gap-3">
-                <img src="${item.cover}" onerror="handleImageError(this)" class="w-12 h-12 rounded object-cover border border-subtle bg-zinc-900">
+                <img src="${item.cover}" onerror="handleImageError(this)" class="w-12 h-12 rounded object-cover border border-subtle bg-zinc-900 shrink-0">
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2">
                     <h4 class="font-bold text-xs text-white truncate cursor-pointer hover:text-amber-400 transition" onclick="showAlbumPage('${key}', '${item.id}')">${item.title}</h4>
                     ${item.isMainCover ? `<span class="text-[9px] zombie-font bg-amber-400 text-black px-1.5 py-0.2 uppercase font-bold">Portada</span>` : ''}
                   </div>
                   <p class="text-[11px] text-zinc-400 truncate">${item.artist || 'Artista'}${item.year ? ` • ${item.year}` : ''}</p>
-                  <div class="flex gap-2 mt-1 items-center">
+                  <div class="flex flex-wrap gap-2 mt-1 items-center">
                     ${item.spotify ? `<a href="${item.spotify}" target="_blank" class="text-[10px] font-bold text-zinc-300 hover:text-emerald-400"><i class="fa-brands fa-spotify"></i> Spotify</a>` : ''}
                     ${item.apple ? `<a href="${item.apple}" target="_blank" class="text-[10px] font-bold text-zinc-300 hover:text-pink-400"><i class="fa-brands fa-apple"></i> Apple</a>` : ''}
                     <button onclick="copyAlbumLink('${key}', '${item.id}')" class="text-[10px] font-bold text-zinc-400 hover:text-white ml-auto transition uppercase"><i class="fa-solid fa-share-nodes"></i> Compartir</button>
@@ -460,7 +468,6 @@
                   </div>
                 ` : ''}
               </div>
-              <!-- Espacio de calificación para el cumpleañero -->
               <div class="border-t border-subtle/60 pt-2 flex items-center justify-between text-xs">
                 <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-mono">Calificación (${currentRating}/5):</span>
                 <div class="flex">${starsHtml}</div>
@@ -629,11 +636,11 @@
       
       document.getElementById('albumPageContent').innerHTML = `
         <div class="flex flex-col sm:flex-row gap-6 items-center">
-          <img src="${coverUrl || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777'}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded border-2 border-subtle bg-zinc-900 shadow-xl">
+          <img src="${coverUrl || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777'}" onerror="handleImageError(this)" class="w-40 h-40 md:w-48 md:h-48 object-cover rounded border-2 border-subtle bg-zinc-900 shadow-xl">
           <div class="flex-1 text-center sm:text-left w-full">
             ${isToday ? `<p class="text-xs text-amber-400 font-bold tracking-widest uppercase mb-2">🎉 ¡Feliz Cumpleaños!</p>` : ''}
-            <h1 class="text-2xl font-bold text-white uppercase mb-1">${album ? album.title : ''}</h1>
-            <h3 class="text-sm text-zinc-400 font-mono mb-4">${album ? album.artist || '' : ''}${album && album.year ? ` // ${album.year}` : ''}</h3>
+            <h1 class="text-xl md:text-2xl font-bold text-white uppercase mb-1">${album ? album.title : ''}</h1>
+            <h3 class="text-xs md:text-sm text-zinc-400 font-mono mb-4">${album ? album.artist || '' : ''}${album && album.year ? ` // ${album.year}` : ''}</h3>
             ${album && album.note ? `<p class="text-xs text-zinc-300 italic mb-4 bg-black p-3 rounded border-2 border-subtle">"${album.note}"</p>` : ''}
             
             <div class="mb-5 flex items-center justify-between sm:justify-start gap-3 bg-black p-3 rounded border-2 border-subtle">
@@ -680,11 +687,11 @@
 
           htmlContent += `
             <div class="flex flex-col sm:flex-row gap-6 items-center border-b-2 border-subtle pb-6 mb-6 last:border-none last:pb-0 last:mb-0">
-              <img src="${coverUrl}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded border-2 border-subtle bg-zinc-900 shadow-xl">
+              <img src="${coverUrl}" onerror="handleImageError(this)" class="w-40 h-40 md:w-48 md:h-48 object-cover rounded border-2 border-subtle bg-zinc-900 shadow-xl">
               <div class="flex-1 text-center sm:text-left w-full">
                 ${isToday ? `<p class="text-xs text-amber-400 font-bold tracking-widest uppercase mb-2">🎉 ¡Feliz Cumpleaños!</p>` : ''}
-                <h1 class="text-2xl font-bold text-white uppercase mb-1">${album.title}</h1>
-                <h3 class="text-sm text-zinc-400 font-mono mb-4">${album.artist || ''}${album.year ? ` // ${album.year}` : ''}</h3>
+                <h1 class="text-xl md:text-2xl font-bold text-white uppercase mb-1">${album.title}</h1>
+                <h3 class="text-xs md:text-sm text-zinc-400 font-mono mb-4">${album.artist || ''}${album.year ? ` // ${album.year}` : ''}</h3>
                 ${album.note ? `<p class="text-xs text-zinc-300 italic mb-4 bg-black p-3 rounded border-2 border-subtle">"${album.note}"</p>` : ''}
                 
                 <div class="mb-5 flex items-center justify-between sm:justify-start gap-3 bg-black p-3 rounded border-2 border-subtle">
