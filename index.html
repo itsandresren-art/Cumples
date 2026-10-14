@@ -7,28 +7,53 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
     body { 
       background-color: #000000; 
       color: #ededed; 
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
       -webkit-font-smoothing: antialiased;
+      perspective: 1000px;
     }
 
     .border-subtle { border-color: #1a1a1a; }
     .bg-card { background-color: #0a0a0a; }
 
+    /* Efecto 3D / Tilt Parallax en las casillas */
     .calendar-day {
-      transition: border-color 0.15s ease, transform 0.15s ease;
+      transition: transform 0.15s ease-out, border-color 0.2s ease, box-shadow 0.2s ease;
+      transform-style: preserve-3d;
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
     }
 
     .calendar-day:hover {
-      border-color: #555555;
-      transform: scale(1.02);
+      border-color: #666666;
+      box-shadow: 0 10px 25px -5px rgba(255, 255, 255, 0.12);
+      z-index: 20;
+    }
+
+    /* Ambient Glow Container */
+    .glow-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glow-bg {
+      position: absolute;
+      inset: -30px;
+      background-size: cover;
+      background-position: center;
+      filter: blur(50px) brightness(0.45) opacity(0.85);
+      z-index: 0;
+      transition: all 0.5s ease;
+    }
+
+    .glow-content {
+      position: relative;
+      z-index: 10;
     }
   </style>
 </head>
@@ -48,12 +73,8 @@
 
   <!-- Vista Principal: Calendario -->
   <main id="mainView" class="max-w-4xl mx-auto w-full flex-1">
-    
-    <!-- Controles de Mes -->
     <div class="flex justify-between items-center mb-8">
-      <h2 id="monthTitle" class="text-2xl font-light tracking-tight text-white">
-        Enero
-      </h2>
+      <h2 id="monthTitle" class="text-2xl font-light tracking-tight text-white">Enero</h2>
       <div class="flex items-center gap-1">
         <button onclick="changeMonth(-1)" class="w-8 h-8 rounded-lg border border-subtle hover:border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-white transition">
           <i class="fa-solid fa-chevron-left text-xs"></i>
@@ -64,24 +85,25 @@
       </div>
     </div>
 
-    <!-- Encabezado de Días -->
     <div class="grid grid-cols-7 gap-2 mb-2 text-center text-[11px] text-zinc-600 font-medium uppercase tracking-wider">
       <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
     </div>
 
-    <!-- Grid del Calendario -->
     <div id="calendarGrid" class="grid grid-cols-7 gap-2"></div>
   </main>
 
-  <!-- Vista Álbum en Pantalla Completa / Vista Compartida -->
+  <!-- Vista Álbum en Pantalla Completa con Ambient Glow -->
   <main id="albumPage" class="max-w-2xl mx-auto w-full flex-1 hidden">
-    <div class="bg-card rounded-2xl p-8 border border-subtle" id="albumPageContent"></div>
+    <div class="bg-card rounded-2xl p-8 border border-subtle glow-card" id="albumPageCard">
+      <div id="albumGlowBg" class="glow-bg"></div>
+      <div class="glow-content" id="albumPageContent"></div>
+    </div>
   </main>
 
   <!-- Modal para Día / Formulario -->
   <div id="modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-    <div class="bg-card max-w-md w-full rounded-2xl p-6 relative border border-subtle max-h-[85vh] overflow-y-auto">
-      <button onclick="closeModal()" class="absolute top-5 right-5 text-zinc-500 hover:text-white text-sm">
+    <div class="bg-card max-w-md w-full rounded-2xl p-6 relative border border-subtle max-h-[90vh] overflow-y-auto" id="modalContainer">
+      <button onclick="closeModal()" class="absolute top-5 right-5 text-zinc-500 hover:text-white text-sm z-50">
         <i class="fa-solid fa-xmark"></i>
       </button>
       <div id="modalContent"></div>
@@ -135,7 +157,7 @@
       "06-26": [{ id: "j26", title: "El Retorno", artist: "Santiago Motorizado", note: "" }],
       "06-29": [{ id: "j29", title: "DATA", artist: "Tainy", note: "" }],
       "07-08": [{ id: "jul8", title: "Introducción a los Fother Muckers: Menudencias (Sólo para fanáticos)", artist: "Fother Muckers", note: "" }],
-      "07-11": [{ id: "jul11", title: "166", artist: "Milo J", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/44/28/6f/44286f05-27a9-25ea-4d89-f538350aa8bd/198588235282.jpg/400x400bb.jpg" }],
+      "07-11": [{ id: "jul11", title: "166", artist: "Milo J", notePath: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/44/28/6f/44286f05-27a9-25ea-4d89-f538350aa8bd/198588235282.jpg/400x400bb.jpg" }],
       "07-15": [{ id: "jul15", title: "Gemini Rights", artist: "Steve Lacy", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/8e/31/58/8e3158c3-4f99-f215-6839-4d6d0285a82e/196589218205.jpg/400x400bb.jpg" }],
       "07-16": [{ id: "jul16", title: "Oh yeah?", artist: "Steve Lacy", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/8e/31/58/8e3158c3-4f99-f215-6839-4d6d0285a82e/196589218205.jpg/400x400bb.jpg" }],
       "07-17": [{ id: "jul17", title: "Kill the Lights", artist: "Tony Molina", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music118/v4/f2/0a/6e/f20a6e03-7521-9e8c-ef0c-bfb86a8ff71f/634457805118.jpg/400x400bb.jpg" }],
@@ -211,9 +233,8 @@
     let isAdmin = false;
     let isIsolatedMode = false;
 
-    // Reseteamos a la v6 para forzar la actualización de datos estáticos
-    localStorage.removeItem('musicCalendarDB_v5');
-    let db = JSON.parse(localStorage.getItem('musicCalendarDB_v6')) || fullMusicData;
+    localStorage.removeItem('musicCalendarDB_v7');
+    let db = JSON.parse(localStorage.getItem('musicCalendarDB_v8')) || fullMusicData;
 
     function getTodayKey() {
       const today = new Date();
@@ -223,7 +244,7 @@
     }
 
     function saveDB() {
-      localStorage.setItem('musicCalendarDB_v6', JSON.stringify(db));
+      localStorage.setItem('musicCalendarDB_v8', JSON.stringify(db));
       renderCalendar(currentMonth);
     }
 
@@ -324,6 +345,18 @@
             dayCell.style.backgroundImage = `linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.3)), url('${mainAlbum.cover}')`;
           }
         }
+
+        // Efecto 3D Tilt al mover el mouse
+        dayCell.onmousemove = (e) => {
+          const rect = dayCell.getBoundingClientRect();
+          const x = e.clientX - rect.left - rect.width / 2;
+          const y = e.clientY - rect.top - rect.height / 2;
+          dayCell.style.transform = `rotateY(${x / 8}deg) rotateX(${-y / 8}deg) scale(1.04)`;
+        };
+
+        dayCell.onmouseleave = () => {
+          dayCell.style.transform = `rotateY(0deg) rotateX(0deg) scale(1)`;
+        };
 
         let html = `<div class="flex justify-between items-center relative z-10"><span class="text-xs ${isToday ? 'text-purple-400 font-bold' : (releases.length > 0 ? 'text-white font-medium' : 'text-zinc-600')}">${day}</span>`;
         if (isAdmin) {
@@ -540,18 +573,24 @@
       if (album && !coverUrl) {
         coverUrl = await getAppleCoverUrl(album.title, album.artist);
       }
+
+      // Aplicar Ambient Glow en el fondo
+      const glowBg = document.getElementById('albumGlowBg');
+      if (coverUrl) {
+        glowBg.style.backgroundImage = `url('${coverUrl}')`;
+      }
       
       document.getElementById('albumPageContent').innerHTML = `
         <div class="flex flex-col sm:flex-row gap-6 items-center">
-          <img src="${coverUrl || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777'}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded-xl border border-subtle bg-zinc-900 shadow-xl">
+          <img src="${coverUrl || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777'}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded-xl border border-subtle bg-zinc-900 shadow-2xl">
           <div class="flex-1 text-center sm:text-left">
             ${isToday ? `<p class="text-xs text-purple-400 font-medium tracking-wide mb-2">🎉 ¡Feliz Cumpleaños!</p>` : ''}
             <h1 class="text-xl font-medium text-white mb-1">${album ? album.title : ''}</h1>
             <h3 class="text-sm text-zinc-400 mb-4">${album ? album.artist : ''}</h3>
-            ${album && album.note ? `<p class="text-xs text-zinc-400 italic mb-6 bg-black p-3 rounded-lg border border-subtle">"${album.note}"</p>` : ''}
-            <div class="flex gap-3 justify-center sm:justify-start">
-              ${album && album.spotify ? `<a href="${album.spotify}" target="_blank" class="border border-subtle text-zinc-300 hover:text-white text-xs px-3.5 py-1.5 rounded-lg flex items-center gap-2 transition"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify</a>` : ''}
-              ${album && album.apple ? `<a href="${album.apple}" target="_blank" class="border border-subtle text-zinc-300 hover:text-white text-xs px-3.5 py-1.5 rounded-lg flex items-center gap-2 transition"><i class="fa-brands fa-apple text-pink-400"></i> Apple Music</a>` : ''}
+            ${album && album.note ? `<p class="text-xs text-zinc-300 italic mb-6 bg-black/60 p-3 rounded-lg border border-subtle backdrop-blur-md">"${album.note}"</p>` : ''}
+            <div class="flex flex-wrap gap-3 justify-center sm:justify-start">
+              ${album && album.spotify ? `<a href="${album.spotify}" target="_blank" class="border border-subtle bg-black/40 backdrop-blur-md text-zinc-300 hover:text-white text-xs px-3.5 py-1.5 rounded-lg flex items-center gap-2 transition"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify</a>` : ''}
+              ${album && album.apple ? `<a href="${album.apple}" target="_blank" class="border border-subtle bg-black/40 backdrop-blur-md text-zinc-300 hover:text-white text-xs px-3.5 py-1.5 rounded-lg flex items-center gap-2 transition"><i class="fa-brands fa-apple text-pink-400"></i> Apple Music</a>` : ''}
             </div>
           </div>
         </div>
