@@ -3,61 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="referrer" content="no-referrer">
   <title>Calendario Musical</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
     
     body { 
       background-color: #000000; 
       color: #ededed; 
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
       -webkit-font-smoothing: antialiased;
-      perspective: 1000px;
     }
 
     .border-subtle { border-color: #1a1a1a; }
     .bg-card { background-color: #0a0a0a; }
 
     .calendar-day {
-      transition: transform 0.15s ease-out, border-color 0.2s ease, box-shadow 0.2s ease;
-      transform-style: preserve-3d;
+      transition: border-color 0.15s ease, transform 0.15s ease;
       background-size: cover;
       background-position: center;
-      background-repeat: no-repeat;
     }
 
     .calendar-day:hover {
-      border-color: #666666;
-      box-shadow: 0 10px 25px -5px rgba(255, 255, 255, 0.12);
-      z-index: 20;
-    }
-
-    .glow-card {
-      position: relative;
-      overflow: hidden;
-    }
-
-    .glow-bg {
-      position: absolute;
-      inset: -30px;
-      background-size: cover;
-      background-position: center;
-      filter: blur(50px) brightness(0.45) opacity(0.85);
-      z-index: 0;
-      transition: all 0.5s ease;
-    }
-
-    .glow-content {
-      position: relative;
-      z-index: 10;
+      border-color: #555555;
+      transform: scale(1.02);
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between p-6 md:p-12">
 
+  <!-- Header Minimalista -->
   <header class="max-w-4xl mx-auto w-full flex justify-between items-center mb-12">
     <div id="brandLogo" class="cursor-pointer" onclick="goHome()">
       <h1 class="text-lg font-medium tracking-tight text-white">Calendario Musical</h1>
@@ -69,9 +45,14 @@
     </button>
   </header>
 
+  <!-- Vista Principal: Calendario -->
   <main id="mainView" class="max-w-4xl mx-auto w-full flex-1">
+    
+    <!-- Controles de Mes -->
     <div class="flex justify-between items-center mb-8">
-      <h2 id="monthTitle" class="text-2xl font-light tracking-tight text-white">Enero</h2>
+      <h2 id="monthTitle" class="text-2xl font-light tracking-tight text-white">
+        Enero
+      </h2>
       <div class="flex items-center gap-1">
         <button onclick="changeMonth(-1)" class="w-8 h-8 rounded-lg border border-subtle hover:border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-white transition">
           <i class="fa-solid fa-chevron-left text-xs"></i>
@@ -82,23 +63,24 @@
       </div>
     </div>
 
+    <!-- Encabezado de Días -->
     <div class="grid grid-cols-7 gap-2 mb-2 text-center text-[11px] text-zinc-600 font-medium uppercase tracking-wider">
       <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
     </div>
 
+    <!-- Grid del Calendario -->
     <div id="calendarGrid" class="grid grid-cols-7 gap-2"></div>
   </main>
 
+  <!-- Vista Álbum en Pantalla Completa / Vista Compartida -->
   <main id="albumPage" class="max-w-2xl mx-auto w-full flex-1 hidden">
-    <div class="bg-card rounded-2xl p-8 border border-subtle glow-card" id="albumPageCard">
-      <div id="albumGlowBg" class="glow-bg"></div>
-      <div class="glow-content" id="albumPageContent"></div>
-    </div>
+    <div class="bg-card rounded-2xl p-8 border border-subtle" id="albumPageContent"></div>
   </main>
 
+  <!-- Modal para Día / Formulario -->
   <div id="modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-    <div class="bg-card max-w-md w-full rounded-2xl p-6 relative border border-subtle max-h-[90vh] overflow-y-auto" id="modalContainer">
-      <button onclick="closeModal()" class="absolute top-5 right-5 text-zinc-500 hover:text-white text-sm z-50">
+    <div class="bg-card max-w-md w-full rounded-2xl p-6 relative border border-subtle max-h-[85vh] overflow-y-auto">
+      <button onclick="closeModal()" class="absolute top-5 right-5 text-zinc-500 hover:text-white text-sm">
         <i class="fa-solid fa-xmark"></i>
       </button>
       <div id="modalContent"></div>
@@ -107,193 +89,120 @@
 
   <script>
     const fullMusicData = {
-      "01-01": [{ id: "e1", title: "Aquí vamos otra vez", artist: "1280 Almas", year: "1998", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/4a/12/36/4a12368c-2321-f5e1-5121-6548a3d5e23a/1280almas.jpg/400x400bb.jpg" }],
-      "01-15": [{ id: "e15", title: "Almendra", artist: "Almendra", year: "1969", note: "POR FIN", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/a7/6d/4d/a76d4d12-bf9e-8e8e-97bb-20e3f28329b3/886443469118.jpg/400x400bb.jpg" }],
-      "01-17": [{ id: "e17", title: "Circles", artist: "Mac Miller", year: "2020", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music123/v4/31/bc/11/31bc1184-c8c7-9831-7e8c-859eb5a55743/093624896708.jpg/400x400bb.jpg" }],
-      "01-27": [{ id: "e27", title: "Let’s Start Here", artist: "Lil Yachty", year: "2023", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music123/v4/91/97/34/919734d2-d78d-9c3f-ee7e-61fbe2bcbd0a/23UMGIM08200.rgb.jpg/400x400bb.jpg" }],
-      "02-14": [{ id: "f14", title: "The Life of Pablo", artist: "Kanye West", year: "2016", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/5f/8d/62/5f8d62bc-69cb-d1a2-51a8-1a5e12f671df/16UMGIM13926.rgb.jpg/400x400bb.jpg" }],
-      "02-19": [{ id: "f19", title: "Por si mañana no estoy", artist: "Varios", year: "2021", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/b9/e3/3e/b9e33e4b-72df-8f4b-1481-22e7d704d209/cover.jpg/400x400bb.jpg" }],
-      "02-24": [{ id: "f24", title: "Todavía No", artist: "La Paloma", year: "2023", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/d9/b7/40/d9b74052-b8ec-fdfd-01c3-c21e6be7d0bb/8445162791776.jpg/400x400bb.jpg" }],
-      "02-25": [{ id: "f25", title: "Dios y la Mata de Lulo", artist: "Nicolas y los Fumadores", year: "2022", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/b9/e3/3e/b9e33e4b-72df-8f4b-1481-22e7d704d209/cover.jpg/400x400bb.jpg" }],
-      "02-26": [{ id: "f26", title: "El Madrileño", artist: "C. Tangana", year: "2021", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/3d/8c/9b/3d8c9bc8-52b0-d5be-848e-f18b5b546522/194398583226.jpg/400x400bb.jpg" }],
-      "02-27": [{ id: "f27", title: "David Ruffin", artist: "David Ruffin", year: "1969", note: "no realmente pero lo es en mi corazón", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/95/be/e0/95bee01f-0e1d-c8d5-05e8-f9d9241b71d9/00602537754432.rgb.jpg/400x400bb.jpg" }],
-      "02-28": [{ id: "f28", title: "CHASE", artist: "AARON MAY", year: "2019", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music113/v4/8e/3c/60/8e3c6046-6f7f-7a2e-8302-36cbb8051740/859730896238_cover.jpg/400x400bb.jpg" }],
-      "03-03": [{ id: "m3", title: "American Teen", artist: "Khalid", year: "2017", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/e0/75/f2/e075f2ee-be68-5452-32b7-84f9bfaeb5cd/886446337193.jpg/400x400bb.jpg" }],
-      "03-09": [{ id: "m9", title: "Como Pez en el Hielo", artist: "Nicolás y los Fumadores", year: "2018", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/7e/81/ef/7e81ef40-8f92-563b-9a70-76bc03be4be8/cover.jpg/400x400bb.jpg" }],
-      "03-16": [{ id: "m16", title: "Gran Santiago", artist: "Teleradio Donoso", year: "2007", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/b8/b6/29/b8b629e4-4d8b-efb2-3837-bb9d554aefb6/7804618210146.jpg/400x400bb.jpg" }],
-      "03-18": [{ id: "m18", title: "Cara y Cruz", artist: "Ayax y Prok", year: "2018", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/58/58/b6/5858b688-2949-e37d-94c6-e9105151590b/8429006095914.jpg/400x400bb.jpg" }],
-      "03-22": [{ id: "m22", title: "Mika’s Laundry", artist: "Matt Champion", year: "2024", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/44/1a/bc/441abc91-be71-55db-11ed-108ec9cf7b12/198588040688.jpg/400x400bb.jpg" }],
-      "03-24": [{ id: "m24", title: "Películas", artist: "La máquina de hacer pájaros", year: "1977", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/bf/1d/18/bf1d1847-19d2-7c85-eb99-c8c3e8a719c8/886443469125.jpg/400x400bb.jpg" }],
-      "03-25": [{ id: "m25", title: "Casiopea", artist: "Casiopea", year: "1979", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/f2/0a/63/f20a6316-24ef-bdfa-b154-1a3b11e2fef7/VRCL-2221.jpg/400x400bb.jpg" }],
-      "03-26": [{ id: "m26", title: "Comedown Machine", artist: "The Strokes", year: "2013", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/b6/12/32/b61232c7-0131-0be8-f9b9-d2b3dbb89bf2/886443831830.jpg/400x400bb.jpg" }],
-      "03-28": [
-        { id: "m28_1", title: "The Dude", artist: "Quincy Jones", year: "1981", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/58/df/6e/58df6e68-fb9e-3d71-dfcb-e26084a9e334/00082839372123.rgb.jpg/400x400bb.jpg" },
-        { id: "m28_2", title: "10 Songs", artist: "Q", year: "2018", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/19/33/88/193388a1-d6bc-ecaa-655f-bb54845417eb/196292080313.jpg/400x400bb.jpg" }
-      ],
-      "03-31": [{ id: "m31", title: "JúJú & The Flowerbug", artist: "Sunny Colon", year: "2023", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/df/3d/bd/df3dbd76-e179-c561-1c50-b83c509a25b3/198000401828.jpg/400x400bb.jpg" }],
-      "04-02": [{ id: "a2", title: "Starry Cat", artist: "Starry Cat", year: "2013", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/ef/0f/c6/ef0fc61a-0eef-cd9c-1d01-e25f82216503/190394300306.jpg/400x400bb.jpg" }],
-      "04-10": [
-        { id: "a10_1", title: "The New Abnormal", artist: "The Strokes", year: "2020", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/ed/c2/f3/edc2f3d6-44ec-7613-2d01-2e652bf740c0/886448259646.jpg/400x400bb.jpg" },
-        { id: "a10_2", title: "QNEPT", artist: "JAZE", year: "2021", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/3d/8c/9b/3d8c9bc8-52b0-d5be-848e-f18b5b546522/194398583226.jpg/400x400bb.jpg" }
-      ],
-      "04-14": [{ id: "a14", title: "Damn", artist: "Kendrick Lamar", year: "2017", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/10/ec/e3/10ece3e6-fa15-7a4c-5bf1-9128f73117cf/17UMGIM08272.rgb.jpg/400x400bb.jpg" }],
-      "04-18": [
-        { id: "a18_1", title: "Cripta y vida", artist: "Pedropiedra", year: "2011", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/44/d5/4d/44d54d2a-f887-2be2-26cb-df4e287472df/7804618210214.jpg/400x400bb.jpg" },
-        { id: "a18_2", title: "I Heard That Noise", artist: "quickly, quickly", year: "2017", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/1f/2b/95/1f2b95b8-53e3-728f-7b00-fb744e857e4e/191018288592.jpg/400x400bb.jpg" }
-      ],
-      "04-23": [{ id: "a23", title: "FERXXO (VOL 1: MOR)", artist: "Feid", year: "2020", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/3a/00/f0/3a00f0bd-d971-d1c9-be44-fa30b3eb2b00/20UMGIM22363.rgb.jpg/400x400bb.jpg" }],
-      "04-26": [
-        { id: "a26_1", title: "Apricot Princess", artist: "Rex Orange County", year: "2017", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/bd/1a/ef/bd1aefc3-706b-f4d6-3e05-d1fb789be6f2/886446452148.jpg/400x400bb.jpg" },
-        { id: "a26_2", title: "Por Cesarea", artist: "DILLOM", year: "2024", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/8a/be/4e/8abe4ee8-095a-6fb0-cd09-3286bf5ea176/198588049810.jpg/400x400bb.jpg" }
-      ],
-      "05-05": [{ id: "may5", title: "Soul, PRESENT", artist: "Q", year: "2023", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/81/aa/22/81aa22d5-913a-b85b-6c4b-bfa1bdf6674b/196871021964.jpg/400x400bb.jpg" }],
-      "05-06": [{ id: "may6", title: "Melanchole", artist: "Salvia Palth", year: "2013", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/bf/1d/1b/bf1d1b94-2792-7489-0be0-4bc3e65839ff/859718428871_cover.jpg/400x400bb.jpg" }],
-      "05-08": [{ id: "may8", title: "Pedropiedra", artist: "Pedropiedra", year: "2009", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/58/a3/95/58a395c5-2884-2ea0-6dd8-91efbd780822/7804618210085.jpg/400x400bb.jpg" }],
-      "05-10": [{ id: "may10", title: "Hopes and Fears", artist: "Keane", year: "2004", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/1f/a6/50/1fa6504b-9e41-d557-45bc-c157bbd4e8c5/00602498616183.rgb.jpg/400x400bb.jpg" }],
-      "05-13": [{ id: "may13", title: "Mr Morale & the Big Steppers", artist: "Kendrick Lamar", year: "2022", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/80/7e/bb/807ebb41-1194-e3db-745a-c60f4ff31cb1/22UMGIM41822.rgb.jpg/400x400bb.jpg" }],
-      "05-17": [
-        { id: "may17_1", title: "IGOR", artist: "TYLER, THE CREATOR", year: "2019", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/1a/0c/b5/1a0cb5d6-6d60-70f9-2c0b-fa52da3f82a9/886447761003.jpg/400x400bb.jpg" },
-        { id: "may17_2", title: "Sayonara", artist: "Alvaro Diaz", year: "2024", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/a3/e5/22/a3e522ff-ee5f-9f37-d205-09c313a2ebf5/196871997634.jpg/400x400bb.jpg" },
-        { id: "may17_3", title: "Hit Me Hard and Soft", artist: "Billie Eilish", year: "2024", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/cb/7a/ff/cb7affeb-c4bb-3965-cfef-e836ecbc1e28/24UMGIM33100.rgb.jpg/400x400bb.jpg" }
-      ],
-      "05-22": [{ id: "may22", title: "Omakase", artist: "Alvaro Diaz", year: "2024", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/a3/e5/22/a3e522ff-ee5f-9f37-d205-09c313a2ebf5/196871997634.jpg/400x400bb.jpg" }],
-      "05-23": [{ id: "may23", title: "Goodbye and good Riddance", artist: "Juice Wrld", year: "2018", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/10/ec/e3/10ece3e6-fa15-7a4c-5bf1-9128f73117cf/17UMGIM08272.rgb.jpg/400x400bb.jpg" }],
-      "06-05": [{ id: "j5", title: "The Shave Experiment (Director's Cut)", artist: "Q", year: "2021", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/19/33/88/193388a1-d6bc-ecaa-655f-bb54845417eb/196292080313.jpg/400x400bb.jpg" }],
-      "06-06": [{ id: "j6", title: "Les Étolies Vagabondes", artist: "Nekfeu", year: "2019", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music113/v4/8a/89/3b/8a893bd5-b220-d4cf-29d0-13a48e7e172a/19UMGIM41829.rgb.jpg/400x400bb.jpg" }],
-      "06-08": [{ id: "j8", title: "Kids See Ghost", artist: "Kanye West & Kid Cudi", year: "2018", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/21/df/b6/21dfb6fb-c584-c5a4-1249-14a008d32b50/18UMGIM09009.rgb.jpg/400x400bb.jpg" }],
-      "06-10": [{ id: "j10", title: "Channel Orange", artist: "Frank Ocean", year: "2012", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/31/6f/a6/316fa625-b461-fb9f-7a54-7278d65a88c3/12UMGIM26768.rgb.jpg/400x400bb.jpg" }],
-      "06-16": [
-        { id: "j16_1", title: "Inefable", artist: "Micro Tdh", year: "2017", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/0f/bc/d0/0fbcd067-ff70-1f92-5d46-44ec05b3e218/075679860644.jpg/400x400bb.jpg" },
-        { id: "j16_2", title: "Abysmal Thoughts", artist: "The Drums", year: "2017", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/6b/e0/7d/6be07dc1-3563-718e-4f36-5d635071dfb6/0045778753227.rgb.jpg/400x400bb.jpg" }
-      ],
-      "06-20": [{ id: "j20", title: "RANDOM ACCESS MEMORIES", artist: "DAFT PUNK", year: "2013", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/71/39/a0/7139a0fa-a37f-a6a9-858e-0f0f4a2da5e0/886443927083.jpg/400x400bb.jpg" }],
-      "06-25": [{ id: "j25", title: "Vice Versa", artist: "Rauw Alejandro", year: "2021", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/65/56/64/6556641e-0897-4015-4674-8dbffcf0aa15/886449339231.jpg/400x400bb.jpg" }],
-      "06-26": [{ id: "j26", title: "El Retorno", artist: "Santiago Motorizado", year: "2021", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/4a/aa/5b/4aaa5bc8-53e3-7bc2-b9cf-2b0e9dd1a5f4/cover.jpg/400x400bb.jpg" }],
-      "06-29": [{ id: "j29", title: "DATA", artist: "Tainy", year: "2023", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/93/bf/ea/93bfeac6-cb04-89ec-e3dc-9c86a6042db0/197188350033.jpg/400x400bb.jpg" }],
-      "07-08": [{ id: "jul8", title: "Introducción a los Fother Muckers", artist: "Fother Muckers", year: "2011", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/3d/bf/99/3dbf99eb-be5a-bc84-934c-d9cfddf2f114/7804618210337.jpg/400x400bb.jpg" }],
-      "07-11": [{ id: "jul11", title: "166", artist: "Milo J", year: "2024", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/44/28/6f/44286f05-27a9-25ea-4d89-f538350aa8bd/198588235282.jpg/400x400bb.jpg" }],
-      "07-15": [{ id: "jul15", title: "Gemini Rights", artist: "Steve Lacy", year: "2022", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/8e/31/58/8e3158c3-4f99-f215-6839-4d6d0285a82e/196589218205.jpg/400x400bb.jpg" }],
-      "07-16": [{ id: "jul16", title: "Oh yeah?", artist: "Steve Lacy", year: "2022", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/8e/31/58/8e3158c3-4f99-f215-6839-4d6d0285a82e/196589218205.jpg/400x400bb.jpg" }],
-      "07-17": [{ id: "jul17", title: "Kill the Lights", artist: "Tony Molina", year: "2018", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music118/v4/f2/0a/6e/f20a6e03-7521-9e8c-ef0c-bfb86a8ff71f/634457805118.jpg/400x400bb.jpg" }],
-      "07-28": [{ id: "jul28", title: "Utopia", artist: "Travis Scott", year: "2023", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/4a/1b/9a/4a1b9a95-ef66-3b32-bb17-80beea7fb220/196589388380.jpg/400x400bb.jpg" }],
-      "07-30": [{ id: "jul30", title: "Is This It", artist: "The Strokes", year: "2001", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/11/49/11/11491176-5a41-a18d-69d6-e26e2a2fb25a/886443339077.jpg/400x400bb.jpg" }],
-      "08-03": [{ id: "ag3", title: "Swimming", artist: "Mac Miller", year: "2018", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/1d/12/36/1d123681-79bb-81ef-25d2-06e1d2c67623/093624905875.jpg/400x400bb.jpg" }],
-      "08-08": [{ id: "ag8", title: "Coastal Grooves", artist: "Blood Orange", year: "2011", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/21/5d/4f/215d4fe4-2d56-78b1-bf50-10332f1f0a28/886443152065.jpg/400x400bb.jpg" }],
-      "08-10": [
-        { id: "ag10_1", title: "Off The Wall", artist: "Michael Jackson", year: "1979", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/a4/09/b3/a409b30c-51fa-6644-8d49-43c333bbad94/886445582962.jpg/400x400bb.jpg" },
-        { id: "ag10_2", title: "Life is a Trip", artist: "Trippie Redd", year: "2018", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/a2/63/87/a2638708-8123-0865-9b98-0d1253d537f5/886447238468.jpg/400x400bb.jpg" }
-      ],
-      "08-14": [{ id: "ag14", title: "ATP", artist: "Nsqk", year: "2024", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/e5/bd/a6/e5bda611-e6df-c1df-f2d1-21396f4b63eb/198000787137.jpg/400x400bb.jpg" }],
-      "08-15": [{ id: "ag15", title: "Baby", artist: "Dijon", year: "2021", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/e3/3d/bf/e33dbfb7-4481-8b06-efdf-4581177b94b0/093624878230.jpg/400x400bb.jpg" }],
-      "08-20": [
-        { id: "ag20_1", title: "Blonde", artist: "Frank Ocean", year: "2016", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/3f/17/be/3f17be26-9d22-1209-669e-8c9e50e9323d/886446014384.jpg/400x400bb.jpg" },
-        { id: "ag20_2", title: "Intershibuya La Mafia", artist: "Feid", year: "2021", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/91/9f/62/919f622f-3769-d4c3-2dbe-7690327f33be/21UMGIM63636.rgb.jpg/400x400bb.jpg" }
-      ],
-      "08-25": [{ id: "ag25", title: "17", artist: "Xxxtentacion", year: "2017", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/9f/ed/b7/9fedb7d9-04ef-b2e1-a085-f3c5f59fa5f1/886446698645.jpg/400x400bb.jpg" }],
-      "08-26": [{ id: "ag26", title: "All The Topings", artist: "Panuccis Pizza", year: "2016", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/21/df/f6/21dff6e3-bc12-f19b-f111-e12d46e102f1/198002011032.jpg/400x400bb.jpg" }],
-      "08-28": [
-        { id: "ag28_1", title: "CTV3 Cool Tape Vol.3", artist: "Jaden Smith", year: "2020", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/6c/fb/8e/6cfb8e21-0a44-df47-6df7-51d02e774028/20UMGIM69408.rgb.jpg/400x400bb.jpg" },
-        { id: "ag28_2", title: "Lets get it on", artist: "Marvin Gaye", year: "1973", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/3d/88/1d/3d881d85-3e28-a4bd-e984-7a13c4cbb8db/00602537554902.rgb.jpg/400x400bb.jpg" }
-      ],
-      "08-29": [{ id: "ag29", title: "Donda", artist: "Kanye West", year: "2021", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/19/2f/55/192f551b-4395-5c12-3200-58ed692bf9b8/21UMGIM78864.rgb.jpg/400x400bb.jpg" }],
-      "08-31": [{ id: "ag31", title: "Peperina", artist: "Serú Girán", year: "1981", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/6b/02/b6/6b02b662-f29e-2d93-3d44-be1dbed7eb20/886443469101.jpg/400x400bb.jpg" }],
-      "09-02": [{ id: "s2", title: "Portamento", artist: "The Drums", year: "2011", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/80/e5/22/80e522b5-5387-a2f0-f925-e51c8a51bc99/00602527818465.rgb.jpg/400x400bb.jpg" }],
-      "09-03": [{ id: "s3", title: "Juventud Americana", artist: "Ases Falsos", year: "2012", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/05/aa/26/05aa263f-7e04-d450-ef8d-ff4aa6c2dfb7/7804618210252.jpg/400x400bb.jpg" }],
-      "09-04": [
-        { id: "s4_1", title: "Rodeo", artist: "Travis Scott", year: "2015", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/d5/43/d8/d543d8c1-17ef-fbef-96a9-8580629735d6/886445472287.jpg/400x400bb.jpg" },
-        { id: "s4_2", title: "Bcos U Will Never B Free", artist: "Rex Orange County", year: "2015", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/d9/38/2a/d9382a92-efaa-f5bc-132d-20becc6a8025/192641617466.jpg/400x400bb.jpg" }
-      ],
-      "09-05": [
-        { id: "s5_1", title: "Mourn", artist: "Corbin", year: "2017", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music118/v4/be/8f/f9/be8ff9e4-be4b-df23-8cf4-cf564be65063/886446700584.jpg/400x400bb.jpg" },
-        { id: "s5_2", title: "Absolutely", artist: "Dijon", year: "2021", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/6b/ff/9f/6bff9f22-1d54-ceba-e9b4-b9c2a6aaef9e/093624878223.jpg/400x400bb.jpg" }
-      ],
-      "09-06": [{ id: "s6", title: "Inútil Corazón", artist: "Axel Catalán", year: "2022", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/aa/e3/3f/aae33fc0-e3eb-b5c6-b92c-567a216e2570/198003666248.jpg/400x400bb.jpg" }],
-      "09-07": [
-        { id: "s7_1", title: "Siembra", artist: "Rubén Blades & Willy Colón", year: "1978", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/bc/97/8f/bc978f84-1d3c-bdcd-eeeb-a1d2f6381bc6/888880624921.jpg/400x400bb.jpg" },
-        { id: "s7_2", title: "Para Hondo", artist: "Cristobal Briceño", year: "2019", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/b9/79/f6/b979f6e5-4f40-ec89-b841-f6becc48651c/7804618210382.jpg/400x400bb.jpg" }
-      ],
-      "09-09": [{ id: "s9", title: "ALTA SUCIEDAD", artist: "ANDRES CALAMARO", year: "1997", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/a7/08/bf/a708bf96-b0ff-ce22-ecf1-4dbfa458d350/886443469163.jpg/400x400bb.jpg" }],
-      "09-11": [{ id: "s11", title: "Graduation", artist: "Kanye West", year: "2007", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/2d/a0/0a/2da00ab3-e28d-1cb3-6903-8d6ddc9e5300/00602517443336.rgb.jpg/400x400bb.jpg" }],
-      "09-12": [{ id: "s12", title: "Bailar y llorar", artist: "teleradio donoso", year: "2008", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/44/2c/38/442c38d2-43bb-5f5d-7dd2-793db5f8bf8c/7804618210153.jpg/400x400bb.jpg" }],
-      "09-13": [{ id: "s13", title: "Heaven Surrounds You", artist: "Surf Curse", year: "2019", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music113/v4/7e/3e/2a/7e3e2a22-30ff-6d7d-570a-42c2be96eef1/886447833076.jpg/400x400bb.jpg" }],
-      "09-14": [{ id: "s14", title: "Feliz Cumpleaños FERXXO te pirateamos el álbum", artist: "Feid", year: "2022", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/b8/b6/2a/b8b62a6e-44ef-650a-f02a-db3df34ed682/22UMGIM95540.rgb.jpg/400x400bb.jpg" }],
-      "09-15": [
-        { id: "s15_1", title: "I will be on my one because there is a devil inside my body", artist: "Teen Suicide", year: "2012", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/1f/ee/48/1fee48a0-bb6e-ef84-5f21-7fa8a2098d8d/811408022880.jpg/400x400bb.jpg" },
-        { id: "s15_2", title: "SUPERNOVA", artist: "Ralphie Choo", year: "2023", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/8e/eb/45/8eeb4519-74d3-e7e0-9e87-6cfd6a503550/197188713029.jpg/400x400bb.jpg" }
-      ],
-      "09-20": [{ id: "s20", title: "El jardin de los presentes", artist: "Invisible", year: "1976", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/61/89/3b/61893b82-f6be-17b5-22a0-b590e82c5950/886443469156.jpg/400x400bb.jpg" }],
-      "09-23": [{ id: "s23", title: "El Círculo", artist: "Kase.O", year: "2016", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/6b/6e/c3/6b6ec3c6-e7dd-2d64-e46c-c9d3be4737d9/8429006935210.jpg/400x400bb.jpg" }],
-      "09-24": [
-        { id: "s24_1", title: "Nothing Was The Same", artist: "Drake", year: "2013", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/d9/bd/28/d9bd28d0-08e0-333e-1317-5750d4d03e33/13UMGIM34479.rgb.jpg/400x400bb.jpg" },
-        { id: "s24_2", title: "Nectar", artist: "Joji", year: "2020", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/33/c2/f6/33c2f6d0-2f92-7efc-60db-b3e10db5eef3/888295982856.jpg/400x400bb.jpg" }
-      ],
-      "09-25": [{ id: "s25", title: "De la Linea Diez al Sol", artist: "Niña Polaca", year: "2020", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/65/56/64/6556643c-66e0-2f47-a8da-0d193d5de68f/8435383681423.jpg/400x400bb.jpg" }],
-      "09-28": [{ id: "s28", title: "Songs In The Key of Life", artist: "Stevie Wonder", year: "1976", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/ef/41/70/ef4170d4-fb46-7f41-0370-1f9d50ed96b7/00602537330759.rgb.jpg/400x400bb.jpg" }],
-      "09-29": [
-        { id: "s29_1", title: "The Stranger", artist: "Billy Joel", year: "1977", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/8b/63/03/8b63032d-eb3b-1a9a-436d-15967efc6f3f/886443216897.jpg/400x400bb.jpg" },
-        { id: "s29_2", title: "Salvavidas(O de las balas perdidas)", artist: "La Maravillosa Orquesta del Alcohol", year: "2017", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/4b/32/38/4b323862-23c2-bf72-b830-67df7a36f981/8435383626240.jpg/400x400bb.jpg" }
-      ],
-      "10-03": [{ id: "o3", title: "Un Golpe de Suerte", artist: "La Paloma", year: "2023", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/02/da/90/02da9081-30d8-5586-a5df-efae56677464/8445162791783.jpg/400x400bb.jpg" }],
-      "10-06": [
-        { id: "o6_1", title: "Artaud", artist: "Pescado Rabioso", year: "1973", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/5b/c2/f3/5bc2f3f9-72b2-8c1d-15ef-71e89324d03e/886443469149.jpg/400x400bb.jpg" },
-        { id: "o6_2", title: "Así se hace", artist: "Fother Muckers", year: "2008", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/3d/bf/99/3dbf99eb-be5a-bc84-934c-d9cfddf2f114/7804618210337.jpg/400x400bb.jpg" }
-      ],
-      "10-08": [{ id: "o8", title: "Melophobia", artist: "Cage the Elephant", year: "2013", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/c3/8c/fb/c38cfb29-b695-bd35-cdff-ef0c3664d5bc/886444140023.jpg/400x400bb.jpg" }],
-      "10-11": [{ id: "o11", title: "Emanuel", artist: "Pedro Piedra", year: "2013", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/ef/47/43/ef4743c6-9491-03db-747f-829d5b00c3db/7804618210344.jpg/400x400bb.jpg" }],
-      "10-13": [{ id: "o13", title: "52nd Street", artist: "Billy Joel", year: "1978", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/13/2b/96/132b9631-591b-6490-67df-c5793014c405/886443216880.jpg/400x400bb.jpg" }],
-      "10-18": [
-        { id: "o18_1", title: "Reconoceronte", artist: "Los Mil Jinetes", year: "2010", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/3d/bf/99/3dbf99eb-be5a-bc84-934c-d9cfddf2f114/7804618210337.jpg/400x400bb.jpg" },
-        { id: "o18_2", title: "Salen otras diez", artist: "Las Chaquetas Amarillas", year: "2014", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/b8/b6/29/b8b629e4-4d8b-efb2-3837-bb9d554aefb6/7804618210146.jpg/400x400bb.jpg" },
-        { id: "o18_3", title: "Glimmer of God", artist: "Jean Dawson", year: "2024", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/64/a8/75/64a8759a-1011-85e6-7253-e5d48a12e52c/198588820358.jpg/400x400bb.jpg" }
-      ],
-      "10-21": [{ id: "o21", title: "Durazno Sangrando", artist: "Invisible", year: "1975", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/bf/20/be/bf20be68-f9b6-bf23-8cfb-6f296c0ca8e0/886443469132.jpg/400x400bb.jpg" }],
-      "10-26": [{ id: "o26", title: "Ballads 1", artist: "Joji", year: "2018", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music118/v4/b9/71/3b/b9713b19-3c3e-f1bd-f389-bd0fbd29c3a3/888295806497.jpg/400x400bb.jpg" }],
-      "10-28": [
-        { id: "o28_1", title: "Chromakopia", artist: "Tyler the Creator", year: "2024", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/64/09/b8/6409b82f-2d4e-b016-e414-b4a1b02b66cb/198588882202.jpg/400x400bb.jpg" },
-        { id: "o28_2", title: "Room in Fire", artist: "The Strokes", year: "2003", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/11/49/11/11491176-5a41-a18d-69d6-e26e2a2fb25a/886443339077.jpg/400x400bb.jpg" },
-        { id: "o28_3", title: "Dúo Niagara", artist: "Dúo Niagara", year: "2022", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/4a/aa/5b/4aaa5bc8-53e3-7bc2-b9cf-2b0e9dd1a5f4/cover.jpg/400x400bb.jpg" }
-      ],
-      "10-29": [
-        { id: "o29_1", title: "Felicilandia", artist: "Alvaro Diaz", year: "2021", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/bb/12/30/bb1230e9-b5c9-9404-e349-f538562d9fb4/196292376682.jpg/400x400bb.jpg" },
-        { id: "o29_2", title: "No soy uno", artist: "Fother Muckers", year: "2008", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/3d/bf/99/3dbf99eb-be5a-bc84-934c-d9cfddf2f114/7804618210337.jpg/400x400bb.jpg" }
-      ],
-      "10-31": [{ id: "o31", title: "Ghost with Skin", artist: "Corbin", year: "2021", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/e0/75/a0/e075a00d-5874-95d8-5c42-26cb4dbb39e3/196292582885.jpg/400x400bb.jpg" }],
-      "11-04": [{ id: "n4", title: "Her Loss", artist: "Drake & 21 Savage", year: "2022", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/0b/49/7c/0b497c39-dfed-13e0-3e2f-48e02d8da090/22UMGIM12563.rgb.jpg/400x400bb.jpg" }],
-      "11-08": [{ id: "n8", title: "Mal que bien", artist: "Nicolas y los fumadores", year: "2022", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/b9/e3/3e/b9e33e4b-72df-8f4b-1481-22e7d704d209/cover.jpg/400x400bb.jpg" }],
-      "11-11": [
-        { id: "n11_1", title: "No", artist: "Pánico", year: "1995", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/b8/b6/29/b8b629e4-4d8b-efb2-3837-bb9d554aefb6/7804618210146.jpg/400x400bb.jpg" },
-        { id: "n11_2", title: "Espejo", artist: "ZPU", year: "2016", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/6b/6e/c3/6b6ec3c6-e7dd-2d64-e46c-c9d3be4737d9/8429006935210.jpg/400x400bb.jpg" },
-        { id: "n11_3", title: "Modal Soul", artist: "Mojabes", year: "2005", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/ee/f5/67/eef567d0-fb16-628b-b87c-03d321bb4632/cover.jpg/400x400bb.jpg" }
-      ],
-      "11-15": [{ id: "n15", title: "Cosa Nuestra", artist: "Rauw Alejando", year: "2024", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/4a/01/f9/4a01f9bb-616c-e1f4-3d1f-82bbd512a86a/886449339231.jpg/400x400bb.jpg" }],
-      "11-17": [{ id: "n17", title: "Syre", artist: "Jaden Smith", year: "2017", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/6c/fb/8e/6cfb8e21-0a44-df47-6df7-51d02e774028/20UMGIM69408.rgb.jpg/400x400bb.jpg" }],
-      "11-18": [{ id: "n18", title: "Harmless Melodies", artist: "Yellow Days", year: "2016", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/1f/2b/95/1f2b95b8-53e3-728f-7b00-fb744e857e4e/191018288592.jpg/400x400bb.jpg" }],
-      "11-21": [
-        { id: "n21_1", title: "Justo y necesario", artist: "Fother Muckers", year: "2008", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/3d/bf/99/3dbf99eb-be5a-bc84-934c-d9cfddf2f114/7804618210337.jpg/400x400bb.jpg" },
-        { id: "n21_2", title: "You", artist: "Larry Lovestein & The Velvet Revival", year: "2012", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music123/v4/31/bc/11/31bc1184-c8c7-9831-7e8c-859eb5a55743/093624896708.jpg/400x400bb.jpg" }
-      ],
-      "11-23": [{ id: "n23", title: "Roy", artist: "NSQK", year: "2022", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/e5/bd/a6/e5bda611-e6df-c1df-f2d1-21396f4b63eb/198000787137.jpg/400x400bb.jpg" }],
-      "11-26": [{ id: "n26", title: "Una idea, pero es triste", artist: "La Paloma", year: "2021", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/d9/b7/40/d9b74052-b8ec-fdfd-01c3-c21e6be7d0bb/8445162791776.jpg/400x400bb.jpg" }],
-      "12-02": [{ id: "d2", title: "Awaken, My Love!", artist: "Childish Gambino", year: "2016", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/be/89/3f/be893f41-0f37-142f-8703-9bb6ff0b62e4/886446227913.jpg/400x400bb.jpg" }],
-      "12-04": [{ id: "d4", title: "The Lo-Fis", artist: "Steve Lacy", year: "2020", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/8e/31/58/8e3158c3-4f99-f215-6839-4d6d0285a82e/196589218205.jpg/400x400bb.jpg" }],
-      "12-06": [{ id: "d6", title: "Perro Viejo", artist: "Axel Catalán", year: "2016", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/aa/e3/3f/aae33fc0-e3eb-b5c6-b92c-567a216e2570/198003666248.jpg/400x400bb.jpg" }],
-      "12-09": [
-        { id: "d9_1", title: "Stoney", artist: "Post Malone", year: "2016", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/37/b8/b5/37b8b584-7e8c-ef0c-8d07-285b0d0be087/16UMGIM13926.rgb.jpg/400x400bb.jpg" },
-        { id: "d9_2", title: "Lift Your Skinny Fists like Antennas to Heaven", artist: "Godspeed You! Black Emperor", year: "2000", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/5a/2d/e9/5a2de941-8f53-2713-3330-d33a75f84d33/666017001826.jpg/400x400bb.jpg" }
-      ],
-      "12-10": [{ id: "d10", title: "Because the Internet", artist: "Childish Gambino", year: "2013", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/be/89/3f/be893f41-0f37-142f-8703-9bb6ff0b62e4/886446227913.jpg/400x400bb.jpg" }],
-      "12-11": [{ id: "d11", title: "Man On The Moon lll", artist: "Kid Cudi", year: "2020", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/4b/dd/68/4bdd6851-d419-79be-7538-4e1d9bb09ff2/20UMGIM97950.rgb.jpg/400x400bb.jpg" }],
-      "12-14": [{ id: "d14", title: "Spiderman Into the Spiderverse", artist: "Muchos", year: "2018", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/10/7f/db/107fdb7e-a0e2-892f-b4bb-a982181d9f82/886447432323.jpg/400x400bb.jpg" }],
-      "12-17": [{ id: "d17", title: "El Paisaje Salvaje", artist: "Fother Muckers", year: "2010", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/3d/bf/99/3dbf99eb-be5a-bc84-934c-d9cfddf2f114/7804618210337.jpg/400x400bb.jpg" }],
-      "12-20": [{ id: "d20", title: "La Grasa de Las Capitales", artist: "Serú Giran", year: "1979", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/6b/02/b6/6b02b662-f29e-2d93-3d44-be1dbed7eb20/886443469101.jpg/400x400bb.jpg" }],
-      "12-21": [{ id: "d21", title: "Sin Futuro", artist: "Axel Catalán?", year: "2018", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/aa/e3/3f/aae33fc0-e3eb-b5c6-b92c-567a216e2570/198003666248.jpg/400x400bb.jpg" }],
-      "12-24": [
-        { id: "d24_1", title: "X100PRE", artist: "Bad Bunny", year: "2018", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/80/7e/bb/807ebb41-1194-e3db-745a-c60f4ff31cb1/22UMGIM41822.rgb.jpg/400x400bb.jpg" },
-        { id: "d24_2", title: "Andate Cabrita", artist: "Los Mil Jinetes", year: "2008", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/3d/bf/99/3dbf99eb-be5a-bc84-934c-d9cfddf2f114/7804618210337.jpg/400x400bb.jpg" }
-      ],
-      "12-25": [{ id: "d25", title: "Una Navidad con los Fother Muckers", artist: "Fother Muckers", year: "2008", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/3d/bf/99/3dbf99eb-be5a-bc84-934c-d9cfddf2f114/7804618210337.jpg/400x400bb.jpg" }],
-      "12-30": [{ id: "d30", title: "Diaz Antes", artist: "Alvaro Diaz", year: "2020", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/bb/12/30/bb1230e9-b5c9-9404-e349-f538562d9fb4/196292376682.jpg/400x400bb.jpg" }],
-      "12-31": [{ id: "d31", title: "Si No Tienes Nada Que Decir Entonces Calla", artist: "Fother Muckers", year: "2009", note: "", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/3d/bf/99/3dbf99eb-be5a-bc84-934c-d9cfddf2f114/7804618210337.jpg/400x400bb.jpg" }]
+      "01-01": [{ id: "e1", title: "Aquí vamos otra vez", artist: "1280 Almas", note: "" }],
+      "01-15": [{ id: "e15", title: "Almendra", artist: "Almendra", note: "POR FIN" }],
+      "01-17": [{ id: "e17", title: "Circles", artist: "Mac Miller", note: "" }],
+      "01-27": [{ id: "e27", title: "Let’s Start Here", artist: "Lil Yachty", note: "" }],
+      "02-14": [{ id: "f14", title: "The Life of Pablo", artist: "Kanye West", note: "" }],
+      "02-19": [{ id: "f19", title: "Por si mañana no estoy", artist: "", note: "" }],
+      "02-24": [{ id: "f24", title: "Todavía No", artist: "La Paloma", note: "" }],
+      "02-25": [{ id: "f25", title: "Dios y la Mata de Lulo", artist: "Nicolas y los Fumadores", note: "" }],
+      "02-26": [{ id: "f26", title: "El Madrileño", artist: "C. Tangana", note: "" }],
+      "02-27": [{ id: "f27", title: "David Ruffin", artist: "David Ruffin", note: "no realmente pero lo es en mi corazón" }],
+      "02-28": [{ id: "f28", title: "CHASE", artist: "AARON MAY", note: "" }],
+      "03-03": [{ id: "m3", title: "American Teen", artist: "Khalid", note: "" }],
+      "03-09": [{ id: "m9", title: "Como Pez en el Hielo", artist: "Nicolás y los Fumadores", note: "" }],
+      "03-16": [{ id: "m16", title: "Gran Santiago", artist: "Teleradio Donoso", note: "" }],
+      "03-18": [{ id: "m18", title: "Cara y Cruz", artist: "Ayax y Prok", note: "" }],
+      "03-22": [{ id: "m22", title: "Mika’s Laundry", artist: "Matt Champion", note: "" }],
+      "03-24": [{ id: "m24", title: "Películas", artist: "La máquina de hacer pájaros", note: "" }],
+      "03-25": [{ id: "m25", title: "Casiopea", artist: "Casiopea", note: "" }],
+      "03-26": [{ id: "m26", title: "Comedown Machine", artist: "The Strokes", note: "" }],
+      "03-28": [{ id: "m28_1", title: "The Dude", artist: "Quincy Jones", note: "" }, { id: "m28_2", title: "10 Songs", artist: "Q", note: "" }],
+      "03-31": [{ id: "m31", title: "JúJú & The Flowerbug", artist: "Sunny Colon", note: "" }],
+      "04-02": [{ id: "a2", title: "Starry Cat", artist: "Starry Cat", note: "" }],
+      "04-10": [{ id: "a10_1", title: "The New Abnormal", artist: "The Strokes", note: "" }, { id: "a10_2", title: "QNEPT", artist: "JAZE", note: "" }],
+      "04-14": [{ id: "a14", title: "Damn", artist: "Kendrick Lamar", note: "" }],
+      "04-18": [{ id: "a18_1", title: "Cripta y vida", artist: "Pedropiedra", note: "" }, { id: "a18_2", title: "I Heard That Noise", artist: "quickly, quickly", note: "" }],
+      "04-23": [{ id: "a23", title: "FERXXO (VOL 1: MOR)", artist: "Feid", note: "" }],
+      "04-26": [{ id: "a26_1", title: "Apricot Princess", artist: "Rex Orange County", note: "" }, { id: "a26_2", title: "Por Cesarea", artist: "DILLOM", note: "" }],
+      "05-05": [{ id: "may5", title: "Soul, PRESENT", artist: "Q", note: "" }],
+      "05-06": [{ id: "may6", title: "Melanchole", artist: "Salvia Palth", note: "" }],
+      "05-08": [{ id: "may8", title: "Pedropiedra", artist: "Pedropiedra", note: "" }],
+      "05-10": [{ id: "may10", title: "Hopes and Fears", artist: "Keane", note: "" }],
+      "05-13": [{ id: "may13", title: "Mr Morale & the Big Steppers", artist: "Kendrick Lamar", note: "" }],
+      "05-17": [{ id: "may17_1", title: "IGOR", artist: "TYLER, THE CREATOR", note: "" }, { id: "may17_2", title: "Sayonara", artist: "Alvaro Diaz", note: "" }, { id: "may17_3", title: "Hit Me Hard and Soft", artist: "Billie Eilish", note: "" }],
+      "05-22": [{ id: "may22", title: "Omakase", artist: "Alvaro Diaz", note: "" }],
+      "05-23": [{ id: "may23", title: "Goodbye and good Riddance", artist: "Juice Wrld", note: "" }],
+      "06-05": [{ id: "j5", title: "The Shave Experiment (Director's Cut)", artist: "Q", note: "" }],
+      "06-06": [{ id: "j6", title: "Les Étolies Vagabondes", artist: "Nekfeu", note: "" }],
+      "06-08": [{ id: "j8", title: "Kids See Ghost", artist: "Kanye West & Kid Cudi", note: "" }],
+      "06-10": [{ id: "j10", title: "Channel Orange", artist: "Frank Ocean", note: "" }],
+      "06-16": [{ id: "j16_1", title: "Inefable", artist: "Micro Tdh", note: "" }, { id: "j16_2", title: "Abysmal Thoughts", artist: "The Drums", note: "" }],
+      "06-20": [{ id: "j20", title: "RANDOM ACCESS MEMORIES", artist: "DAFT PUNK", note: "" }],
+      "06-25": [{ id: "j25", title: "Vice Versa", artist: "Rauw Alejandro", note: "" }],
+      "06-26": [{ id: "j26", title: "El Retorno", artist: "Santiago Motorizado", note: "" }],
+      "06-29": [{ id: "j29", title: "DATA", artist: "Tainy", note: "" }],
+      "07-08": [{ id: "jul8", title: "Introducción a los Fother Muckers: Menudencias (Sólo para fanáticos)", artist: "Fother Muckers", note: "" }],
+      "07-11": [{ id: "jul11", title: "166", artist: "Milo J", note: "" }],
+      "07-15": [{ id: "jul15", title: "Gemini Rights", artist: "Steve Lacy", note: "" }],
+      "07-16": [{ id: "jul16", title: "Oh yeah?", artist: "Steve Lacy", note: "" }],
+      "07-17": [{ id: "jul17", title: "Kill the Lights", artist: "Tony Molina", note: "" }],
+      "07-28": [{ id: "jul28", title: "Utopia", artist: "Travis Scott", note: "" }],
+      "07-30": [{ id: "jul30", title: "Is This It", artist: "The Strokes", note: "" }],
+      "08-03": [{ id: "ag3", title: "Swimming", artist: "Mac Miller", note: "" }],
+      "08-08": [{ id: "ag8", title: "Coastal Grooves", artist: "Blood Orange", note: "" }],
+      "08-10": [{ id: "ag10_1", title: "Off The Wall", artist: "Michael Jackson", note: "" }, { id: "ag10_2", title: "Life is a Trip", artist: "Trippie Redd", note: "" }],
+      "08-14": [{ id: "ag14", title: "ATP", artist: "Nsqk", note: "" }],
+      "08-15": [{ id: "ag15", title: "Baby", artist: "Dijon", note: "" }],
+      "08-20": [{ id: "ag20_1", title: "Blonde", artist: "Frank Ocean", note: "" }, { id: "ag20_2", title: "Intershibuya La Mafia", artist: "Feid", note: "" }],
+      "08-25": [{ id: "ag25", title: "17", artist: "Xxxtentacion", note: "" }],
+      "08-26": [{ id: "ag26", title: "All The Topings", artist: "Panuccis Pizza", note: "" }],
+      "08-28": [{ id: "ag28_1", title: "CTV3 Cool Tape Vol.3", artist: "Jaden Smith", note: "" }, { id: "ag28_2", title: "Lets get it on", artist: "Marvin Gaye", note: "" }],
+      "08-29": [{ id: "ag29", title: "Donda", artist: "Kanye West", note: "" }],
+      "08-31": [{ id: "ag31", title: "Peperina", artist: "Serú Girán", note: "" }],
+      "09-02": [{ id: "s2", title: "Portamento", artist: "The Drums", note: "" }],
+      "09-03": [{ id: "s3", title: "Juventud Americana", artist: "Ases Falsos", note: "" }],
+      "09-04": [{ id: "s4_1", title: "Rodeo", artist: "Travis Scott", note: "" }, { id: "s4_2", title: "Bcos U Will Never B Free", artist: "Rex Orange County", note: "" }],
+      "09-05": [{ id: "s5_1", title: "Mourn", artist: "Corbin", note: "" }, { id: "s5_2", title: "Absolutely", artist: "Dijon", note: "" }],
+      "09-06": [{ id: "s6", title: "Inútil Corazón", artist: "Axel Catalán", note: "" }],
+      "09-07": [{ id: "s7_1", title: "Siembra", artist: "Rubén Blades & Willy Colón", note: "" }, { id: "s7_2", title: "Para Hondo", artist: "Cristobal Briceño", note: "" }],
+      "09-09": [{ id: "s9", title: "ALTA SUCIEDAD", artist: "ANDRES CALAMARO", note: "" }],
+      "09-11": [{ id: "s11", title: "Graduation", artist: "Kanye West", note: "" }],
+      "09-12": [{ id: "s12", title: "Bailar y llorar", artist: "teleradio donoso", note: "" }],
+      "09-13": [{ id: "s13", title: "Heaven Surrounds You", artist: "Surf Curse", note: "" }],
+      "09-14": [{ id: "s14", title: "Feliz Cumpleaños FERXXO te pirateamos el álbum", artist: "Feid", note: "" }],
+      "09-15": [{ id: "s15_1", title: "I will be on my one because there is a devil inside my body", artist: "Teen Suicide", note: "" }, { id: "s15_2", title: "SUPERNOVA", artist: "Ralphie Choo", note: "" }],
+      "09-20": [{ id: "s20", title: "El jardin de los presentes", artist: "Invisible", note: "" }],
+      "09-23": [{ id: "s23", title: "El Círculo", artist: "Kase.O", note: "" }],
+      "09-24": [{ id: "s24_1", title: "Nothing Was The Same", artist: "Drake", note: "" }, { id: "s24_2", title: "Nectar", artist: "Joji", note: "" }],
+      "09-25": [{ id: "s25", title: "De la Linea Diez al Sol", artist: "Niña Polaca", note: "" }],
+      "09-28": [{ id: "s28", title: "Songs In The Key of Life", artist: "Stevie Wonder", note: "" }],
+      "09-29": [{ id: "s29_1", title: "The Stranger", artist: "Billy Joel", note: "" }, { id: "s29_2", title: "Salvavidas(O de las balas perdidas)", artist: "La Maravillosa Orquesta del Alcohol", note: "" }],
+      "10-03": [{ id: "o3", title: "Un Golpe de Suerte", artist: "La Paloma", note: "" }],
+      "10-06": [{ id: "o6_1", title: "Artaud", artist: "Pescado Rabioso", note: "" }, { id: "o6_2", title: "Así se hace", artist: "Fother Muckers", note: "" }],
+      "10-08": [{ id: "o8", title: "Melophobia", artist: "Cage the Elephant", note: "" }],
+      "10-11": [{ id: "o11", title: "Emanuel", artist: "Pedro Piedra", note: "" }],
+      "10-13": [{ id: "o13", title: "52nd Street", artist: "Billy Joel", note: "" }],
+      "10-18": [{ id: "o18_1", title: "Reconoceronte", artist: "Los Mil Jinetes", note: "" }, { id: "o18_2", title: "Salen otras diez", artist: "Las Chaquetas Amarillas", note: "" }, { id: "o18_3", title: "Glimmer od God", artist: "Jean Dawson", note: "" }],
+      "10-21": [{ id: "o21", title: "Durazno Sangrando", artist: "Invisible", note: "" }],
+      "10-26": [{ id: "o26", title: "Ballads 1", artist: "Joji", note: "" }],
+      "10-28": [{ id: "o28_1", title: "Chromakopia", artist: "Tyler the Creator", note: "" }, { id: "o28_2", title: "Room in Fire", artist: "The Strokes", note: "" }, { id: "o28_3", title: "Dúo Niagara", artist: "Dúo Niagara", note: "" }],
+      "10-29": [{ id: "o29_1", title: "Felicilandia", artist: "Alvaro Diaz", note: "" }, { id: "o29_2", title: "No soy uno", artist: "Fother Muckers", note: "" }],
+      "10-31": [{ id: "o31", title: "Ghost with Skin", artist: "Corbin", note: "" }],
+      "11-04": [{ id: "n4", title: "Her Loss", artist: "Drake & 21 Savage", note: "" }],
+      "11-08": [{ id: "n8", title: "Mal que bien", artist: "Nicolas y los fumadores", note: "" }],
+      "11-11": [{ id: "n11_1", title: "No", artist: "Pánico", note: "" }, { id: "n11_2", title: "Espejo", artist: "ZPU", note: "" }, { id: "n11_3", title: "Modal Soul", artist: "Mojabes", note: "" }],
+      "11-15": [{ id: "n15", title: "Cosa Nuestra", artist: "Rauw Alejando", note: "" }],
+      "11-17": [{ id: "n17", title: "Syre", artist: "Jaden Smith", note: "" }],
+      "11-18": [{ id: "n18", title: "Harmless Melodies", artist: "Yellow Days", note: "" }],
+      "11-21": [{ id: "n21_1", title: "Justo y necesario", artist: "Fother Muckers", note: "" }, { id: "n21_2", title: "You", artist: "Larry Lovestein & The Velvet Revival", note: "" }],
+      "11-23": [{ id: "n23", title: "Roy", artist: "NSQK", note: "" }],
+      "11-26": [{ id: "n26", title: "Una idea, pero es triste", artist: "La Paloma", note: "" }],
+      "12-02": [{ id: "d2", title: "Awaken, My Love!", artist: "Childish Gambino", note: "" }],
+      "12-04": [{ id: "d4", title: "The Lo-Fis", artist: "Steve Lacy", note: "" }],
+      "12-06": [{ id: "d6", title: "Perro Viejo", artist: "Axel Catalán", note: "" }],
+      "12-09": [{ id: "d9_1", title: "Stoney", artist: "Post Malone", note: "" }, { id: "d9_2", title: "Lift Your Skinny Fists like Antennas to Heaven", artist: "Godspeed You! Black Emperor", note: "" }],
+      "12-10": [{ id: "d10", title: "Because the Internet", artist: "Childish Gambino", note: "" }],
+      "12-11": [{ id: "d11", title: "Man On The Moon lll", artist: "Kid Cudi", note: "" }],
+      "12-14": [{ id: "d14", title: "Spiderman Into the Spiderverse", artist: "Muchos", note: "" }],
+      "12-17": [{ id: "d17", title: "El Paisaje Salvaje", artist: "Fother Muckers", note: "" }],
+      "12-20": [{ id: "d20", title: "La Grasa de Las Capitales", artist: "Serú Giran", note: "" }],
+      "12-21": [{ id: "d21", title: "Sin Futuro", artist: "Axel Catalán?", note: "" }],
+      "12-24": [{ id: "d24_1", title: "X100PRE", artist: "Bad Bunny", note: "" }, { id: "d24_2", title: "Andate Cabrita", artist: "Los Mil Jinetes", note: "" }],
+      "12-25": [{ id: "d25", title: "Una Navidad con los Fother Muckers", artist: "Fother Muckers", note: "" }],
+      "12-30": [{ id: "d30", title: "Diaz Antes", artist: "Alvaro Diaz", note: "" }],
+      "12-31": [{ id: "d31", title: "Si No Tienes Nada Que Decir Entonces Calla", artist: "Fother Muckers", note: "" }]
     };
 
     const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -301,7 +210,7 @@
     let isAdmin = false;
     let isIsolatedMode = false;
 
-    let db = JSON.parse(localStorage.getItem('musicCalendarDB_v101')) || fullMusicData;
+    let db = JSON.parse(localStorage.getItem('musicCalendarDB_v4')) || fullMusicData;
 
     function getTodayKey() {
       const today = new Date();
@@ -311,7 +220,7 @@
     }
 
     function saveDB() {
-      localStorage.setItem('musicCalendarDB_v101', JSON.stringify(db));
+      localStorage.setItem('musicCalendarDB_v4', JSON.stringify(db));
       renderCalendar(currentMonth);
     }
 
@@ -346,6 +255,58 @@
       img.src = 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
     }
 
+    async function extractCoverFromUrl(url) {
+      if (!url) return '';
+      if (url.includes('spotify.com')) {
+        try {
+          const res = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`);
+          const data = await res.json();
+          if (data.thumbnail_url) return data.thumbnail_url;
+        } catch (e) {}
+      }
+      if (url.includes('apple.com')) {
+        try {
+          const match = url.match(/\/album\/[^\/]+\/([0-9]+)/) || url.match(/i=([0-9]+)/) || url.match(/id=([0-9]+)/);
+          if (match) {
+            const resApi = await fetch(`https://itunes.apple.com/lookup?id=${match[1]}`);
+            const dataApi = await resApi.json();
+            if (dataApi.results && dataApi.results[0].artworkUrl100) {
+              return dataApi.results[0].artworkUrl100.replace('100x100bb', '600x600bb');
+            }
+          }
+        } catch (e) {}
+      }
+      return '';
+    }
+
+    async function getAppleCoverUrl(title, artist) {
+      if (!title) return '';
+      const query = encodeURIComponent(`${title} ${artist || ''}`);
+      try {
+        const res = await fetch(`https://itunes.apple.com/search?term=${query}&entity=album&limit=1`);
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+          return data.results[0].artworkUrl100.replace('100x100bb', '400x400bb');
+        }
+      } catch (e) {}
+      return 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
+    }
+
+    // Carga e inicializa portadas para todos los elementos rápidamente
+    async function preloadCovers() {
+      for (const key in db) {
+        if (db[key] && db[key].length > 0) {
+          for (let item of db[key]) {
+            if (!item.cover) {
+              item.cover = await getAppleCoverUrl(item.title, item.artist);
+            }
+          }
+        }
+      }
+      localStorage.setItem('musicCalendarDB_v4', JSON.stringify(db));
+      renderCalendar(currentMonth);
+    }
+
     function renderCalendar(month) {
       const grid = document.getElementById('calendarGrid');
       grid.innerHTML = '';
@@ -370,22 +331,13 @@
         }`;
 
         if (releases.length > 0) {
+          // Obtener el álbum asignado como portada o el primero
           let mainAlbum = releases.find(a => a.isMainCover) || releases[0];
-          if (mainAlbum && mainAlbum.cover) {
-            dayCell.style.backgroundImage = `linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.3)), url("${mainAlbum.cover}")`;
+          let coverUrl = mainAlbum.cover || '';
+          if (coverUrl) {
+            dayCell.style.backgroundImage = `linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.4)), url('${coverUrl}')`;
           }
         }
-
-        dayCell.onmousemove = (e) => {
-          const rect = dayCell.getBoundingClientRect();
-          const x = e.clientX - rect.left - rect.width / 2;
-          const y = e.clientY - rect.top - rect.height / 2;
-          dayCell.style.transform = `rotateY(${x / 8}deg) rotateX(${-y / 8}deg) scale(1.04)`;
-        };
-
-        dayCell.onmouseleave = () => {
-          dayCell.style.transform = `rotateY(0deg) rotateX(0deg) scale(1)`;
-        };
 
         let html = `<div class="flex justify-between items-center relative z-10"><span class="text-xs ${isToday ? 'text-purple-400 font-bold' : (releases.length > 0 ? 'text-white font-medium' : 'text-zinc-600')}">${day}</span>`;
         if (isAdmin) {
@@ -407,7 +359,7 @@
       }
     }
 
-    function openDayModal(key, day, monthName) {
+    async function openDayModal(key, day, monthName) {
       const items = db[key] || [];
       const isToday = key === getTodayKey();
 
@@ -428,6 +380,9 @@
       } else {
         for (let i = 0; i < items.length; i++) {
           const item = items[i];
+          if (!item.cover) {
+            item.cover = await getAppleCoverUrl(item.title, item.artist);
+          }
 
           html += `
             <div class="mb-4 p-3 rounded-xl border border-subtle bg-black flex items-center gap-3">
@@ -437,7 +392,7 @@
                   <h4 class="font-medium text-xs text-white truncate cursor-pointer hover:text-purple-400 transition" onclick="showAlbumPage('${key}', '${item.id}')">${item.title}</h4>
                   ${item.isMainCover ? `<span class="text-[9px] bg-purple-900/60 text-purple-300 border border-purple-700/60 px-1.5 py-0.5 rounded">Portada</span>` : ''}
                 </div>
-                <p class="text-[11px] text-zinc-500 truncate">${item.artist || 'Artista'}${item.year ? ` • ${item.year}` : ''}</p>
+                <p class="text-[11px] text-zinc-500 truncate">${item.artist || 'Artista'}</p>
                 <div class="flex gap-2 mt-1">
                   ${item.spotify ? `<a href="${item.spotify}" target="_blank" class="text-[10px] text-zinc-400 hover:text-emerald-400"><i class="fa-brands fa-spotify"></i> Spotify</a>` : ''}
                   ${item.apple ? `<a href="${item.apple}" target="_blank" class="text-[10px] text-zinc-400 hover:text-pink-400"><i class="fa-brands fa-apple"></i> Apple</a>` : ''}
@@ -466,7 +421,7 @@
     }
 
     function openEditForm(key, albumId = null) {
-      const item = albumId && db[key] ? db[key].find(a => a.id === albumId) : { title: '', artist: '', year: '', note: '', cover: '', spotify: '', apple: '', isMainCover: false };
+      const item = albumId && db[key] ? db[key].find(a => a.id === albumId) : { title: '', artist: '', note: '', cover: '', spotify: '', apple: '', isMainCover: false };
       
       let html = `
         <h3 class="text-sm font-medium text-white mb-4">${albumId ? 'Editar Álbum' : 'Agregar Álbum'}</h3>
@@ -478,10 +433,6 @@
           <div>
             <label class="text-[10px] text-zinc-500 uppercase">Artista</label>
             <input type="text" id="formArtist" value="${item.artist}" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
-          </div>
-          <div>
-            <label class="text-[10px] text-zinc-500 uppercase">Año de Lanzamiento</label>
-            <input type="number" id="formYear" value="${item.year || ''}" placeholder="Ej: 2016" class="w-full bg-black border border-subtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-zinc-700">
           </div>
           <div>
             <label class="text-[10px] text-zinc-500 uppercase">Spotify Link</label>
@@ -512,18 +463,34 @@
       document.getElementById('modal').classList.add('flex');
     }
 
-    function saveAlbumForm(e, key, albumId) {
+    async function saveAlbumForm(e, key, albumId) {
       e.preventDefault();
+      
+      const submitBtn = document.getElementById('saveSubmitBtn');
+      if (submitBtn) {
+        submitBtn.innerText = "Guardando...";
+        submitBtn.disabled = true;
+      }
 
       if (!db[key]) db[key] = [];
 
       const title = document.getElementById('formTitle').value;
       const artist = document.getElementById('formArtist').value;
-      const year = document.getElementById('formYear').value;
       const spotify = document.getElementById('formSpotify').value;
       const apple = document.getElementById('formApple').value;
       let cover = document.getElementById('formCover').value;
       const isMainCover = document.getElementById('formIsMainCover').checked;
+
+      let extracted = await extractCoverFromUrl(spotify);
+      if (!extracted) {
+        extracted = await extractCoverFromUrl(apple);
+      }
+
+      if (extracted) {
+        cover = extracted;
+      } else if (!cover) {
+        cover = await getAppleCoverUrl(title, artist);
+      }
 
       if (isMainCover) {
         db[key].forEach(a => a.isMainCover = false);
@@ -533,7 +500,6 @@
         id: albumId || String(Date.now()),
         title: title,
         artist: artist,
-        year: year,
         spotify: spotify,
         apple: apple,
         cover: cover,
@@ -577,7 +543,7 @@
       }
     }
 
-    function showAlbumPage(key, albumId) {
+    async function showAlbumPage(key, albumId) {
       const album = db[key].find(a => a.id === albumId);
       closeModal();
       document.getElementById('mainView').classList.add('hidden');
@@ -585,23 +551,21 @@
       const isToday = key === getTodayKey();
 
       let coverUrl = album ? album.cover : '';
-
-      const glowBg = document.getElementById('albumGlowBg');
-      if (coverUrl) {
-        glowBg.style.backgroundImage = `url("${coverUrl}")`;
+      if (album && !coverUrl) {
+        coverUrl = await getAppleCoverUrl(album.title, album.artist);
       }
       
       document.getElementById('albumPageContent').innerHTML = `
         <div class="flex flex-col sm:flex-row gap-6 items-center">
-          <img src="${coverUrl}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded-xl border border-subtle bg-zinc-900 shadow-2xl">
+          <img src="${coverUrl || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777'}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded-xl border border-subtle bg-zinc-900 shadow-xl">
           <div class="flex-1 text-center sm:text-left">
             ${isToday ? `<p class="text-xs text-purple-400 font-medium tracking-wide mb-2">🎉 ¡Feliz Cumpleaños!</p>` : ''}
             <h1 class="text-xl font-medium text-white mb-1">${album ? album.title : ''}</h1>
-            <h3 class="text-sm text-zinc-400 mb-4">${album ? album.artist || '' : ''}${album && album.year ? ` • ${album.year}` : ''}</h3>
-            ${album && album.note ? `<p class="text-xs text-zinc-300 italic mb-6 bg-black/60 p-3 rounded-lg border border-subtle backdrop-blur-md">"${album.note}"</p>` : ''}
-            <div class="flex flex-wrap gap-3 justify-center sm:justify-start">
-              ${album && album.spotify ? `<a href="${album.spotify}" target="_blank" class="border border-subtle bg-black/40 backdrop-blur-md text-zinc-300 hover:text-white text-xs px-3.5 py-1.5 rounded-lg flex items-center gap-2 transition"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify</a>` : ''}
-              ${album && album.apple ? `<a href="${album.apple}" target="_blank" class="border border-subtle bg-black/40 backdrop-blur-md text-zinc-300 hover:text-white text-xs px-3.5 py-1.5 rounded-lg flex items-center gap-2 transition"><i class="fa-brands fa-apple text-pink-400"></i> Apple Music</a>` : ''}
+            <h3 class="text-sm text-zinc-400 mb-4">${album ? album.artist : ''}</h3>
+            ${album && album.note ? `<p class="text-xs text-zinc-400 italic mb-6 bg-black p-3 rounded-lg border border-subtle">"${album.note}"</p>` : ''}
+            <div class="flex gap-3 justify-center sm:justify-start">
+              ${album && album.spotify ? `<a href="${album.spotify}" target="_blank" class="border border-subtle text-zinc-300 hover:text-white text-xs px-3.5 py-1.5 rounded-lg flex items-center gap-2 transition"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify</a>` : ''}
+              ${album && album.apple ? `<a href="${album.apple}" target="_blank" class="border border-subtle text-zinc-300 hover:text-white text-xs px-3.5 py-1.5 rounded-lg flex items-center gap-2 transition"><i class="fa-brands fa-apple text-pink-400"></i> Apple Music</a>` : ''}
             </div>
           </div>
         </div>
@@ -609,7 +573,7 @@
       albumPage.classList.remove('hidden');
     }
 
-    function renderIsolatedDayView(fecha) {
+    async function renderIsolatedDayView(fecha) {
       isIsolatedMode = true;
       document.getElementById('mainView').classList.add('hidden');
       document.getElementById('brandLogo').onclick = null;
@@ -623,13 +587,18 @@
       } else {
         let htmlContent = '';
         for (const album of albums) {
+          let coverUrl = album.cover;
+          if (!coverUrl) {
+            coverUrl = await getAppleCoverUrl(album.title, album.artist);
+            album.cover = coverUrl;
+          }
           htmlContent += `
             <div class="flex flex-col sm:flex-row gap-6 items-center border-b border-subtle/50 pb-6 mb-6 last:border-none last:pb-0 last:mb-0">
-              <img src="${album.cover}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded-xl border border-subtle bg-zinc-900 shadow-xl">
+              <img src="${coverUrl}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded-xl border border-subtle bg-zinc-900 shadow-xl">
               <div class="flex-1 text-center sm:text-left">
                 ${isToday ? `<p class="text-xs text-purple-400 font-medium tracking-wide mb-2">🎉 ¡Feliz Cumpleaños!</p>` : ''}
                 <h1 class="text-xl font-medium text-white mb-1">${album.title}</h1>
-                <h3 class="text-sm text-zinc-400 mb-4">${album.artist || ''}${album.year ? ` • ${album.year}` : ''}</h3>
+                <h3 class="text-sm text-zinc-400 mb-4">${album.artist || ''}</h3>
                 ${album.note ? `<p class="text-xs text-zinc-400 italic mb-6 bg-black p-3 rounded-lg border border-subtle">"${album.note}"</p>` : ''}
                 <div class="flex gap-3 justify-center sm:justify-start">
                   ${album.spotify ? `<a href="${album.spotify}" target="_blank" class="border border-subtle text-zinc-300 hover:text-white text-xs px-3.5 py-1.5 rounded-lg flex items-center gap-2 transition"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify</a>` : ''}
@@ -670,6 +639,7 @@
         renderIsolatedDayView(fecha);
       } else {
         renderCalendar(currentMonth);
+        preloadCovers();
       }
     };
   </script>
