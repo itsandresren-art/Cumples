@@ -6,6 +6,8 @@
   <title>Calendario Musical</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- SDK de Supabase para la base de datos en la nube -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@300;400;500;700&display=swap');
     
@@ -108,129 +110,19 @@
   </div>
 
   <script>
-    const fullMusicData = {
-      "01-01": [{ id: "e1", title: "Aquí vamos otra vez", artist: "1280 Almas", year: "1998", note: "" }],
-      "01-15": [{ id: "e15", title: "Almendra", artist: "Almendra", year: "1969", note: "POR FIN" }],
-      "01-17": [{ id: "e17", title: "Circles", artist: "Mac Miller", year: "2020", note: "" }],
-      "01-27": [{ id: "e27", title: "Let’s Start Here", artist: "Lil Yachty", year: "2023", note: "" }],
-      "02-14": [{ id: "f14", title: "The Life of Pablo", artist: "Kanye West", year: "2016", note: "" }],
-      "02-19": [{ id: "f19", title: "Por si mañana no estoy", artist: "", year: "2021", note: "" }],
-      "02-24": [{ id: "f24", title: "Todavía No", artist: "La Paloma", year: "2023", note: "" }],
-      "02-25": [{ id: "f25", title: "Dios y la Mata de Lulo", artist: "Nicolas y los Fumadores", year: "2022", note: "" }],
-      "02-26": [{ id: "f26", title: "El Madrileño", artist: "C. Tangana", year: "2021", note: "" }],
-      "02-27": [{ id: "f27", title: "David Ruffin", artist: "David Ruffin", year: "1969", note: "no realmente pero lo es en mi corazón" }],
-      "02-28": [{ id: "f28", title: "CHASE", artist: "AARON MAY", year: "2019", note: "" }],
-      "03-03": [{ id: "m3", title: "American Teen", artist: "Khalid", year: "2017", note: "" }],
-      "03-09": [{ id: "m9", title: "Como Pez en el Hielo", artist: "Nicolás y los Fumadores", year: "2018", note: "" }],
-      "03-16": [{ id: "m16", title: "Gran Santiago", artist: "Teleradio Donoso", year: "2007", note: "" }],
-      "03-18": [{ id: "m18", title: "Cara y Cruz", artist: "Ayax y Prok", year: "2018", note: "" }],
-      "03-22": [{ id: "m22", title: "Mika’s Laundry", artist: "Matt Champion", year: "2024", note: "" }],
-      "03-24": [{ id: "m24", title: "Películas", artist: "La máquina de hacer pájaros", year: "1977", note: "" }],
-      "03-25": [{ id: "m25", title: "Casiopea", artist: "Casiopea", year: "1979", note: "" }],
-      "03-26": [{ id: "m26", title: "Comedown Machine", artist: "The Strokes", year: "2013", note: "" }],
-      "03-28": [{ id: "m28_1", title: "The Dude", artist: "Quincy Jones", year: "1981", note: "" }, { id: "m28_2", title: "10 Songs", artist: "Q", year: "2018", note: "" }],
-      "03-31": [{ id: "m31", title: "JúJú & The Flowerbug", artist: "Sunny Colon", year: "2023", note: "" }],
-      "04-02": [{ id: "a2", title: "Starry Cat", artist: "Starry Cat", year: "2013", note: "" }],
-      "04-10": [{ id: "a10_1", title: "The New Abnormal", artist: "The Strokes", year: "2020", note: "" }, { id: "a10_2", title: "QNEPT", artist: "JAZE", year: "2021", note: "" }],
-      "04-14": [{ id: "a14", title: "Damn", artist: "Kendrick Lamar", year: "2017", note: "" }],
-      "04-18": [{ id: "a18_1", title: "Cripta y vida", artist: "Pedropiedra", year: "2011", note: "" }, { id: "a18_2", title: "I Heard That Noise", artist: "quickly, quickly", year: "2017", note: "" }],
-      "04-23": [{ id: "a23", title: "FERXXO (VOL 1: MOR)", artist: "Feid", year: "2020", note: "" }],
-      "04-26": [{ id: "a26_1", title: "Apricot Princess", artist: "Rex Orange County", year: "2017", note: "" }, { id: "a26_2", title: "Por Cesarea", artist: "DILLOM", year: "2024", note: "" }],
-      "05-05": [{ id: "may5", title: "Soul, PRESENT", artist: "Q", year: "2023", note: "" }],
-      "05-06": [{ id: "may6", title: "Melanchole", artist: "Salvia Palth", year: "2013", note: "" }],
-      "05-08": [{ id: "may8", title: "Pedropiedra", artist: "Pedropiedra", year: "2009", note: "" }],
-      "05-10": [{ id: "may10", title: "Hopes and Fears", artist: "Keane", year: "2004", note: "" }],
-      "05-13": [{ id: "may13", title: "Mr Morale & the Big Steppers", artist: "Kendrick Lamar", year: "2022", note: "" }],
-      "05-17": [{ id: "may17_1", title: "IGOR", artist: "TYLER, THE CREATOR", year: "2019", note: "" }, { id: "may17_2", title: "Sayonara", artist: "Alvaro Diaz", year: "2024", note: "" }, { id: "may17_3", title: "Hit Me Hard and Soft", artist: "Billie Eilish", year: "2024", note: "" }],
-      "05-22": [{ id: "may22", title: "Omakase", artist: "Alvaro Diaz", year: "2024", note: "" }],
-      "05-23": [{ id: "may23", title: "Goodbye and good Riddance", artist: "Juice Wrld", year: "2018", note: "" }],
-      "06-05": [{ id: "j5", title: "The Shave Experiment (Director's Cut)", artist: "Q", year: "2021", note: "" }],
-      "06-06": [{ id: "j6", title: "Les Étolies Vagabondes", artist: "Nekfeu", year: "2019", note: "" }],
-      "06-08": [{ id: "j8", title: "Kids See Ghost", artist: "Kanye West & Kid Cudi", year: "2018", note: "" }],
-      "06-10": [{ id: "j10", title: "Channel Orange", artist: "Frank Ocean", year: "2012", note: "" }],
-      "06-16": [{ id: "j16_1", title: "Inefable", artist: "Micro Tdh", year: "2017", note: "" }, { id: "j16_2", title: "Abysmal Thoughts", artist: "The Drums", year: "2017", note: "" }],
-      "06-20": [{ id: "j20", title: "RANDOM ACCESS MEMORIES", artist: "DAFT PUNK", year: "2013", note: "" }],
-      "06-25": [{ id: "j25", title: "Vice Versa", artist: "Rauw Alejandro", year: "2021", note: "" }],
-      "06-26": [{ id: "j26", title: "El Retorno", artist: "Santiago Motorizado", year: "2021", note: "" }],
-      "06-29": [{ id: "j29", title: "DATA", artist: "Tainy", year: "2023", note: "" }],
-      "07-08": [{ id: "jul8", title: "Introducción a los Fother Muckers: Menudencias (Sólo para fanáticos)", artist: "Fother Muckers", year: "2011", note: "" }],
-      "07-11": [{ id: "jul11", title: "166", artist: "Milo J", year: "2024", note: "" }],
-      "07-15": [{ id: "jul15", title: "Gemini Rights", artist: "Steve Lacy", year: "2022", note: "" }],
-      "07-16": [{ id: "jul16", title: "Oh yeah?", artist: "Steve Lacy", year: "2022", note: "" }],
-      "07-17": [{ id: "jul17", title: "Kill the Lights", artist: "Tony Molina", year: "2018", note: "" }],
-      "07-28": [{ id: "jul28", title: "Utopia", artist: "Travis Scott", year: "2023", note: "" }],
-      "07-30": [{ id: "jul30", title: "Is This It", artist: "The Strokes", year: "2001", note: "" }],
-      "08-03": [{ id: "ag3", title: "Swimming", artist: "Mac Miller", year: "2018", note: "" }],
-      "08-08": [{ id: "ag8", title: "Coastal Grooves", artist: "Blood Orange", year: "2011", note: "" }],
-      "08-10": [{ id: "ag10_1", title: "Off The Wall", artist: "Michael Jackson", year: "1979", note: "" }, { id: "ag10_2", title: "Life is a Trip", artist: "Trippie Redd", year: "2018", note: "" }],
-      "08-14": [{ id: "ag14", title: "ATP", artist: "Nsqk", year: "2024", note: "" }],
-      "08-15": [{ id: "ag15", title: "Baby", artist: "Dijon", year: "2021", note: "" }],
-      "08-20": [{ id: "ag20_1", title: "Blonde", artist: "Frank Ocean", year: "2016", note: "" }, { id: "ag20_2", title: "Intershibuya La Mafia", artist: "Feid", year: "2021", note: "" }],
-      "08-25": [{ id: "ag25", title: "17", artist: "Xxxtentacion", year: "2017", note: "" }],
-      "08-26": [{ id: "ag26", title: "All The Topings", artist: "Panuccis Pizza", year: "2016", note: "" }],
-      "08-28": [{ id: "ag28_1", title: "CTV3 Cool Tape Vol.3", artist: "Jaden Smith", year: "2020", note: "" }, { id: "ag28_2", title: "Lets get it on", artist: "Marvin Gaye", year: "1973", note: "" }],
-      "08-29": [{ id: "ag29", title: "Donda", artist: "Kanye West", year: "2021", note: "" }],
-      "08-31": [{ id: "ag31", title: "Peperina", artist: "Serú Girán", year: "1981", note: "" }],
-      "09-02": [{ id: "s2", title: "Portamento", artist: "The Drums", year: "2011", note: "" }],
-      "09-03": [{ id: "s3", title: "Juventud Americana", artist: "Ases Falsos", year: "2012", note: "" }],
-      "09-04": [{ id: "s4_1", title: "Rodeo", artist: "Travis Scott", year: "2015", note: "" }, { id: "s4_2", title: "Bcos U Will Never B Free", artist: "Rex Orange County", year: "2015", note: "" }],
-      "09-05": [{ id: "s5_1", title: "Mourn", artist: "Corbin", year: "2017", note: "" }, { id: "s5_2", title: "Absolutely", artist: "Dijon", year: "2021", note: "" }],
-      "09-06": [{ id: "s6", title: "Inútil Corazón", artist: "Axel Catalán", year: "2022", note: "" }],
-      "09-07": [{ id: "s7_1", title: "Siembra", artist: "Rubén Blades & Willy Colón", year: "1978", note: "" }, { id: "s7_2", title: "Para Hondo", artist: "Cristobal Briceño", year: "2019", note: "" }],
-      "09-09": [{ id: "s9", title: "ALTA SUCIEDAD", artist: "ANDRES CALAMARO", year: "1997", note: "" }],
-      "09-11": [{ id: "s11", title: "Graduation", artist: "Kanye West", year: "2007", note: "" }],
-      "09-12": [{ id: "s12", title: "Bailar y llorar", artist: "teleradio donoso", year: "2008", note: "" }],
-      "09-13": [{ id: "s13", title: "Heaven Surrounds You", artist: "Surf Curse", year: "2019", note: "" }],
-      "09-14": [{ id: "s14", title: "Feliz Cumpleaños FERXXO te pirateamos el álbum", artist: "Feid", year: "2022", note: "" }],
-      "09-15": [{ id: "s15_1", title: "I will be on my one because there is a devil inside my body", artist: "Teen Suicide", year: "2012", note: "" }, { id: "s15_2", title: "SUPERNOVA", artist: "Ralphie Choo", year: "2023", note: "" }],
-      "09-20": [{ id: "s20", title: "El jardin de los presentes", artist: "Invisible", year: "1976", note: "" }],
-      "09-23": [{ id: "s23", title: "El Círculo", artist: "Kase.O", year: "2016", note: "" }],
-      "09-24": [{ id: "s24_1", title: "Nothing Was The Same", artist: "Drake", year: "2013", note: "" }, { id: "s24_2", title: "Nectar", artist: "Joji", year: "2020", note: "" }],
-      "09-25": [{ id: "s25", title: "De la Linea Diez al Sol", artist: "Niña Polaca", year: "2020", note: "" }],
-      "09-28": [{ id: "s28", title: "Songs In The Key of Life", artist: "Stevie Wonder", year: "1976", note: "" }],
-      "09-29": [{ id: "s29_1", title: "The Stranger", artist: "Billy Joel", year: "1977", note: "" }, { id: "s29_2", title: "Salvavidas(O de las balas perdidas)", artist: "La Maravillosa Orquesta del Alcohol", year: "2017", note: "" }],
-      "10-03": [{ id: "o3", title: "Un Golpe de Suerte", artist: "La Paloma", year: "2023", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/37/10/7c/37107c12-32b4-e462-817a-251f2249339e/8445162391039.jpg/600x600bb.jpg", note: "" }],
-      "10-06": [{ id: "o6_1", title: "Artaud", artist: "Pescado Rabioso", year: "1973", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/93/29/79/932979b9-d2b5-fc6e-d910-c0ba711ef8d9/7798140321727.jpg/600x600bb.jpg", note: "" }, { id: "o6_2", title: "Así se hace", artist: "Fother Muckers", year: "2008", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/6b/f2/87/6bf28701-4475-4303-3e11-e406f856cf22/cover.jpg/600x600bb.jpg", note: "" }],
-      "10-08": [{ id: "o8", title: "Melophobia", artist: "Cage the Elephant", year: "2013", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/1c/eb/54/1ceb54e7-402a-a9e9-d7b4-3a95cda2a3ff/886444158499.jpg/600x600bb.jpg", note: "" }],
-      "10-11": [{ id: "o11", title: "Emanuel", artist: "Pedro Piedra", year: "2013", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music113/v4/cc/62/17/cc62176d-0bb0-7988-8255-a4b08f44d183/886444211132.jpg/600x600bb.jpg", note: "" }],
-      "10-13": [{ id: "o13", title: "52nd Street", artist: "Billy Joel", year: "1978", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/b4/e4/df/b4e4df0c-c76b-3aa8-7013-0ea13d33194a/074643560927.jpg/600x600bb.jpg", note: "" }],
-      "10-18": [{ id: "o18_1", title: "Reconoceronte", artist: "Los Mil Jinetes", year: "2010", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/6b/f2/87/6bf28701-4475-4303-3e11-e406f856cf22/cover.jpg/600x600bb.jpg", note: "" }, { id: "o18_2", title: "Salen otras diez", artist: "Las Chaquetas Amarillas", year: "2014", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/6b/f2/87/6bf28701-4475-4303-3e11-e406f856cf22/cover.jpg/600x600bb.jpg", note: "" }, { id: "o18_3", title: "Glimmer of God", artist: "Jean Dawson", year: "2024", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/b1/7d/5d/b17d5d28-769a-6b83-a261-7589d89269aa/artwork.jpg/600x600bb.jpg", note: "" }],
-      "10-21": [{ id: "o21", title: "Durazno Sangrando", artist: "Invisible", year: "1975", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/97/91/ee/9791ee0a-04ef-5e8c-8519-c0ea4ee8992a/190295195228.jpg/600x600bb.jpg", note: "" }],
-      "10-26": [{ id: "o26", title: "Ballads 1", artist: "Joji", year: "2018", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/b9/6c/07/b96c0710-161b-944f-1707-1bc90a880ae7/886447190014.jpg/600x600bb.jpg", note: "" }],
-      "10-28": [{ id: "o28_1", title: "Chromakopia", artist: "Tyler the Creator", year: "2024", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/e5/22/02/e5220263-128a-77df-9800-4b5b5cda579b/196871578326.jpg/600x600bb.jpg", note: "" }, { id: "o28_2", title: "Room in Fire", artist: "The Strokes", year: "2003", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/2b/43/66/2b43666b-83c9-0268-24cc-029471167aa6/886443425509.jpg/600x600bb.jpg", note: "" }, { id: "o28_3", title: "Dúo Niagara", artist: "Dúo Niagara", year: "2022", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/6b/f2/87/6bf28701-4475-4303-3e11-e406f856cf22/cover.jpg/600x600bb.jpg", note: "" }],
-      "10-29": [{ id: "o29_1", title: "Felicilandia", artist: "Alvaro Diaz", year: "2021", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/65/cc/d9/65ccd946-aa40-c918-be85-0fb0b3b4260f/artwork.jpg/600x600bb.jpg", note: "" }, { id: "o29_2", title: "No soy uno", artist: "Fother Muckers", year: "2008", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/6b/f2/87/6bf28701-4475-4303-3e11-e406f856cf22/cover.jpg/600x600bb.jpg", note: "" }],
-      "10-31": [{ id: "o31", title: "Ghost with Skin", artist: "Corbin", year: "2021", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/c3/91/66/c39166cf-712e-a22c-a28a-72efee73f089/artwork.jpg/600x600bb.jpg", note: "" }],
-      "11-04": [{ id: "n4", title: "Her Loss", artist: "Drake & 21 Savage", year: "2022", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/35/6b/5d/356b5d92-127e-e179-8263-d1ea2e742516/22UMGIM82959.rgb.jpg/600x600bb.jpg", note: "" }],
-      "11-08": [{ id: "n8", title: "Mal que bien", artist: "Nicolas y los fumadores", year: "2022", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/58/0c/33/580c33a3-7e1d-44aa-ee65-9a842b113063/artwork.jpg/600x600bb.jpg", note: "" }],
-      "11-11": [{ id: "n11_1", title: "No", artist: "Pánico", year: "1995", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/8a/0a/60/8a0a6042-43cf-6192-3112-70b9df636da8/cover.jpg/600x600bb.jpg", note: "" }, { id: "n11_2", title: "Espejo", artist: "ZPU", year: "2016", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music71/v4/c3/91/66/c39166cf-712e-a22c-a28a-72efee73f089/8436536551820.jpg/600x600bb.jpg", note: "" }, { id: "n11_3", title: "Modal Soul", artist: "Mojabes", year: "2005", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/55/a7/68/55a76856-11f2-1d57-1981-d1f5e8869c3a/dj.vpxzyljz.jpg/600x600bb.jpg", note: "" }],
-      "11-15": [{ id: "n15", title: "Cosa Nuestra", artist: "Rauw Alejando", year: "2024", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/91/a6/63/91a6639c-c045-f0ea-7365-27f29bbbb5c1/886446265737.jpg/600x600bb.jpg", note: "" }],
-      "11-17": [{ id: "n17", title: "Syre", artist: "Jaden Smith", year: "2017", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/bc/9f/c7/bc9fc7d1-e633-911e-97eb-3b6bc6b9319b/886446702652.jpg/600x600bb.jpg", note: "" }],
-      "11-18": [{ id: "n18", title: "Harmless Melodies", artist: "Yellow Days", year: "2016", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/3c/65/56/3c6556e0-2495-2aa6-218a-a4369e5dff7f/886445851412.jpg/600x600bb.jpg", note: "" }],
-      "11-21": [{ id: "n21_1", title: "Justo y necesario", artist: "Fother Muckers", year: "2008", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/6b/f2/87/6bf28701-4475-4303-3e11-e406f856cf22/cover.jpg/600x600bb.jpg", note: "" }, { id: "n21_2", title: "You", artist: "Larry Lovestein & The Velvet Revival", year: "2012", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music/v4/5a/0c/39/5a0c39f1-3245-5d9e-13c5-bc93e921d746/mzi.fwhqexvc.jpg/600x600bb.jpg", note: "" }],
-      "11-23": [{ id: "n23", title: "Roy", artist: "NSQK", year: "2022", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/85/3c/d5/853cd5d8-c645-f0fb-7788-b2ef62b665fa/artwork.jpg/600x600bb.jpg", note: "" }],
-      "11-26": [{ id: "n26", title: "Una idea, pero es triste", artist: "La Paloma", year: "2021", cover: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/21/50/ea/2150ea31-3316-2ff0-5bfa-51cd72221376/8445162391039.jpg/600x600bb.jpg", note: "" }],
-      "12-02": [{ id: "d2", title: "Awaken, My Love!", artist: "Childish Gambino", year: "2016", note: "" }],
-      "12-04": [{ id: "d4", title: "The Lo-Fis", artist: "Steve Lacy", year: "2020", note: "" }],
-      "12-06": [{ id: "d6", title: "Perro Viejo", artist: "Axel Catalán", year: "2016", note: "" }],
-      "12-09": [{ id: "d9_1", title: "Stoney", artist: "Post Malone", year: "2016", note: "" }, { id: "d9_2", title: "Lift Your Skinny Fists like Antennas to Heaven", artist: "Godspeed You! Black Emperor", year: "2000", note: "" }],
-      "12-10": [{ id: "d10", title: "Because the Internet", artist: "Childish Gambino", year: "2013", note: "" }],
-      "12-11": [{ id: "d11", title: "Man On The Moon lll", artist: "Kid Cudi", year: "2020", note: "" }],
-      "12-14": [{ id: "d14", title: "Spiderman Into the Spiderverse", artist: "Muchos", year: "2018", note: "" }],
-      "12-17": [{ id: "d17", title: "El Paisaje Salvaje", artist: "Fother Muckers", year: "2010", note: "" }],
-      "12-20": [{ id: "d20", title: "La Grasa de Las Capitales", artist: "Serú Giran", year: "1979", note: "" }],
-      "12-21": [{ id: "d21", title: "Sin Futuro", artist: "Axel Catalán?", year: "2018", note: "" }],
-      "12-24": [{ id: "d24_1", title: "X100PRE", artist: "Bad Bunny", year: "2018", note: "" }, { id: "d24_2", title: "Andate Cabrita", artist: "Los Mil Jinetes", year: "2008", note: "" }],
-      "12-25": [{ id: "d25", title: "Una Navidad con los Fother Muckers", artist: "Fother Muckers", year: "2008", note: "" }],
-      "12-30": [{ id: "d30", title: "Diaz Antes", artist: "Alvaro Diaz", year: "2020", note: "" }],
-      "12-31": [{ id: "d31", title: "Si No Tienes Nada Que Decir Entonces Calla", artist: "Fother Muckers", year: "2009", note: "" }]
-    };
+    // ==========================================
+    // CONFIGURACIÓN DE SUPABASE (Ya configurada)
+    // ==========================================
+    const SUPABASE_URL = 'https://rpkbqxyhjpkwvvxlgerd.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwa2JxeHloanBrd3Z2eGxnZXJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5NDgyMDYsImV4cCI6MjEwNzUyNDIwNn0.V4y-aVBjfiijiTJCRXkzl-44GsXF4P-JuWPClxuz1nI';
+    
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    let db = {};
     const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
     let currentMonth = new Date().getMonth();
     let isAdmin = false;
     let isIsolatedMode = false;
-
-    let db = JSON.parse(localStorage.getItem('musicCalendarDB_vExportJSON')) || fullMusicData;
 
     function getTodayKey() {
       const today = new Date();
@@ -239,9 +131,74 @@
       return `${m}-${d}`;
     }
 
-    function saveDB() {
-      localStorage.setItem('musicCalendarDB_vExportJSON', JSON.stringify(db));
-      renderCalendar(currentMonth);
+    async function loadCloudDB() {
+      try {
+        const { data, error } = await supabaseClient.from('albums').select('*');
+        if (error) throw error;
+
+        db = {};
+        if (data) {
+          data.forEach(row => {
+            if (!db[row.date_key]) db[row.date_key] = [];
+            db[row.date_key].push({
+              id: row.id,
+              title: row.title,
+              artist: row.artist,
+              year: row.year,
+              note: row.note,
+              cover: row.cover,
+              spotify: row.spotify,
+              apple: row.apple,
+              isMainCover: row.is_main_cover,
+              rating: row.rating
+            });
+          });
+        }
+      } catch (err) {
+        console.error("Error al cargar de la nube:", err);
+      }
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      const fecha = urlParams.get('fecha');
+      const albumId = urlParams.get('album');
+
+      if (fecha && db[fecha]) {
+        renderIsolatedDayView(fecha, albumId);
+      } else {
+        renderCalendar(currentMonth);
+      }
+    }
+
+    async function saveAlbumToCloud(key, albumData) {
+      const payload = {
+        id: albumData.id,
+        date_key: key,
+        title: albumData.title,
+        artist: albumData.artist,
+        year: albumData.year,
+        note: albumData.note,
+        cover: albumData.cover,
+        spotify: albumData.spotify,
+        apple: albumData.apple,
+        is_main_cover: albumData.isMainCover,
+        rating: albumData.rating
+      };
+
+      const { error } = await supabaseClient.from('albums').upsert(payload);
+      if (error) {
+        alert("Hubo un error al guardar en la nube: " + error.message);
+      } else {
+        await loadCloudDB();
+      }
+    }
+
+    async function deleteAlbumFromCloud(key, albumId) {
+      const { error } = await supabaseClient.from('albums').delete().eq('id', albumId);
+      if (error) {
+        alert("Error al eliminar: " + error.message);
+      } else {
+        await loadCloudDB();
+      }
     }
 
     function toggleAdmin() {
@@ -277,39 +234,12 @@
       img.src = 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
     }
 
-    async function getAppleCoverUrl(title, artist) {
-      if (!title) return '';
-      const query = encodeURIComponent(`${title} ${artist || ''}`);
-      try {
-        const res = await fetch(`https://itunes.apple.com/search?term=${query}&entity=album&limit=1`);
-        const data = await res.json();
-        if (data.results && data.results.length > 0) {
-          return data.results[0].artworkUrl100.replace('100x100bb', '400x400bb');
-        }
-      } catch (e) {}
-      return 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
-    }
-
-    async function preloadCovers() {
-      for (const key in db) {
-        if (db[key] && db[key].length > 0) {
-          for (let item of db[key]) {
-            if (!item.cover) {
-              item.cover = await getAppleCoverUrl(item.title, item.artist);
-            }
-          }
-        }
-      }
-      localStorage.setItem('musicCalendarDB_vExportJSON', JSON.stringify(db));
-      renderCalendar(currentMonth);
-    }
-
-    function setRating(key, albumId, rating) {
+    async function setRating(key, albumId, rating) {
       if (!db[key]) return;
       const album = db[key].find(a => a.id === albumId);
       if (album) {
         album.rating = rating;
-        saveDB();
+        await saveAlbumToCloud(key, album);
         if (isIsolatedMode) {
           const urlParams = new URLSearchParams(window.location.search);
           renderIsolatedDayView(key, urlParams.get('album'));
@@ -393,7 +323,7 @@
       }
     }
 
-    async function openDayModal(key, day, monthName) {
+    function openDayModal(key, day, monthName) {
       const items = db[key] || [];
       const isToday = key === getTodayKey();
 
@@ -412,17 +342,14 @@
       } else {
         for (let i = 0; i < items.length; i++) {
           const item = items[i];
-          if (!item.cover) {
-            item.cover = await getAppleCoverUrl(item.title, item.artist);
-          }
-
+          let coverUrl = item.cover || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
           let currentRating = item.rating || 0;
           let starsHtml = generateStarsHtml(key, item.id, currentRating);
 
           html += `
             <div class="mb-4 p-3 rounded-lg border-2 border-subtle bg-black flex flex-col gap-2">
               <div class="flex items-center gap-3">
-                <img src="${item.cover}" crossorigin="anonymous" onerror="handleImageError(this)" class="w-12 h-12 rounded object-cover border border-subtle bg-zinc-900 shrink-0">
+                <img src="${coverUrl}" crossorigin="anonymous" onerror="handleImageError(this)" class="w-12 h-12 rounded object-cover border border-subtle bg-zinc-900 shrink-0">
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2">
                     <h4 class="font-bold text-xs text-white truncate cursor-pointer hover:text-amber-400 transition" onclick="showAlbumPage('${key}', '${item.id}')">${item.title}</h4>
@@ -437,8 +364,6 @@
                 </div>
                 ${isAdmin ? `
                   <div class="flex items-center gap-1.5">
-                    ${i > 0 ? `<button onclick="moveAlbumOrder('${key}', ${i}, -1)" class="text-xs text-zinc-400 hover:text-white p-1" title="Subir"><i class="fa-solid fa-arrow-up"></i></button>` : ''}
-                    ${i < items.length - 1 ? `<button onclick="moveAlbumOrder('${key}', ${i}, 1)" class="text-xs text-zinc-400 hover:text-white p-1" title="Bajar"><i class="fa-solid fa-arrow-down"></i></button>` : ''}
                     <button onclick="openEditForm('${key}', '${item.id}')" class="text-xs text-zinc-400 hover:text-amber-400 p-1"><i class="fa-solid fa-pen"></i></button>
                     <button onclick="deleteAlbum('${key}', '${item.id}')" class="text-xs text-zinc-400 hover:text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button>
                   </div>
@@ -454,23 +379,12 @@
       }
 
       if (isAdmin) {
-        html += `
-          <div class="mt-4 pt-4 border-t-2 border-subtle flex flex-col gap-2">
-            <button onclick="openEditForm('${key}')" class="w-full py-2.5 border-2 border-subtle hover:border-white text-white font-bold text-xs rounded-lg transition uppercase tracking-wider bg-black shadow-[2px_2px_0px_#333]">+ Agregar Álbum</button>
-            <button onclick="exportDatabaseAsCode()" class="w-full py-2.5 bg-amber-400 text-black font-bold text-xs rounded-lg transition hover:bg-amber-300 uppercase tracking-wider shadow-[2px_2px_0px_#555]"><i class="fa-solid fa-code"></i> Copiar Código de Base de Datos</button>
-          </div>
-        `;
+        html += `<button onclick="openEditForm('${key}')" class="w-full mt-2 py-2.5 border-2 border-subtle hover:border-white text-white font-bold text-xs rounded-lg transition uppercase tracking-wider bg-black shadow-[2px_2px_0px_#333]">+ Agregar Álbum</button>`;
       }
 
       document.getElementById('modalContent').innerHTML = html;
       document.getElementById('modal').classList.remove('hidden');
       document.getElementById('modal').classList.add('flex');
-    }
-
-    function exportDatabaseAsCode() {
-      const codeString = `const fullMusicData = ` + JSON.stringify(db, null, 2) + `;`;
-      navigator.clipboard.writeText(codeString);
-      alert('¡Código de la base de datos copiado al portapapeles!\n\nVe a tu archivo en GitHub, reemplaza la sección de "const fullMusicData = {...}" por este código copiado y guarda los cambios.');
     }
 
     function openEditForm(key, albumId = null) {
@@ -500,8 +414,8 @@
             <input type="url" id="formApple" value="${item.apple || ''}" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white">
           </div>
           <div>
-            <label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">URL Portada Imagen (Opcional)</label>
-            <input type="url" id="formCover" value="${item.cover || ''}" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white">
+            <label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">URL Portada Imagen</label>
+            <input type="url" id="formCover" value="${item.cover || ''}" placeholder="https://..." class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white">
           </div>
           <div>
             <label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Nota</label>
@@ -511,7 +425,7 @@
             <input type="checkbox" id="formIsMainCover" ${item.isMainCover ? 'checked' : ''} class="rounded bg-black border-subtle text-amber-400 focus:ring-0">
             <label for="formIsMainCover" class="text-xs text-zinc-300 cursor-pointer font-medium">Usar como portada de fondo de este día</label>
           </div>
-          <button type="submit" id="saveSubmitBtn" class="w-full bg-[#f4f4f0] text-black py-2.5 rounded font-bold text-xs uppercase tracking-wider transition hover:bg-white mt-2 shadow-[2px_2px_0px_#555]">Guardar</button>
+          <button type="submit" id="saveSubmitBtn" class="w-full bg-[#f4f4f0] text-black py-2.5 rounded font-bold text-xs uppercase tracking-wider transition hover:bg-white mt-2 shadow-[2px_2px_0px_#555]">Guardar en la Nube</button>
         </form>
       `;
 
@@ -525,51 +439,32 @@
       
       const submitBtn = document.getElementById('saveSubmitBtn');
       if (submitBtn) {
-        submitBtn.innerText = "Guardando...";
+        submitBtn.innerText = "Guardando en la nube...";
         submitBtn.disabled = true;
       }
 
       if (!db[key]) db[key] = [];
 
-      const title = document.getElementById('formTitle').value;
-      const artist = document.getElementById('formArtist').value;
-      const year = document.getElementById('formYear').value;
-      const spotify = document.getElementById('formSpotify').value;
-      const apple = document.getElementById('formApple').value;
-      let cover = document.getElementById('formCover').value;
-      const isMainCover = document.getElementById('formIsMainCover').checked;
-
-      if (!cover) {
-        cover = await getAppleCoverUrl(title, artist);
-      }
-
-      if (isMainCover) {
-        db[key].forEach(a => a.isMainCover = false);
-      }
-
       const existingAlbum = albumId ? db[key].find(a => a.id === albumId) : null;
 
       const newAlbum = {
         id: albumId || String(Date.now()),
-        title: title,
-        artist: artist,
-        year: year,
-        spotify: spotify,
-        apple: apple,
-        cover: cover,
-        isMainCover: isMainCover,
+        title: document.getElementById('formTitle').value,
+        artist: document.getElementById('formArtist').value,
+        year: document.getElementById('formYear').value,
+        spotify: document.getElementById('formSpotify').value,
+        apple: document.getElementById('formApple').value,
+        cover: document.getElementById('formCover').value,
+        isMainCover: document.getElementById('formIsMainCover').checked,
         note: document.getElementById('formNote').value,
         rating: existingAlbum ? (existingAlbum.rating || 0) : 0
       };
 
-      if (albumId) {
-        const idx = db[key].findIndex(a => a.id === albumId);
-        if (idx !== -1) db[key][idx] = newAlbum;
-      } else {
-        db[key].push(newAlbum);
+      if (newAlbum.isMainCover) {
+        if (db[key]) db[key].forEach(a => a.isMainCover = false);
       }
 
-      saveDB();
+      await saveAlbumToCloud(key, newAlbum);
       closeModal();
 
       if (isIsolatedMode) {
@@ -578,23 +473,9 @@
       }
     }
 
-    function moveAlbumOrder(key, index, direction) {
-      const items = db[key];
-      const targetIndex = index + direction;
-      if (targetIndex >= 0 && targetIndex < items.length) {
-        const temp = items[index];
-        items[index] = items[targetIndex];
-        items[targetIndex] = temp;
-        saveDB();
-        const dateObj = new Date(2026, parseInt(key.split('-')[0]) - 1, parseInt(key.split('-')[1]));
-        openDayModal(key, dateObj.getDate(), monthNames[dateObj.getMonth()]);
-      }
-    }
-
-    function deleteAlbum(key, albumId) {
-      if (confirm("¿Eliminar este álbum?")) {
-        db[key] = db[key].filter(a => a.id !== albumId);
-        saveDB();
+    async function deleteAlbum(key, albumId) {
+      if (confirm("¿Eliminar este álbum de la nube para todos?")) {
+        await deleteAlbumFromCloud(key, albumId);
         closeModal();
       }
     }
@@ -606,17 +487,13 @@
       const albumPage = document.getElementById('albumPage');
       const isToday = key === getTodayKey();
 
-      let coverUrl = album ? album.cover : '';
-      if (album && !coverUrl) {
-        coverUrl = await getAppleCoverUrl(album.title, album.artist);
-      }
-
+      let coverUrl = album && album.cover ? album.cover : 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
       let currentRating = album ? (album.rating || 0) : 0;
       let starsHtml = generateStarsHtml(key, albumId, currentRating);
       
       document.getElementById('albumPageContent').innerHTML = `
         <div class="flex flex-col sm:flex-row gap-6 items-center">
-          <img src="${coverUrl || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777'}" crossorigin="anonymous" onerror="handleImageError(this)" class="w-40 h-40 md:w-48 md:h-48 object-cover rounded border-2 border-subtle bg-zinc-900 shadow-xl">
+          <img src="${coverUrl}" crossorigin="anonymous" onerror="handleImageError(this)" class="w-40 h-40 md:w-48 md:h-48 object-cover rounded border-2 border-subtle bg-zinc-900 shadow-xl">
           <div class="flex-1 text-center sm:text-left w-full">
             ${isToday ? `<p class="text-xs text-amber-400 font-bold tracking-widest uppercase mb-2">🎉 ¡Feliz Cumpleaños!</p>` : ''}
             <h1 class="text-xl md:text-2xl font-bold text-white uppercase mb-1">${album ? album.title : ''}</h1>
@@ -656,12 +533,7 @@
       } else {
         let htmlContent = '';
         for (const album of albums) {
-          let coverUrl = album.cover;
-          if (!coverUrl) {
-            coverUrl = await getAppleCoverUrl(album.title, album.artist);
-            album.cover = coverUrl;
-          }
-
+          let coverUrl = album.cover || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
           let currentRating = album.rating || 0;
           let starsHtml = generateStarsHtml(fecha, album.id, currentRating);
 
@@ -712,16 +584,7 @@
     }
 
     window.onload = () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const fecha = urlParams.get('fecha');
-      const albumId = urlParams.get('album');
-
-      if (fecha && db[fecha]) {
-        renderIsolatedDayView(fecha, albumId);
-      } else {
-        renderCalendar(currentMonth);
-        preloadCovers();
-      }
+      loadCloudDB();
     };
   </script>
 </body>
