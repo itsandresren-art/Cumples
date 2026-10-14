@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Calendario Musical — Zine</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#0c0c0c;--fg:#f4f4f0;--muted:#a3a39b;--line:#f4f4f0}
+*{box-sizing:border-box}body{background:var(--bg);color:var(--fg);font-family:Inter,sans-serif}
+h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif}
+.hard{border:2px solid var(--line);box-shadow:4px 4px 0 var(--line);transition:transform .12s,box-shadow .12s}
+.hard:hover{transform:translate(-1px,-1px);box-shadow:6px 6px 0 var(--line)}
+.hard:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--line)}
+.day{min-height:120px;position:relative;overflow:hidden;background:#151515;text-align:left}
+.day-cover{position:absolute;inset:0;background-position:center;background-size:cover;opacity:.48}
+.day-shade{position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.95),rgba(0,0,0,.12))}
+.day-content{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;justify-content:space-between;min-height:116px;padding:8px}
+.day-title{font-size:11px;line-height:1.2;font-weight:700;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.day-num{font-family:'Space Grotesk';font-size:14px}
+.modal-backdrop{background:rgba(0,0,0,.82);backdrop-filter:blur(5px)}
+.star{color:#525252;cursor:pointer}.star.active{color:#facc15}
+.album-cover{aspect-ratio:1/1;object-fit:cover;background:#222}
+.field{width:100%;background:#151515;border:1px solid #666;padding:10px;color:var(--fg);border-radius:0}
+@media(max-width:640px){.day{min-height:88px}.day-content{min-height:84px;padding:5px}.day-title{font-size:9px;-webkit-line-clamp:2}.day-num{font-size:12px}.hard{box-shadow:3px 3px 0 var(--line)}}
+</style>
+</head>
+<body>
+<div id="app" class="min-h-screen max-w-7xl mx-auto px-3 sm:px-6 py-5 sm:py-8">
+<header class="flex flex-wrap items-center justify-between gap-4 border-b-2 border-white pb-5 mb-6">
+  <div><p class="uppercase tracking-[.25em] text-xs text-zinc-400 mb-2">Archivo personal · 365 días de música</p><h1 class="display text-3xl sm:text-5xl font-bold tracking-tight">CALENDARIO<span class="text-lime-300">/</span>MUSICAL</h1></div>
+  <button id="adminBtn" class="hard px-4 py-2 font-bold text-sm"><i class="fa-solid fa-lock mr-2"></i><span>Modo admin</span></button>
+</header>
+<div id="configNotice" class="hidden border border-yellow-300 text-yellow-100 p-4 mb-5 text-sm">Configura <code>SUPABASE_URL</code> y <code>SUPABASE_ANON_KEY</code> al final de <code>index.html</code> para conectar la base de datos.</div>
+<main id="calendarView">
+  <div class="flex items-end justify-between gap-3 mb-5">
+    <div><p class="text-xs uppercase tracking-[.2em] text-zinc-500">Edición anual</p><h2 id="monthLabel" class="display text-3xl sm:text-4xl font-bold">ENERO</h2></div>
+    <div class="flex gap-2"><button id="prevMonth" class="hard w-11 h-11" aria-label="Mes anterior"><i class="fa-solid fa-arrow-left"></i></button><button id="todayBtn" class="hard px-3 h-11 text-xs font-bold">HOY</button><button id="nextMonth" class="hard w-11 h-11" aria-label="Mes siguiente"><i class="fa-solid fa-arrow-right"></i></button></div>
+  </div>
+  <div class="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center text-[10px] sm:text-xs uppercase tracking-widest text-zinc-500">
+    <div>Lu</div><div>Ma</div><div>Mi</div><div>Ju</div><div>Vi</div><div>Sá</div><div>Do</div>
+  </div>
+  <div id="calendarGrid" class="grid grid-cols-7 gap-1 sm:gap-2"></div>
+  <p class="mt-6 text-xs text-zinc-500"><span class="inline-block w-2 h-2 bg-lime-300 mr-2"></span>Los días con lanzamientos tienen contenido. Haz clic para abrir la ficha del día.</p>
+</main>
+<section id="isolatedView" class="hidden"></section>
+<footer class="mt-12 pt-4 border-t border-zinc-700 flex flex-wrap justify-between gap-2 text-[10px] uppercase tracking-widest text-zinc-500"><span>Hecho para escuchar con atención.</span><span id="status">Conectando con Supabase…</span></footer>
+</div>
+
+<div id="dayModal" class="hidden fixed inset-0 z-40 modal-backdrop overflow-y-auto p-3 sm:p-8">
+ <div class="max-w-5xl mx-auto my-4 bg-[#0c0c0c] border-2 border-white p-4 sm:p-6">
+  <div class="flex justify-between items-start gap-4 border-b border-zinc-700 pb-4 mb-5"><div><p class="text-xs uppercase tracking-widest text-zinc-500">Archivo del día</p><h2 id="modalTitle" class="display text-2xl sm:text-3xl font-bold"></h2></div><button id="closeModal" class="text-2xl px-2" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button></div>
+  <div id="modalAlbums" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+  <button id="addAlbumBtn" class="hidden hard mt-5 px-4 py-3 font-bold text-sm"><i class="fa-solid fa-plus mr-2"></i>Agregar álbum a este día</button>
+ </div>
+</div>
+
+<div id="editModal" class="hidden fixed inset-0 z-50 modal-backdrop overflow-y-auto p-3 sm:p-8">
+ <div class="max-w-xl mx-auto my-4 bg-[#0c0c0c] border-2 border-white p-5">
+  <div class="flex justify-between items-center mb-5"><h2 id="editHeading" class="display text-2xl font-bold">Agregar álbum</h2><button id="closeEdit" class="text-2xl"><i class="fa-solid fa-xmark"></i></button></div>
+  <form id="albumForm" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   <label class="text-xs text-zinc-400">ID (vacío = automático)<input name="id" class="field mt-1" placeholder="opcional"></label>
+   <label class="text-xs text-zinc-400">Fecha MM-DD<input name="date_key" class="field mt-1" placeholder="10-06" pattern="\\d{2}-\\d{2}" required></label>
+   <label class="text-xs text-zinc-400 sm:col-span-2">Título<input name="title" class="field mt-1" required></label>
+   <label class="text-xs text-zinc-400">Artista<input name="artist" class="field mt-1" required></label>
+   <label class="text-xs text-zinc-400">Año<input name="year" class="field mt-1" type="number" min="1900" max="2100"></label>
+   <label class="text-xs text-zinc-400 sm:col-span-2">Portada (URL)<input name="cover" class="field mt-1" type="url" placeholder="https://..."></label>
+   <label class="text-xs text-zinc-400 sm:col-span-2">Nota personal<textarea name="note" class="field mt-1" rows="2"></textarea></label>
+   <label class="text-xs text-zinc-400 sm:col-span-2">Spotify (URL)<input name="spotify" class="field mt-1" type="url" placeholder="opcional"></label>
+   <label class="text-xs text-zinc-400 sm:col-span-2">Apple Music (URL)<input name="apple" class="field mt-1" type="url" placeholder="opcional"></label>
+   <label class="flex gap-2 items-center text-sm sm:col-span-2"><input name="is_main_cover" type="checkbox"> Usar portada como fondo del día</label>
+   <div class="sm:col-span-2 flex gap-3"><button class="hard px-4 py-3 font-bold flex-1" type="submit">Guardar en Supabase</button><button class="border border-zinc-600 px-4" type="button" id="cancelEdit">Cancelar</button></div>
+  </form>
+ </div>
+</div>
+
+<script>
+/* 1) Sustituye estos dos valores por Project URL y anon/public key de Supabase. */
+const SUPABASE_URL = "https://YOUR_PROJECT.supabase.co";
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+const ADMIN_PASSWORD = "roxin";
+const MONTHS = ["ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE"];
+const DAYS = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+let supabase = null, albums = [], currentMonth = new Date().getMonth(), currentYear = new Date().getFullYear();
+let isAdmin = false, activeDateKey = null, editingId = null;
+const $ = s => document.querySelector(s);
+const validUrl = value => { if (!value || !String(value).trim()) return false; try { const u = new URL(value); return u.protocol === "https:" || u.protocol === "http:"; } catch { return false; } };
+const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const dateKey = (m,d) => `${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+const albumsFor = key => albums.filter(a => a.date_key === key);
+function setStatus(text){$("#status").textContent=text;}
+function checkConfig(){
+ if(SUPABASE_URL.includes("YOUR_PROJECT") || SUPABASE_ANON_KEY.includes("YOUR_SUPABASE")){$("#configNotice").classList.remove("hidden");setStatus("Falta configurar Supabase");return false}
+ supabase = window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);return true;
+}
+async function loadAlbums(){
+ if(!supabase){renderCalendar();return}
+ setStatus("Sincronizando…");
+ const {data,error}=await supabase.from("albums").select("*").order("date_key").order("title");
+ if(error){setStatus("Error de conexión");console.error(error);alert("No se pudieron cargar los álbumes: "+error.message);return}
+ albums=data||[];setStatus(`${albums.length} álbumes · sincronizado`);renderCalendar();
+ const params=new URLSearchParams(location.search);
+ if(params.has("fecha") && params.has("album")) renderIsolated(params.get("fecha"),params.get("album"));
+}
+function renderCalendar(){
+ $("#monthLabel").textContent=`${MONTHS[currentMonth]} ${currentYear}`;
+ const grid=$("#calendarGrid");grid.innerHTML="";
+ const first=new Date(currentYear,currentMonth,1).getDay(), offset=(first+6)%7, total=new Date(currentYear,currentMonth+1,0).getDate();
+ for(let i=0;i<offset;i++){const blank=document.createElement("div");blank.className="min-h-[88px] sm:min-h-[120px] border border-zinc-800 bg-[#101010]";grid.appendChild(blank)}
+ for(let day=1;day<=total;day++){
+  const key=dateKey(currentMonth,day), dayAlbums=albumsFor(key), main=dayAlbums.find(a=>a.is_main_cover && validUrl(a.cover));
+  const btn=document.createElement("button");btn.className="day hard";btn.setAttribute("aria-label",`${key}: ${dayAlbums.length} álbumes`);
+  btn.innerHTML=`${main?`<div class="day-cover" style="background-image:url('${esc(main.cover).replace(/'/g,"%27")}')"></div><div class="day-shade"></div>`:""}<div class="day-content"><span class="day-num">${day}${dayAlbums.length?` <span class="text-lime-300">· ${dayAlbums.length}</span>`:""}</span><div class="day-title">${dayAlbums.slice(0,2).map(a=>esc(a.title)).join("<br>")}${dayAlbums.length>2?`<br>+${dayAlbums.length-2} más`:""}</div>${isAdmin?`<span class="text-[9px] font-bold text-lime-300">+ ADMIN</span>`:""}</div>`;
+  btn.addEventListener("click",()=>openDay(key));grid.appendChild(btn);
+ }
+}
+function albumCard(a){
+ const cover=validUrl(a.cover)?`<img class="album-cover w-full" loading="lazy" src="${esc(a.cover)}" alt="Portada de ${esc(a.title)}" onerror="this.style.display='none'">`:`<div class="album-cover w-full flex items-center justify-center text-zinc-600"><i class="fa-solid fa-compact-disc text-4xl"></i></div>`;
+ const spotify=validUrl(a.spotify)?`<a class="hard px-3 py-2 text-xs font-bold inline-flex items-center gap-2" target="_blank" rel="noopener noreferrer" href="${esc(a.spotify)}"><i class="fa-brands fa-spotify"></i> Spotify</a>`:"";
+ const apple=validUrl(a.apple)?`<a class="hard px-3 py-2 text-xs font-bold inline-flex items-center gap-2" target="_blank" rel="noopener noreferrer" href="${esc(a.apple)}"><i class="fa-solid fa-music"></i> Apple Music</a>`:"";
+ const stars=[1,2,3,4,5].map(n=>`<button type="button" class="star ${(Number(a.rating)||0)>=n?"active":""}" data-star="${n}" data-id="${esc(a.id)}" aria-label="Calificar ${n} de 5 estrellas"><i class="fa-solid fa-star"></i></button>`).join("");
+ return `<article class="border-2 border-zinc-700 p-3 flex flex-col gap-3" data-card="${esc(a.id)}">${cover}<div><p class="text-[10px] uppercase tracking-widest text-zinc-500">${esc(a.date_key)}${a.year?` · ${esc(a.year)}`:""}</p><h3 class="display text-xl font-bold leading-tight mt-1">${esc(a.title)}</h3><p class="text-sm text-zinc-300 mt-1">${esc(a.artist)}</p>${a.note?`<p class="text-sm text-zinc-400 mt-3 whitespace-pre-wrap">${esc(a.note)}</p>`:""}</div><div class="flex items-center gap-1" aria-label="Calificación">${stars}<span class="text-xs text-zinc-500 ml-2">${Number(a.rating)||0}/5</span></div><div class="flex flex-wrap gap-2">${spotify}${apple}</div>${isAdmin?`<div class="flex gap-2 pt-2 border-t border-zinc-700"><button class="editAlbum border border-white px-3 py-2 text-xs font-bold" data-id="${esc(a.id)}"><i class="fa-solid fa-pen mr-1"></i>Editar</button><button class="deleteAlbum border border-red-400 text-red-300 px-3 py-2 text-xs font-bold" data-id="${esc(a.id)}"><i class="fa-solid fa-trash mr-1"></i>Eliminar</button><button class="shareAlbum border border-zinc-500 px-3 py-2 text-xs" data-id="${esc(a.id)}"><i class="fa-solid fa-link mr-1"></i>Compartir</button></div>`:""}</article>`;
+}
+function wireCards(root){
+ root.querySelectorAll("[data-star]").forEach(b=>b.addEventListener("click",()=>rateAlbum(b.dataset.id,Number(b.dataset.star))));
+ root.querySelectorAll(".editAlbum").forEach(b=>b.addEventListener("click",()=>editAlbum(b.dataset.id)));
+ root.querySelectorAll(".deleteAlbum").forEach(b=>b.addEventListener("click",()=>deleteAlbum(b.dataset.id)));
+ root.querySelectorAll(".shareAlbum").forEach(b=>b.addEventListener("click",()=>shareAlbum(b.dataset.id)));
+}
+function openDay(key){
+ activeDateKey=key;$("#modalTitle").textContent=`${key} · ${albumsFor(key).length} álbum(es)`;
+ const root=$("#modalAlbums");root.innerHTML=albumsFor(key).length?albumsFor(key).map(albumCard).join(""):'<p class="text-zinc-500 text-sm">No hay álbumes registrados para este día.</p>';
+ wireCards(root);$("#addAlbumBtn").classList.toggle("hidden",!isAdmin);$("#dayModal").classList.remove("hidden");
+}
+function closeDay(){$("#dayModal").classList.add("hidden")}
+function openEditor(a=null,key=activeDateKey){
+ editingId=a?.id??null;$("#editHeading").textContent=a?"Editar álbum":"Agregar álbum";
+ const f=$("#albumForm");f.reset();
+ for(const name of ["id","date_key","title","artist","year","note","cover","spotify","apple"]) f.elements[name].value=a?.[name]??(name==="date_key"?(key||""):"");
+ f.elements.is_main_cover.checked=!!a?.is_main_cover;
+ $("#editModal").classList.remove("hidden");
+}
+async function saveAlbum(e){
+ e.preventDefault();if(!isAdmin)return alert("Activa el modo admin primero.");
+ const f=e.currentTarget, fd=new FormData(f), raw=Object.fromEntries(fd.entries());
+ const payload={id:(raw.id||editingId||crypto.randomUUID()),date_key:raw.date_key,title:raw.title.trim(),artist:raw.artist.trim(),year:raw.year?Number(raw.year):null,note:raw.note.trim()||null,cover:raw.cover.trim()||null,spotify:validUrl(raw.spotify)?raw.spotify.trim():null,apple:validUrl(raw.apple)?raw.apple.trim():null,is_main_cover:f.elements.is_main_cover.checked,rating:editingId?(Number(albums.find(a=>a.id===editingId)?.rating)||0):0};
+ if(!/^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(payload.date_key))return alert("La fecha debe tener formato MM-DD.");
+ const {error}=editingId?await supabase.from("albums").update(payload).eq("id",editingId):await supabase.from("albums").insert(payload);
+ if(error){alert("No se pudo guardar: "+error.message);return}
+ $("#editModal").classList.add("hidden");await loadAlbums();if(activeDateKey)openDay(activeDateKey);
+}
+async function rateAlbum(id,rating){
+ const a=albums.find(x=>String(x.id)===String(id));if(!a)return;
+ if(!supabase)return alert("Configura Supabase primero.");
+ const {error}=await supabase.from("albums").update({rating}).eq("id",id);
+ if(error){alert("No se pudo guardar la calificación: "+error.message);return}
+ a.rating=rating;renderCalendar();if(!$("#dayModal").classList.contains("hidden"))openDay(activeDateKey);
+ if(new URLSearchParams(location.search).has("album"))renderIsolated(new URLSearchParams(location.search).get("fecha"),id);
+}
+async function deleteAlbum(id){
+ if(!isAdmin||!confirm("¿Eliminar este álbum permanentemente?"))return;
+ const {error}=await supabase.from("albums").delete().eq("id",id);
+ if(error){alert("No se pudo eliminar: "+error.message);return}
+ await loadAlbums();if(activeDateKey)openDay(activeDateKey);
+}
+function editAlbum(id){const a=albums.find(x=>String(x.id)===String(id));if(a)openEditor(a,a.date_key)}
+function shareAlbum(id){
+ const a=albums.find(x=>String(x.id)===String(id));if(!a)return;
+ const url=new URL(location.href);url.searchParams.set("fecha",a.date_key);url.searchParams.set("album",a.id);
+ navigator.clipboard?.writeText(url.toString()).then(()=>alert("Enlace copiado.")).catch(()=>prompt("Copia este enlace:",url.toString()));
+}
+function renderIsolated(key,id){
+ const a=albums.find(x=>String(x.id)===String(id)&&(!key||x.date_key===key));
+ $("#calendarView").classList.add("hidden");$("#isolatedView").classList.remove("hidden");
+ if(!a){$("#isolatedView").innerHTML=`<div class="min-h-[70vh] flex flex-col items-center justify-center text-center"><p class="text-zinc-500 mb-4">No se encontró ese álbum.</p><a class="hard px-4 py-3" href="${location.pathname}">Ver calendario</a></div>`;return}
+ $("#isolatedView").innerHTML=`<div class="min-h-[78vh] flex items-center justify-center py-6"><div class="w-full max-w-4xl grid md:grid-cols-2 gap-8 items-center">${validUrl(a.cover)?`<img src="${esc(a.cover)}" class="w-full max-w-xl mx-auto border-2 border-white" alt="Portada de ${esc(a.title)}">`:`<div class="aspect-square border-2 border-white flex items-center justify-center"><i class="fa-solid fa-compact-disc text-8xl"></i></div>`}<div><p class="text-xs tracking-[.25em] uppercase text-lime-300 mb-3">Calendario musical · ${esc(a.date_key)}</p><h2 class="display text-4xl sm:text-6xl font-bold leading-tight">${esc(a.title)}</h2><p class="text-xl mt-4">${esc(a.artist)}</p><p class="text-zinc-500 mt-1">${esc(a.year||"")}</p>${a.note?`<p class="mt-6 text-zinc-300 whitespace-pre-wrap">${esc(a.note)}</p>`:""}<div class="flex gap-1 mt-5">${[1,2,3,4,5].map(n=>`<button class="star ${(Number(a.rating)||0)>=n?"active":""}" data-star="${n}" data-id="${esc(a.id)}"><i class="fa-solid fa-star"></i></button>`).join("")}</div><div class="flex flex-wrap gap-3 mt-6">${validUrl(a.spotify)?`<a class="hard px-4 py-3" target="_blank" rel="noopener noreferrer" href="${esc(a.spotify)}"><i class="fa-brands fa-spotify mr-2"></i>Spotify</a>`:""}${validUrl(a.apple)?`<a class="hard px-4 py-3" target="_blank" rel="noopener noreferrer" href="${esc(a.apple)}"><i class="fa-solid fa-music mr-2"></i>Apple Music</a>`:""}</div><a class="inline-block mt-8 text-sm underline text-zinc-400" href="${location.pathname}">← Ver calendario completo</a></div></div></div>`;
+ wireCards($("#isolatedView"));
+}
+$("#prevMonth").addEventListener("click",()=>{currentMonth--;if(currentMonth<0){currentMonth=11;currentYear--}renderCalendar()});
+$("#nextMonth").addEventListener("click",()=>{currentMonth++;if(currentMonth>11){currentMonth=0;currentYear++}renderCalendar()});
+$("#todayBtn").addEventListener("click",()=>{currentMonth=new Date().getMonth();currentYear=new Date().getFullYear();renderCalendar()});
+$("#closeModal").addEventListener("click",closeDay);$("#dayModal").addEventListener("click",e=>{if(e.target===$("#dayModal"))closeDay()});
+$("#closeEdit").addEventListener("click",()=>$("#editModal").classList.add("hidden"));$("#cancelEdit").addEventListener("click",()=>$("#editModal").classList.add("hidden"));
+$("#albumForm").addEventListener("submit",saveAlbum);
+$("#addAlbumBtn").addEventListener("click",()=>openEditor(null,activeDateKey));
+$("#adminBtn").addEventListener("click",()=>{
+ if(isAdmin){isAdmin=false;$("#adminBtn").innerHTML='<i class="fa-solid fa-lock mr-2"></i><span>Modo admin</span>';renderCalendar();if(activeDateKey&&!$("#dayModal").classList.contains("hidden"))openDay(activeDateKey);return}
+ const pass=prompt("Contraseña de administrador:");
+ if(pass===null)return;if(pass!==ADMIN_PASSWORD){alert("Contraseña incorrecta.");return}
+ isAdmin=true;$("#adminBtn").innerHTML='<i class="fa-solid fa-lock-open mr-2"></i><span>Admin activo · salir</span>';renderCalendar();if(activeDateKey&&!$("#dayModal").classList.contains("hidden"))openDay(activeDateKey);
+});
+(async()=>{if(checkConfig())await loadAlbums();else renderCalendar()})();
+</script>
+</body></html>
