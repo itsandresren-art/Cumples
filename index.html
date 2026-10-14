@@ -233,7 +233,10 @@
     let isAdmin = false;
     let isIsolatedMode = false;
 
-    let db = JSON.parse(localStorage.getItem('musicCalendarDB_v11')) || fullMusicData;
+    // Limpiar bases de datos obsoletas para forzar la carga limpia
+    ['musicCalendarDB_v5', 'musicCalendarDB_v6', 'musicCalendarDB_v7', 'musicCalendarDB_v8', 'musicCalendarDB_v9', 'musicCalendarDB_v10', 'musicCalendarDB_v11'].forEach(k => localStorage.removeItem(k));
+    
+    let db = JSON.parse(localStorage.getItem('musicCalendarDB_v12')) || fullMusicData;
 
     function getTodayKey() {
       const today = new Date();
@@ -243,7 +246,7 @@
     }
 
     function saveDB() {
-      localStorage.setItem('musicCalendarDB_v11', JSON.stringify(db));
+      localStorage.setItem('musicCalendarDB_v12', JSON.stringify(db));
       renderCalendar(currentMonth);
     }
 
