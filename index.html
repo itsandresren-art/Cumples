@@ -37,12 +37,9 @@
       z-index: 10;
     }
 
-    /* Estilo Zine Sticker */
-    .zine-badge {
-      background: #f4f4f0;
-      color: #0c0c0c;
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 700;
+    .star-rating i {
+      cursor: pointer;
+      transition: color 0.1s ease;
     }
   </style>
 </head>
@@ -52,7 +49,7 @@
   <header class="max-w-4xl mx-auto w-full flex justify-between items-center mb-12 border-b-2 border-subtle pb-6">
     <div id="brandLogo" class="cursor-pointer" onclick="goHome()">
       <h1 class="text-xl font-bold tracking-tight text-white uppercase">Calendario Musical</h1>
-      <p class="text-xs text-zinc-400 font-mono mt-0.5 tracking-wider">// ARCHIVO DE LANZAMIENTOS</p>
+      <p class="text-xs text-zinc-400 font-mono mt-0.5 tracking-wider">// ARCHIVO DE CUMPLEAÑOS</p>
     </div>
 
     <button id="adminBtn" onclick="toggleAdmin()" class="text-xs font-bold uppercase tracking-wider text-black bg-[#f4f4f0] hover:bg-white px-4 py-2 transition flex items-center gap-2 shadow-[2px_2px_0px_#555]">
@@ -225,7 +222,7 @@
     let isAdmin = false;
     let isIsolatedMode = false;
 
-    let db = JSON.parse(localStorage.getItem('musicCalendarDB_vZine')) || fullMusicData;
+    let db = JSON.parse(localStorage.getItem('musicCalendarDB_vRate')) || fullMusicData;
 
     function getTodayKey() {
       const today = new Date();
@@ -235,7 +232,7 @@
     }
 
     function saveDB() {
-      localStorage.setItem('musicCalendarDB_vZine', JSON.stringify(db));
+      localStorage.setItem('musicCalendarDB_vRate', JSON.stringify(db));
       renderCalendar(currentMonth);
     }
 
@@ -319,8 +316,24 @@
           }
         }
       }
-      localStorage.setItem('musicCalendarDB_vZine', JSON.stringify(db));
+      localStorage.setItem('musicCalendarDB_vRate', JSON.stringify(db));
       renderCalendar(currentMonth);
+    }
+
+    function setRating(key, albumId, rating) {
+      if (!db[key]) return;
+      const album = db[key].find(a => a.id === albumId);
+      if (album) {
+        album.rating = rating;
+        saveDB();
+        // Actualizar visualmente las estrellas si estamos en el modal o página de álbum
+        if (isIsolatedMode) {
+          renderIsolatedDayView(key);
+        } else {
+          const dateObj = new Date(2026, parseInt(key.split('-')[0]) - 1, parseInt(key.split('-')[1]));
+          openDayModal(key, dateObj.getDate(), monthNames[dateObj.getMonth()]);
+        }
+      }
     }
 
     function renderCalendar(month) {
@@ -399,28 +412,41 @@
             item.cover = await getAppleCoverUrl(item.title, item.artist);
           }
 
+          let currentRating = item.rating || 0;
+          let starsHtml = '';
+          for (let s = 1; s <= 5; s++) {
+            starsHtml += `<i class="fa-${s <= currentRating ? 'solid' : 'regular'} fa-star text-amber-400 text-xs" onclick="setRating('${key}', '${item.id}', ${s})"></i>`;
+          }
+
           html += `
-            <div class="mb-4 p-3 rounded-lg border-2 border-subtle bg-black flex items-center gap-3">
-              <img src="${item.cover}" onerror="handleImageError(this)" class="w-12 h-12 rounded object-cover border border-subtle bg-zinc-900">
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2">
-                  <h4 class="font-bold text-xs text-white truncate cursor-pointer hover:text-amber-400 transition" onclick="showAlbumPage('${key}', '${item.id}')">${item.title}</h4>
-                  ${item.isMainCover ? `<span class="text-[9px] zombie-font bg-amber-400 text-black px-1.5 py-0.2 uppercase font-bold">Portada</span>` : ''}
+            <div class="mb-4 p-3 rounded-lg border-2 border-subtle bg-black flex flex-col gap-2">
+              <div class="flex items-center gap-3">
+                <img src="${item.cover}" onerror="handleImageError(this)" class="w-12 h-12 rounded object-cover border border-subtle bg-zinc-900">
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2">
+                    <h4 class="font-bold text-xs text-white truncate cursor-pointer hover:text-amber-400 transition" onclick="showAlbumPage('${key}', '${item.id}')">${item.title}</h4>
+                    ${item.isMainCover ? `<span class="text-[9px] zombie-font bg-amber-400 text-black px-1.5 py-0.2 uppercase font-bold">Portada</span>` : ''}
+                  </div>
+                  <p class="text-[11px] text-zinc-400 truncate">${item.artist || 'Artista'}${item.year ? ` • ${item.year}` : ''}</p>
+                  <div class="flex gap-2 mt-1">
+                    ${item.spotify ? `<a href="${item.spotify}" target="_blank" class="text-[10px] font-bold text-zinc-300 hover:text-emerald-400"><i class="fa-brands fa-spotify"></i> Spotify</a>` : ''}
+                    ${item.apple ? `<a href="${item.apple}" target="_blank" class="text-[10px] font-bold text-zinc-300 hover:text-pink-400"><i class="fa-brands fa-apple"></i> Apple</a>` : ''}
+                  </div>
                 </div>
-                <p class="text-[11px] text-zinc-400 truncate">${item.artist || 'Artista'}${item.year ? ` • ${item.year}` : ''}</p>
-                <div class="flex gap-2 mt-1">
-                  ${item.spotify ? `<a href="${item.spotify}" target="_blank" class="text-[10px] font-bold text-zinc-300 hover:text-emerald-400"><i class="fa-brands fa-spotify"></i> Spotify</a>` : ''}
-                  ${item.apple ? `<a href="${item.apple}" target="_blank" class="text-[10px] font-bold text-zinc-300 hover:text-pink-400"><i class="fa-brands fa-apple"></i> Apple</a>` : ''}
-                </div>
+                ${isAdmin ? `
+                  <div class="flex items-center gap-1.5">
+                    ${i > 0 ? `<button onclick="moveAlbumOrder('${key}', ${i}, -1)" class="text-xs text-zinc-400 hover:text-white p-1" title="Subir"><i class="fa-solid fa-arrow-up"></i></button>` : ''}
+                    ${i < items.length - 1 ? `<button onclick="moveAlbumOrder('${key}', ${i}, 1)" class="text-xs text-zinc-400 hover:text-white p-1" title="Bajar"><i class="fa-solid fa-arrow-down"></i></button>` : ''}
+                    <button onclick="openEditForm('${key}', '${item.id}')" class="text-xs text-zinc-400 hover:text-amber-400 p-1"><i class="fa-solid fa-pen"></i></button>
+                    <button onclick="deleteAlbum('${key}', '${item.id}')" class="text-xs text-zinc-400 hover:text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button>
+                  </div>
+                ` : ''}
               </div>
-              ${isAdmin ? `
-                <div class="flex items-center gap-1.5">
-                  ${i > 0 ? `<button onclick="moveAlbumOrder('${key}', ${i}, -1)" class="text-xs text-zinc-400 hover:text-white p-1" title="Subir"><i class="fa-solid fa-arrow-up"></i></button>` : ''}
-                  ${i < items.length - 1 ? `<button onclick="moveAlbumOrder('${key}', ${i}, 1)" class="text-xs text-zinc-400 hover:text-white p-1" title="Bajar"><i class="fa-solid fa-arrow-down"></i></button>` : ''}
-                  <button onclick="openEditForm('${key}', '${item.id}')" class="text-xs text-zinc-400 hover:text-amber-400 p-1"><i class="fa-solid fa-pen"></i></button>
-                  <button onclick="deleteAlbum('${key}', '${item.id}')" class="text-xs text-zinc-400 hover:text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button>
-                </div>
-              ` : ''}
+              <!-- Espacio de calificación para el cumpleañero -->
+              <div class="border-t border-subtle/60 pt-2 flex items-center justify-between text-xs">
+                <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-mono">Calificación:</span>
+                <div class="star-rating flex gap-1">${starsHtml}</div>
+              </div>
             </div>
           `;
         }
@@ -516,6 +542,8 @@
         db[key].forEach(a => a.isMainCover = false);
       }
 
+      const existingAlbum = albumId ? db[key].find(a => a.id === albumId) : null;
+
       const newAlbum = {
         id: albumId || String(Date.now()),
         title: title,
@@ -525,7 +553,8 @@
         apple: apple,
         cover: cover,
         isMainCover: isMainCover,
-        note: document.getElementById('formNote').value
+        note: document.getElementById('formNote').value,
+        rating: existingAlbum ? (existingAlbum.rating || 0) : 0
       };
 
       if (albumId) {
@@ -575,15 +604,27 @@
       if (album && !coverUrl) {
         coverUrl = await getAppleCoverUrl(album.title, album.artist);
       }
+
+      let currentRating = album ? (album.rating || 0) : 0;
+      let starsHtml = '';
+      for (let s = 1; s <= 5; s++) {
+        starsHtml += `<i class="fa-${s <= currentRating ? 'solid' : 'regular'} fa-star text-amber-400 text-sm" onclick="setRating('${key}', '${albumId}', ${s})"></i>`;
+      }
       
       document.getElementById('albumPageContent').innerHTML = `
         <div class="flex flex-col sm:flex-row gap-6 items-center">
           <img src="${coverUrl || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777'}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded border-2 border-subtle bg-zinc-900 shadow-xl">
-          <div class="flex-1 text-center sm:text-left">
+          <div class="flex-1 text-center sm:text-left w-full">
             ${isToday ? `<p class="text-xs text-amber-400 font-bold tracking-widest uppercase mb-2">🎉 ¡Feliz Cumpleaños!</p>` : ''}
             <h1 class="text-2xl font-bold text-white uppercase mb-1">${album ? album.title : ''}</h1>
             <h3 class="text-sm text-zinc-400 font-mono mb-4">${album ? album.artist || '' : ''}${album && album.year ? ` // ${album.year}` : ''}</h3>
-            ${album && album.note ? `<p class="text-xs text-zinc-300 italic mb-6 bg-black p-3 rounded border-2 border-subtle">"${album.note}"</p>` : ''}
+            ${album && album.note ? `<p class="text-xs text-zinc-300 italic mb-4 bg-black p-3 rounded border-2 border-subtle">"${album.note}"</p>` : ''}
+            
+            <div class="mb-5 flex items-center justify-center sm:justify-start gap-3 bg-black p-3 rounded border-2 border-subtle">
+              <span class="text-xs text-zinc-400 uppercase tracking-widest font-mono">Tu Calificación:</span>
+              <div class="star-rating flex gap-1.5">${starsHtml}</div>
+            </div>
+
             <div class="flex gap-3 justify-center sm:justify-start">
               ${album && album.spotify ? `<a href="${album.spotify}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 transition hover:border-white bg-black shadow-[2px_2px_0px_#333]"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify</a>` : ''}
               ${album && album.apple ? `<a href="${album.apple}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 transition hover:border-white bg-black shadow-[2px_2px_0px_#333]"><i class="fa-brands fa-apple text-pink-400"></i> Apple Music</a>` : ''}
@@ -613,14 +654,27 @@
             coverUrl = await getAppleCoverUrl(album.title, album.artist);
             album.cover = coverUrl;
           }
+
+          let currentRating = album.rating || 0;
+          let starsHtml = '';
+          for (let s = 1; s <= 5; s++) {
+            starsHtml += `<i class="fa-${s <= currentRating ? 'solid' : 'regular'} fa-star text-amber-400 text-sm" onclick="setRating('${fecha}', '${album.id}', ${s})"></i>`;
+          }
+
           htmlContent += `
             <div class="flex flex-col sm:flex-row gap-6 items-center border-b-2 border-subtle pb-6 mb-6 last:border-none last:pb-0 last:mb-0">
               <img src="${coverUrl}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded border-2 border-subtle bg-zinc-900 shadow-xl">
-              <div class="flex-1 text-center sm:text-left">
+              <div class="flex-1 text-center sm:text-left w-full">
                 ${isToday ? `<p class="text-xs text-amber-400 font-bold tracking-widest uppercase mb-2">🎉 ¡Feliz Cumpleaños!</p>` : ''}
                 <h1 class="text-2xl font-bold text-white uppercase mb-1">${album.title}</h1>
                 <h3 class="text-sm text-zinc-400 font-mono mb-4">${album.artist || ''}${album.year ? ` // ${album.year}` : ''}</h3>
-                ${album.note ? `<p class="text-xs text-zinc-300 italic mb-6 bg-black p-3 rounded border-2 border-subtle">"${album.note}"</p>` : ''}
+                ${album.note ? `<p class="text-xs text-zinc-300 italic mb-4 bg-black p-3 rounded border-2 border-subtle">"${album.note}"</p>` : ''}
+                
+                <div class="mb-5 flex items-center justify-center sm:justify-start gap-3 bg-black p-3 rounded border-2 border-subtle">
+                  <span class="text-xs text-zinc-400 uppercase tracking-widest font-mono">Tu Calificación:</span>
+                  <div class="star-rating flex gap-1.5">${starsHtml}</div>
+                </div>
+
                 <div class="flex gap-3 justify-center sm:justify-start">
                   ${album.spotify ? `<a href="${album.spotify}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 transition hover:border-white bg-black shadow-[2px_2px_0px_#333]"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify</a>` : ''}
                   ${album.apple ? `<a href="${album.apple}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 transition hover:border-white bg-black shadow-[2px_2px_0px_#333]"><i class="fa-brands fa-apple text-pink-400"></i> Apple Music</a>` : ''}
