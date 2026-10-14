@@ -23,6 +23,7 @@
       transition: border-color 0.15s ease, transform 0.15s ease;
       background-size: cover;
       background-position: center;
+      background-repeat: no-repeat;
     }
 
     .calendar-day:hover {
@@ -210,7 +211,9 @@
     let isAdmin = false;
     let isIsolatedMode = false;
 
-    let db = JSON.parse(localStorage.getItem('musicCalendarDB_v4')) || fullMusicData;
+    // Forzamos limpiar cache interno de version vieja para iPhone
+    localStorage.removeItem('musicCalendarDB_v3');
+    let db = JSON.parse(localStorage.getItem('musicCalendarDB_v5')) || fullMusicData;
 
     function getTodayKey() {
       const today = new Date();
@@ -220,7 +223,7 @@
     }
 
     function saveDB() {
-      localStorage.setItem('musicCalendarDB_v4', JSON.stringify(db));
+      localStorage.setItem('musicCalendarDB_v5', JSON.stringify(db));
       renderCalendar(currentMonth);
     }
 
@@ -292,19 +295,8 @@
       return 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
     }
 
-    // Carga e inicializa portadas para todos los elementos rápidamente
-    async function preloadCovers() {
-      for (const key in db) {
-        if (db[key] && db[key].length > 0) {
-          for (let item of db[key]) {
-            if (!item.cover) {
-              item.cover = await getAppleCoverUrl(item.title, item.artist);
-            }
-          }
-        }
-      }
-      localStorage.setItem('musicCalendarDB_v4', JSON.stringify(db));
-      renderCalendar(currentMonth);
+    async function fetchCoverDirect(title, artist) {
+      return await getAppleCoverUrl(title, artist);
     }
 
     function renderCalendar(month) {
@@ -331,11 +323,17 @@
         }`;
 
         if (releases.length > 0) {
-          // Obtener el álbum asignado como portada o el primero
           let mainAlbum = releases.find(a => a.isMainCover) || releases[0];
-          let coverUrl = mainAlbum.cover || '';
-          if (coverUrl) {
-            dayCell.style.backgroundImage = `linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.4)), url('${coverUrl}')`;
+          
+          if (mainAlbum.cover) {
+            dayCell.style.backgroundImage = `linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.3)), url('${mainAlbum.cover}')`;
+          } else {
+            // Cargar portada al vuelo si falta
+            fetchCoverDirect(mainAlbum.title, mainAlbum.artist).then(url => {
+              mainAlbum.cover = url;
+              dayCell.style.backgroundImage = `linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.3)), url('${url}')`;
+              localStorage.setItem('musicCalendarDB_v5', JSON.stringify(db));
+            });
           }
         }
 
@@ -639,7 +637,6 @@
         renderIsolatedDayView(fecha);
       } else {
         renderCalendar(currentMonth);
-        preloadCovers();
       }
     };
   </script>
