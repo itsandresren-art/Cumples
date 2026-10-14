@@ -10,100 +10,49 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@300;400;500;700&display=swap');
     
-    body { 
-      background-color: #0c0c0c; 
-      color: #f4f4f0; 
-      font-family: 'Inter', sans-serif; 
-      -webkit-font-smoothing: antialiased;
-    }
-
-    h1, h2, h3, .zombie-font {
-      font-family: 'Space Grotesk', sans-serif;
-    }
-
+    body { background-color: #0c0c0c; color: #f4f4f0; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+    h1, h2, h3, .zombie-font { font-family: 'Space Grotesk', sans-serif; }
     .border-subtle { border-color: #262626; }
     .bg-card { background-color: #141414; }
-
-    .calendar-day {
-      transition: all 0.15s ease-in-out;
-      background-size: cover;
-      background-position: center;
-      border: 2px solid #222222;
-      min-height: 80px;
-    }
-
-    @media (min-width: 768px) {
-      .calendar-day {
-        min-height: 96px;
-      }
-    }
-
-    .calendar-day:hover {
-      border-color: #f4f4f0;
-      transform: translateY(-2px);
-      box-shadow: 4px 4px 0px #f4f4f0;
-      z-index: 10;
-    }
-
-    .star-container {
-      position: relative;
-      display: inline-block;
-      cursor: pointer;
-    }
+    .calendar-day { transition: all 0.15s ease-in-out; background-size: cover; background-position: center; border: 2px solid #222222; min-height: 80px; }
+    @media (min-width: 768px) { .calendar-day { min-height: 96px; } }
+    .calendar-day:hover { border-color: #f4f4f0; transform: translateY(-2px); box-shadow: 4px 4px 0px #f4f4f0; z-index: 10; }
+    .star-container { position: relative; display: inline-block; cursor: pointer; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between p-4 md:p-12">
 
-  <!-- Header Estilo Zine -->
   <header class="max-w-4xl mx-auto w-full flex justify-between items-center mb-8 md:mb-12 border-b-2 border-subtle pb-6">
     <div id="brandLogo" class="cursor-pointer" onclick="goHome()">
       <h1 class="text-lg md:text-xl font-bold tracking-tight text-white uppercase">Calendario Musical</h1>
       <p class="text-[10px] md:text-xs text-zinc-400 font-mono mt-0.5 tracking-wider">// ARCHIVO DE CUMPLEAÑOS</p>
     </div>
-
     <button id="adminBtn" onclick="toggleAdmin()" class="text-xs font-bold uppercase tracking-wider text-black bg-[#f4f4f0] hover:bg-white px-3 md:px-4 py-2 transition flex items-center gap-2 shadow-[2px_2px_0px_#555]">
       <i class="fa-solid fa-lock text-[10px]" id="adminIcon"></i> <span id="adminText">Admin</span>
     </button>
   </header>
 
-  <!-- Vista Principal: Calendario -->
   <main id="mainView" class="max-w-4xl mx-auto w-full flex-1">
-    
-    <!-- Controles de Mes -->
     <div class="flex justify-between items-center mb-6 md:mb-8">
-      <h2 id="monthTitle" class="text-2xl md:text-3xl font-bold tracking-tight text-white uppercase underline decoration-2 underline-offset-8">
-        Enero
-      </h2>
+      <h2 id="monthTitle" class="text-2xl md:text-3xl font-bold tracking-tight text-white uppercase underline decoration-2 underline-offset-8">Enero</h2>
       <div class="flex items-center gap-2">
-        <button onclick="changeMonth(-1)" class="w-9 h-9 md:w-10 md:h-10 rounded border-2 border-subtle hover:border-white bg-card flex items-center justify-center text-zinc-300 hover:text-white transition shadow-[2px_2px_0px_#222]">
-          <i class="fa-solid fa-chevron-left text-xs"></i>
-        </button>
-        <button onclick="changeMonth(1)" class="w-9 h-9 md:w-10 md:h-10 rounded border-2 border-subtle hover:border-white bg-card flex items-center justify-center text-zinc-300 hover:text-white transition shadow-[2px_2px_0px_#222]">
-          <i class="fa-solid fa-chevron-right text-xs"></i>
-        </button>
+        <button onclick="changeMonth(-1)" class="w-9 h-9 md:w-10 md:h-10 rounded border-2 border-subtle hover:border-white bg-card flex items-center justify-center text-zinc-300 hover:text-white transition shadow-[2px_2px_0px_#222]"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+        <button onclick="changeMonth(1)" class="w-9 h-9 md:w-10 md:h-10 rounded border-2 border-subtle hover:border-white bg-card flex items-center justify-center text-zinc-300 hover:text-white transition shadow-[2px_2px_0px_#222]"><i class="fa-solid fa-chevron-right text-xs"></i></button>
       </div>
     </div>
-
-    <!-- Encabezado de Días -->
     <div class="grid grid-cols-7 gap-1.5 md:gap-2 mb-2 text-center text-[10px] md:text-xs text-zinc-500 font-bold uppercase tracking-widest">
       <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
     </div>
-
-    <!-- Grid del Calendario -->
     <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 md:gap-2.5"></div>
   </main>
 
-  <!-- Vista Álbum en Pantalla Completa / Vista Compartida -->
   <main id="albumPage" class="max-w-2xl mx-auto w-full flex-1 hidden">
     <div class="bg-card rounded-xl p-6 md:p-8 border-2 border-subtle shadow-[6px_6px_0px_#222]" id="albumPageContent"></div>
   </main>
 
-  <!-- Modal para Día / Formulario -->
   <div id="modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
     <div class="bg-card max-w-md w-full rounded-xl p-5 md:p-6 relative border-2 border-subtle max-h-[85vh] overflow-y-auto shadow-[8px_8px_0px_#111]">
-      <button onclick="closeModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white text-base">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
+      <button onclick="closeModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white text-base"><i class="fa-solid fa-xmark"></i></button>
       <div id="modalContent"></div>
     </div>
   </div>
@@ -111,7 +60,6 @@
   <script>
     const SUPABASE_URL = 'https://rpkbqxyhjpkwvvxlgerd.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwa2JxeHloanBrd3Z2eGxnZXJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5NDgyMDYsImV4cCI6MjEwNzUyNDIwNn0.V4y-aVBjfiijiTJCRXkzl-44GsXF4P-JuWPClxuz1nI';
-    
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let db = {};
@@ -122,36 +70,25 @@
 
     function getTodayKey() {
       const today = new Date();
-      const m = String(today.getMonth() + 1).padStart(2, '0');
-      const d = String(today.getDate()).padStart(2, '0');
-      return `${m}-${d}`;
+      return `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     }
 
     async function loadCloudDB() {
       try {
         const { data, error } = await supabaseClient.from('albums').select('*');
         if (error) throw error;
-
         db = {};
         if (data) {
           data.forEach(row => {
             if (!db[row.date_key]) db[row.date_key] = [];
             db[row.date_key].push({
-              id: row.id,
-              title: row.title,
-              artist: row.artist,
-              year: row.year,
-              note: row.note,
-              cover: row.cover,
-              spotify: row.spotify,
-              apple: row.apple,
-              isMainCover: row.is_main_cover,
-              rating: row.rating
+              id: row.id, title: row.title, artist: row.artist, year: row.year, note: row.note,
+              cover: row.cover, spotify: row.spotify, apple: row.apple, isMainCover: row.is_main_cover, rating: row.rating
             });
           });
         }
       } catch (err) {
-        console.error("Error al cargar de la nube:", err);
+        console.error("Error cargando DB:", err);
       }
       
       const urlParams = new URLSearchParams(window.location.search);
@@ -167,56 +104,34 @@
 
     async function saveAlbumToCloud(key, albumData) {
       const payload = {
-        id: albumData.id,
-        date_key: key,
-        title: albumData.title,
-        artist: albumData.artist,
-        year: albumData.year,
-        note: albumData.note,
-        cover: albumData.cover,
-        spotify: albumData.spotify,
-        apple: albumData.apple,
-        is_main_cover: albumData.isMainCover,
-        rating: albumData.rating
+        id: albumData.id, date_key: key, title: albumData.title, artist: albumData.artist, year: albumData.year,
+        note: albumData.note, cover: albumData.cover, spotify: albumData.spotify, apple: albumData.apple,
+        is_main_cover: albumData.isMainCover, rating: albumData.rating
       };
-
-      const { error } = await supabaseClient.from('albums').upsert(payload);
-      if (error) {
-        alert("Hubo un error al guardar en la nube: " + error.message);
-      } else {
-        await loadCloudDB();
-      }
+      await supabaseClient.from('albums').upsert(payload);
+      await loadCloudDB();
     }
 
     async function deleteAlbumFromCloud(key, albumId) {
-      const { error } = await supabaseClient.from('albums').delete().eq('id', albumId);
-      if (error) {
-        alert("Error al eliminar: " + error.message);
-      } else {
-        await loadCloudDB();
-      }
+      await supabaseClient.from('albums').delete().eq('id', albumId);
+      await loadCloudDB();
     }
 
     function toggleAdmin() {
-      const adminPassword = 'roxin';
       if (!isAdmin) {
-        const pass = prompt("Contraseña de administrador:");
-        if (pass === adminPassword) {
+        if (prompt("Contraseña:") === 'roxin') {
           isAdmin = true;
           document.getElementById('adminIcon').className = "fa-solid fa-lock-open text-black";
           document.getElementById('adminBtn').classList.add('bg-emerald-400');
           document.getElementById('adminText').innerText = "Admin Activo";
-          renderCalendar(currentMonth);
-        } else if (pass !== null) {
-          alert("Contraseña incorrecta.");
-        }
+        } else { alert("Contraseña incorrecta."); }
       } else {
         isAdmin = false;
         document.getElementById('adminIcon').className = "fa-solid fa-lock";
         document.getElementById('adminBtn').classList.remove('bg-emerald-400');
         document.getElementById('adminText').innerText = "Admin";
-        renderCalendar(currentMonth);
       }
+      renderCalendar(currentMonth);
     }
 
     function changeMonth(delta) {
@@ -236,36 +151,22 @@
       if (album) {
         album.rating = rating;
         await saveAlbumToCloud(key, album);
-        if (isIsolatedMode) {
-          const urlParams = new URLSearchParams(window.location.search);
-          renderIsolatedDayView(key, urlParams.get('album'));
-        } else {
-          const dateObj = new Date(2026, parseInt(key.split('-')[0]) - 1, parseInt(key.split('-')[1]));
-          openDayModal(key, dateObj.getDate(), monthNames[dateObj.getMonth()]);
-        }
+        isIsolatedMode ? renderIsolatedDayView(key, new URLSearchParams(window.location.search).get('album')) : openDayModal(key, parseInt(key.split('-')[1]), monthNames[parseInt(key.split('-')[0]) - 1]);
       }
     }
 
     function handleStarClick(e, key, albumId, starIndex) {
       const rect = e.currentTarget.getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
-      const isHalf = clickX < rect.width / 2;
-      const rating = isHalf ? starIndex - 0.5 : starIndex;
-      setRating(key, albumId, rating);
+      setRating(key, albumId, (e.clientX - rect.left < rect.width / 2) ? starIndex - 0.5 : starIndex);
     }
 
     function generateStarsHtml(key, albumId, currentRating) {
-      let starsHtml = '';
+      let html = '';
       for (let s = 1; s <= 5; s++) {
-        let iconClass = 'fa-regular fa-star';
-        if (currentRating >= s) {
-          iconClass = 'fa-solid fa-star';
-        } else if (currentRating >= s - 0.5) {
-          iconClass = 'fa-solid fa-star-half-stroke';
-        }
-        starsHtml += `<span class="star-container px-0.5 text-amber-400 text-sm" onclick="handleStarClick(event, '${key}', '${albumId}', ${s})"><i class="${iconClass}"></i></span>`;
+        let icon = currentRating >= s ? 'fa-solid fa-star' : (currentRating >= s - 0.5 ? 'fa-solid fa-star-half-stroke' : 'fa-regular fa-star');
+        html += `<span class="star-container px-0.5 text-amber-400 text-sm" onclick="handleStarClick(event, '${key}', '${albumId}', ${s})"><i class="${icon}"></i></span>`;
       }
-      return starsHtml;
+      return html;
     }
 
     function renderCalendar(month) {
@@ -277,9 +178,7 @@
       const firstDay = new Date(2026, month, 1).getDay();
       const todayKey = getTodayKey();
 
-      for (let i = 0; i < firstDay; i++) {
-        grid.appendChild(Object.assign(document.createElement('div'), { className: "calendar-day rounded bg-[#101010]/40 border-2 border-transparent" }));
-      }
+      for (let i = 0; i < firstDay; i++) grid.appendChild(Object.assign(document.createElement('div'), { className: "calendar-day rounded bg-[#101010]/40 border-2 border-transparent" }));
 
       for (let day = 1; day <= daysInMonth; day++) {
         const key = `${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -287,31 +186,18 @@
         const isToday = key === todayKey;
 
         const dayCell = document.createElement('div');
-        dayCell.className = `calendar-day rounded-lg p-1.5 md:p-2.5 cursor-pointer flex flex-col justify-between overflow-hidden relative ${
-          isToday ? 'border-amber-400 shadow-[3px_3px_0px_#fbbf24]' : (releases.length > 0 ? 'border-subtle bg-card' : 'bg-[#111] border-subtle')
-        }`;
+        dayCell.className = `calendar-day rounded-lg p-1.5 md:p-2.5 cursor-pointer flex flex-col justify-between overflow-hidden relative ${isToday ? 'border-amber-400 shadow-[3px_3px_0px_#fbbf24]' : (releases.length > 0 ? 'border-subtle bg-card' : 'bg-[#111] border-subtle')}`;
 
-        if (releases.length > 0) {
-          let mainAlbum = releases.find(a => a.isMainCover) || releases[0];
-          let coverUrl = mainAlbum.cover || '';
-          if (coverUrl) {
-            dayCell.style.backgroundImage = `linear-gradient(to top, rgba(12, 12, 12, 0.94), rgba(12, 12, 12, 0.6)), url('${coverUrl}')`;
-          }
+        if (releases.length > 0 && (releases.find(a => a.isMainCover) || releases[0]).cover) {
+          dayCell.style.backgroundImage = `linear-gradient(to top, rgba(12, 12, 12, 0.94), rgba(12, 12, 12, 0.6)), url('${(releases.find(a => a.isMainCover) || releases[0]).cover}')`;
         }
 
         let html = `<div class="flex justify-between items-center relative z-10"><span class="text-xs font-bold ${isToday ? 'text-amber-400' : (releases.length > 0 ? 'text-white' : 'text-zinc-600')}">${day}</span>`;
-        if (isAdmin) {
-          html += `<button onclick="event.stopPropagation(); openEditForm('${key}')" class="text-[9px] font-bold text-black bg-[#f4f4f0] px-1.5 py-0.5 rounded"><i class="fa-solid fa-plus"></i></button>`;
-        }
+        if (isAdmin) html += `<button onclick="event.stopPropagation(); openEditForm('${key}')" class="text-[9px] font-bold text-black bg-[#f4f4f0] px-1.5 py-0.5 rounded"><i class="fa-solid fa-plus"></i></button>`;
         html += `</div>`;
 
         if (releases.length > 0) {
-          html += `
-            <div class="truncate text-[9px] md:text-[10px] text-zinc-200 flex items-center gap-1 relative z-10 font-semibold">
-              <span class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-none ${isToday ? 'bg-amber-400' : 'bg-white'} shrink-0"></span>
-              <span class="truncate">${releases[0].title}</span>
-            </div>
-          `;
+          html += `<div class="truncate text-[9px] md:text-[10px] text-zinc-200 flex items-center gap-1 relative z-10 font-semibold"><span class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-none ${isToday ? 'bg-amber-400' : 'bg-white'} shrink-0"></span><span class="truncate">${releases[0].title}</span></div>`;
         }
         dayCell.innerHTML = html;
         dayCell.onclick = () => openDayModal(key, day, monthNames[month]);
@@ -323,265 +209,129 @@
       const items = db[key] || [];
       const isToday = key === getTodayKey();
 
-      let html = `
-        <div class="mb-6 flex justify-between items-center border-b-2 border-subtle pb-4">
-          <div>
-            <h3 class="text-base font-bold text-white uppercase">${day} de ${monthName}</h3>
-            ${isToday ? `<p class="text-[11px] text-amber-400 font-bold mt-0.5 uppercase tracking-wide">🎉 ¡Feliz Cumpleaños!</p>` : ''}
-          </div>
+      let html = `<div class="mb-6 flex justify-between items-center border-b-2 border-subtle pb-4">
+          <div><h3 class="text-base font-bold text-white uppercase">${day} de ${monthName}</h3>${isToday ? `<p class="text-[11px] text-amber-400 font-bold mt-0.5 uppercase tracking-wide">🎉 ¡Feliz Cumpleaños!</p>` : ''}</div>
           <span class="text-xs text-zinc-500 font-mono">Lanzamientos</span>
-        </div>
-      `;
+        </div>`;
 
       if (items.length === 0) {
         html += `<p class="text-xs text-zinc-600 italic py-6 text-center">Sin lanzamientos.</p>`;
       } else {
-        for (let i = 0; i < items.length; i++) {
-          const item = items[i];
+        items.forEach(item => {
           let coverUrl = item.cover || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
-          let currentRating = item.rating || 0;
-          let starsHtml = generateStarsHtml(key, item.id, currentRating);
-
           html += `
             <div class="mb-4 p-3 rounded-lg border-2 border-subtle bg-black flex flex-col gap-2">
               <div class="flex items-center gap-3">
                 <img src="${coverUrl}" crossorigin="anonymous" onerror="handleImageError(this)" class="w-12 h-12 rounded object-cover border border-subtle bg-zinc-900 shrink-0">
                 <div class="flex-1 min-w-0">
-                  <div class="flex items-center gap-2">
-                    <h4 class="font-bold text-xs text-white truncate cursor-pointer hover:text-amber-400 transition" onclick="showAlbumPage('${key}', '${item.id}')">${item.title}</h4>
-                    ${item.isMainCover ? `<span class="text-[9px] zombie-font bg-amber-400 text-black px-1.5 py-0.2 uppercase font-bold">Portada</span>` : ''}
-                  </div>
+                  <div class="flex items-center gap-2"><h4 class="font-bold text-xs text-white truncate cursor-pointer hover:text-amber-400 transition" onclick="showAlbumPage('${key}', '${item.id}')">${item.title}</h4>${item.isMainCover ? `<span class="text-[9px] zombie-font bg-amber-400 text-black px-1.5 py-0.2 uppercase font-bold">Portada</span>` : ''}</div>
                   <p class="text-[11px] text-zinc-400 truncate">${item.artist || 'Artista'}${item.year ? ` • ${item.year}` : ''}</p>
                   <div class="flex flex-wrap gap-2 mt-1 items-center">
-                    ${item.spotify ? `<a href="${item.spotify}" target="_blank" class="text-[10px] font-bold text-zinc-300 hover:text-emerald-400"><i class="fa-brands fa-spotify"></i> Spotify</a>` : ''}
-                    ${item.apple ? `<a href="${item.apple}" target="_blank" class="text-[10px] font-bold text-zinc-300 hover:text-pink-400"><i class="fa-brands fa-apple"></i> Apple</a>` : ''}
+                    ${item.spotify ? `<a href="${item.spotify}" target="_blank" class="text-[10px] font-bold text-zinc-300 hover:text-emerald-400"><i class="fa-brands fa-spotify"></i> Spotify</a>` : (isAdmin ? `<span class="text-[10px] text-zinc-700 italic"><i class="fa-brands fa-spotify"></i> Sin link</span>` : '')}
+                    ${item.apple ? `<a href="${item.apple}" target="_blank" class="text-[10px] font-bold text-zinc-300 hover:text-pink-400"><i class="fa-brands fa-apple"></i> Apple</a>` : (isAdmin ? `<span class="text-[10px] text-zinc-700 italic"><i class="fa-brands fa-apple"></i> Sin link</span>` : '')}
                     <button onclick="copyAlbumLink('${key}', '${item.id}')" class="text-[10px] font-bold text-zinc-400 hover:text-white ml-auto transition uppercase"><i class="fa-solid fa-share-nodes"></i> Compartir</button>
                   </div>
                 </div>
-                ${isAdmin ? `
-                  <div class="flex items-center gap-1.5">
-                    <button onclick="openEditForm('${key}', '${item.id}')" class="text-xs text-zinc-400 hover:text-amber-400 p-1"><i class="fa-solid fa-pen"></i></button>
-                    <button onclick="deleteAlbum('${key}', '${item.id}')" class="text-xs text-zinc-400 hover:text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button>
-                  </div>
-                ` : ''}
+                ${isAdmin ? `<div class="flex items-center gap-1.5"><button onclick="openEditForm('${key}', '${item.id}')" class="text-xs text-zinc-400 hover:text-amber-400 p-1"><i class="fa-solid fa-pen"></i></button><button onclick="deleteAlbum('${key}', '${item.id}')" class="text-xs text-zinc-400 hover:text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button></div>` : ''}
               </div>
               <div class="border-t border-subtle/60 pt-2 flex items-center justify-between text-xs">
-                <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-mono">Calificación (${currentRating}/5):</span>
-                <div class="flex">${starsHtml}</div>
+                <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-mono">Calificación (${item.rating || 0}/5):</span>
+                <div class="flex">${generateStarsHtml(key, item.id, item.rating || 0)}</div>
               </div>
-            </div>
-          `;
-        }
+            </div>`;
+        });
       }
 
-      if (isAdmin) {
-        html += `<button onclick="openEditForm('${key}')" class="w-full mt-2 py-2.5 border-2 border-subtle hover:border-white text-white font-bold text-xs rounded-lg transition uppercase tracking-wider bg-black shadow-[2px_2px_0px_#333]">+ Agregar Álbum</button>`;
-      }
-
+      if (isAdmin) html += `<button onclick="openEditForm('${key}')" class="w-full mt-2 py-2.5 border-2 border-subtle hover:border-white text-white font-bold text-xs rounded-lg transition uppercase tracking-wider bg-black shadow-[2px_2px_0px_#333]">+ Agregar Álbum</button>`;
       document.getElementById('modalContent').innerHTML = html;
-      document.getElementById('modal').classList.remove('hidden');
-      document.getElementById('modal').classList.add('flex');
+      document.getElementById('modal').classList.remove('hidden'); document.getElementById('modal').classList.add('flex');
     }
 
     function openEditForm(key, albumId = null) {
       const item = albumId && db[key] ? db[key].find(a => a.id === albumId) : { title: '', artist: '', year: '', note: '', cover: '', spotify: '', apple: '', isMainCover: false };
-      
-      let html = `
+      document.getElementById('modalContent').innerHTML = `
         <h3 class="text-sm font-bold text-white uppercase mb-4 tracking-wider">${albumId ? 'Editar Álbum' : 'Agregar Álbum'}</h3>
         <form onsubmit="saveAlbumForm(event, '${key}', '${albumId || ''}')" class="space-y-3">
-          <div>
-            <label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Álbum / Canción</label>
-            <input type="text" id="formTitle" value="${item.title}" required class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white">
-          </div>
-          <div>
-            <label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Artista</label>
-            <input type="text" id="formArtist" value="${item.artist}" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white">
-          </div>
-          <div>
-            <label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Año de Lanzamiento</label>
-            <input type="number" id="formYear" value="${item.year || ''}" placeholder="Ej: 2016" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white">
-          </div>
-          <div>
-            <label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Spotify Link</label>
-            <input type="url" id="formSpotify" value="${item.spotify || ''}" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white">
-          </div>
-          <div>
-            <label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Apple Music Link</label>
-            <input type="url" id="formApple" value="${item.apple || ''}" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white">
-          </div>
-          <div>
-            <label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">URL Portada Imagen</label>
-            <input type="url" id="formCover" value="${item.cover || ''}" placeholder="https://..." class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white">
-          </div>
-          <div>
-            <label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Nota</label>
-            <textarea id="formNote" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white">${item.note || ''}</textarea>
-          </div>
-          <div class="flex items-center gap-2 pt-1">
-            <input type="checkbox" id="formIsMainCover" ${item.isMainCover ? 'checked' : ''} class="rounded bg-black border-subtle text-amber-400 focus:ring-0">
-            <label for="formIsMainCover" class="text-xs text-zinc-300 cursor-pointer font-medium">Usar como portada de fondo de este día</label>
-          </div>
+          <div><label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Álbum / Canción</label><input type="text" id="formTitle" value="${item.title}" required class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white"></div>
+          <div><label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Artista</label><input type="text" id="formArtist" value="${item.artist}" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white"></div>
+          <div><label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Año</label><input type="number" id="formYear" value="${item.year || ''}" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white"></div>
+          <div><label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Spotify Link</label><input type="url" id="formSpotify" value="${item.spotify || ''}" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white"></div>
+          <div><label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Apple Music Link</label><input type="url" id="formApple" value="${item.apple || ''}" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white"></div>
+          <div><label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">URL Portada Imagen</label><input type="url" id="formCover" value="${item.cover || ''}" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white"></div>
+          <div><label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Nota</label><textarea id="formNote" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white">${item.note || ''}</textarea></div>
+          <div class="flex items-center gap-2 pt-1"><input type="checkbox" id="formIsMainCover" ${item.isMainCover ? 'checked' : ''} class="rounded bg-black border-subtle text-amber-400 focus:ring-0"><label for="formIsMainCover" class="text-xs text-zinc-300 cursor-pointer font-medium">Usar como portada de fondo de este día</label></div>
           <button type="submit" id="saveSubmitBtn" class="w-full bg-[#f4f4f0] text-black py-2.5 rounded font-bold text-xs uppercase tracking-wider transition hover:bg-white mt-2 shadow-[2px_2px_0px_#555]">Guardar en la Nube</button>
-        </form>
-      `;
-
-      document.getElementById('modalContent').innerHTML = html;
-      document.getElementById('modal').classList.remove('hidden');
-      document.getElementById('modal').classList.add('flex');
+        </form>`;
     }
 
     async function saveAlbumForm(e, key, albumId) {
       e.preventDefault();
-      
-      const submitBtn = document.getElementById('saveSubmitBtn');
-      if (submitBtn) {
-        submitBtn.innerText = "Guardando en la nube...";
-        submitBtn.disabled = true;
-      }
-
+      document.getElementById('saveSubmitBtn').innerText = "Guardando..."; document.getElementById('saveSubmitBtn').disabled = true;
       if (!db[key]) db[key] = [];
-
       const existingAlbum = albumId ? db[key].find(a => a.id === albumId) : null;
-
       const newAlbum = {
-        id: albumId || String(Date.now()),
-        title: document.getElementById('formTitle').value,
-        artist: document.getElementById('formArtist').value,
-        year: document.getElementById('formYear').value,
-        spotify: document.getElementById('formSpotify').value,
-        apple: document.getElementById('formApple').value,
-        cover: document.getElementById('formCover').value,
-        isMainCover: document.getElementById('formIsMainCover').checked,
-        note: document.getElementById('formNote').value,
+        id: albumId || String(Date.now()), title: document.getElementById('formTitle').value, artist: document.getElementById('formArtist').value,
+        year: document.getElementById('formYear').value, spotify: document.getElementById('formSpotify').value, apple: document.getElementById('formApple').value,
+        cover: document.getElementById('formCover').value, isMainCover: document.getElementById('formIsMainCover').checked, note: document.getElementById('formNote').value,
         rating: existingAlbum ? (existingAlbum.rating || 0) : 0
       };
-
-      if (newAlbum.isMainCover) {
-        if (db[key]) db[key].forEach(a => a.isMainCover = false);
-      }
-
+      if (newAlbum.isMainCover) db[key].forEach(a => a.isMainCover = false);
       await saveAlbumToCloud(key, newAlbum);
       closeModal();
-
-      if (isIsolatedMode) {
-        const urlParams = new URLSearchParams(window.location.search);
-        renderIsolatedDayView(key, urlParams.get('album'));
-      }
+      isIsolatedMode ? renderIsolatedDayView(key, new URLSearchParams(window.location.search).get('album')) : renderCalendar(currentMonth);
     }
 
-    async function deleteAlbum(key, albumId) {
-      if (confirm("¿Eliminar este álbum de la nube para todos?")) {
-        await deleteAlbumFromCloud(key, albumId);
-        closeModal();
-      }
-    }
+    async function deleteAlbum(key, albumId) { if (confirm("¿Eliminar este álbum?")) { await deleteAlbumFromCloud(key, albumId); closeModal(); } }
 
     async function showAlbumPage(key, albumId) {
       const album = db[key].find(a => a.id === albumId);
-      closeModal();
-      document.getElementById('mainView').classList.add('hidden');
-      const albumPage = document.getElementById('albumPage');
-      const isToday = key === getTodayKey();
-
-      let coverUrl = album && album.cover ? album.cover : 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
-      let currentRating = album ? (album.rating || 0) : 0;
-      let starsHtml = generateStarsHtml(key, albumId, currentRating);
-      
+      closeModal(); document.getElementById('mainView').classList.add('hidden');
       document.getElementById('albumPageContent').innerHTML = `
         <div class="flex flex-col sm:flex-row gap-6 items-center">
-          <img src="${coverUrl}" crossorigin="anonymous" onerror="handleImageError(this)" class="w-40 h-40 md:w-48 md:h-48 object-cover rounded border-2 border-subtle bg-zinc-900 shadow-xl">
+          <img src="${album.cover || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777'}" crossorigin="anonymous" onerror="handleImageError(this)" class="w-40 h-40 md:w-48 md:h-48 object-cover rounded border-2 border-subtle bg-zinc-900 shadow-xl">
           <div class="flex-1 text-center sm:text-left w-full">
-            ${isToday ? `<p class="text-xs text-amber-400 font-bold tracking-widest uppercase mb-2">🎉 ¡Feliz Cumpleaños!</p>` : ''}
-            <h1 class="text-xl md:text-2xl font-bold text-white uppercase mb-1">${album ? album.title : ''}</h1>
-            <h3 class="text-xs md:text-sm text-zinc-400 font-mono mb-4">${album ? album.artist || '' : ''}${album && album.year ? ` // ${album.year}` : ''}</h3>
-            ${album && album.note ? `<p class="text-xs text-zinc-300 italic mb-4 bg-black p-3 rounded border-2 border-subtle">"${album.note}"</p>` : ''}
-            
+            <h1 class="text-xl md:text-2xl font-bold text-white uppercase mb-1">${album.title}</h1>
+            <h3 class="text-xs md:text-sm text-zinc-400 font-mono mb-4">${album.artist || ''}${album.year ? ` // ${album.year}` : ''}</h3>
+            ${album.note ? `<p class="text-xs text-zinc-300 italic mb-4 bg-black p-3 rounded border-2 border-subtle">"${album.note}"</p>` : ''}
             <div class="mb-5 flex items-center justify-between sm:justify-start gap-3 bg-black p-3 rounded border-2 border-subtle">
-              <span class="text-xs text-zinc-400 uppercase tracking-widest font-mono">Calificación (${currentRating}/5):</span>
-              <div class="flex">${starsHtml}</div>
+              <span class="text-xs text-zinc-400 uppercase tracking-widest font-mono">Calificación (${album.rating || 0}/5):</span>
+              <div class="flex">${generateStarsHtml(key, albumId, album.rating || 0)}</div>
             </div>
-
             <div class="flex flex-wrap gap-3 justify-center sm:justify-start items-center">
-              ${album && album.spotify ? `<a href="${album.spotify}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 transition hover:border-white bg-black shadow-[2px_2px_0px_#333]"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify</a>` : ''}
-              ${album && album.apple ? `<a href="${album.apple}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 transition hover:border-white bg-black shadow-[2px_2px_0px_#333]"><i class="fa-brands fa-apple text-pink-400"></i> Apple Music</a>` : ''}
-              <button onclick="copyAlbumLink('${key}', '${albumId}')" class="border-2 border-subtle text-zinc-300 hover:text-white font-bold text-xs px-3 py-2 rounded flex items-center gap-2 transition bg-black shadow-[2px_2px_0px_#333] uppercase"><i class="fa-solid fa-share-nodes"></i> Compartir</button>
+              ${album.spotify ? `<a href="${album.spotify}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 transition hover:border-white bg-black shadow-[2px_2px_0px_#333]"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify</a>` : ''}
+              ${album.apple ? `<a href="${album.apple}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 transition hover:border-white bg-black shadow-[2px_2px_0px_#333]"><i class="fa-brands fa-apple text-pink-400"></i> Apple Music</a>` : ''}
+              <button onclick="copyAlbumLink('${key}', '${albumId}')" class="border-2 border-subtle text-zinc-300 hover:text-white font-bold text-xs px-3 py-2 rounded transition bg-black shadow-[2px_2px_0px_#333] uppercase"><i class="fa-solid fa-share-nodes"></i> Compartir</button>
             </div>
           </div>
-        </div>
-      `;
-      albumPage.classList.remove('hidden');
-    }
-
-    async function renderIsolatedDayView(fecha, targetAlbumId = null) {
-      isIsolatedMode = true;
-      document.getElementById('mainView').classList.add('hidden');
-      document.getElementById('brandLogo').onclick = null;
-      document.getElementById('brandLogo').classList.remove('cursor-pointer');
-
-      let albums = db[fecha] || [];
-      if (targetAlbumId) {
-        albums = albums.filter(a => a.id === targetAlbumId);
-      }
-      const isToday = fecha === getTodayKey();
-
-      if (albums.length === 0) {
-        document.getElementById('albumPageContent').innerHTML = `<p class="text-xs text-zinc-500 italic text-center py-8">No hay lanzamientos registrados para esta fecha o enlace.</p>`;
-      } else {
-        let htmlContent = '';
-        for (const album of albums) {
-          let coverUrl = album.cover || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
-          let currentRating = album.rating || 0;
-          let starsHtml = generateStarsHtml(fecha, album.id, currentRating);
-
-          htmlContent += `
-            <div class="flex flex-col sm:flex-row gap-6 items-center border-b-2 border-subtle pb-6 mb-6 last:border-none last:pb-0 last:mb-0">
-              <img src="${coverUrl}" crossorigin="anonymous" onerror="handleImageError(this)" class="w-40 h-40 md:w-48 md:h-48 object-cover rounded border-2 border-subtle bg-zinc-900 shadow-xl">
-              <div class="flex-1 text-center sm:text-left w-full">
-                ${isToday ? `<p class="text-xs text-amber-400 font-bold tracking-widest uppercase mb-2">🎉 ¡Feliz Cumpleaños!</p>` : ''}
-                <h1 class="text-xl md:text-2xl font-bold text-white uppercase mb-1">${album.title}</h1>
-                <h3 class="text-xs md:text-sm text-zinc-400 font-mono mb-4">${album.artist || ''}${album.year ? ` // ${album.year}` : ''}</h3>
-                ${album.note ? `<p class="text-xs text-zinc-300 italic mb-4 bg-black p-3 rounded border-2 border-subtle">"${album.note}"</p>` : ''}
-                
-                <div class="mb-5 flex items-center justify-between sm:justify-start gap-3 bg-black p-3 rounded border-2 border-subtle">
-                  <span class="text-xs text-zinc-400 uppercase tracking-widest font-mono">Calificación (${currentRating}/5):</span>
-                  <div class="flex">${starsHtml}</div>
-                </div>
-
-                <div class="flex flex-wrap gap-3 justify-center sm:justify-start items-center">
-                  ${album.spotify ? `<a href="${album.spotify}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 transition hover:border-white bg-black shadow-[2px_2px_0px_#333]"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify</a>` : ''}
-                  ${album.apple ? `<a href="${album.apple}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 transition hover:border-white bg-black shadow-[2px_2px_0px_#333]"><i class="fa-brands fa-apple text-pink-400"></i> Apple Music</a>` : ''}
-                  <button onclick="copyAlbumLink('${fecha}', '${album.id}')" class="border-2 border-subtle text-zinc-300 hover:text-white font-bold text-xs px-3 py-2 rounded flex items-center gap-2 transition bg-black shadow-[2px_2px_0px_#333] uppercase"><i class="fa-solid fa-share-nodes"></i> Compartir</button>
-                </div>
-              </div>
-            </div>
-          `;
-        }
-        document.getElementById('albumPageContent').innerHTML = htmlContent;
-      }
-
+        </div>`;
       document.getElementById('albumPage').classList.remove('hidden');
     }
 
-    function goHome() {
-      if (isIsolatedMode) return;
-      document.getElementById('albumPage').classList.add('hidden');
-      document.getElementById('mainView').classList.remove('hidden');
+    async function renderIsolatedDayView(fecha, targetAlbumId = null) {
+      isIsolatedMode = true; document.getElementById('mainView').classList.add('hidden');
+      document.getElementById('brandLogo').onclick = null; document.getElementById('brandLogo').classList.remove('cursor-pointer');
+      let albums = db[fecha] || []; if (targetAlbumId) albums = albums.filter(a => a.id === targetAlbumId);
+      if (albums.length === 0) { document.getElementById('albumPageContent').innerHTML = `<p class="text-xs text-zinc-500 italic text-center py-8">No hay lanzamientos.</p>`; } 
+      else { document.getElementById('albumPageContent').innerHTML = albums.map(album => `
+            <div class="flex flex-col sm:flex-row gap-6 items-center border-b-2 border-subtle pb-6 mb-6 last:border-none last:pb-0 last:mb-0">
+              <img src="${album.cover || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777'}" crossorigin="anonymous" onerror="handleImageError(this)" class="w-40 h-40 md:w-48 md:h-48 object-cover rounded border-2 border-subtle bg-zinc-900 shadow-xl">
+              <div class="flex-1 text-center sm:text-left w-full">
+                <h1 class="text-xl md:text-2xl font-bold text-white uppercase mb-1">${album.title}</h1>
+                <h3 class="text-xs md:text-sm text-zinc-400 font-mono mb-4">${album.artist || ''}${album.year ? ` // ${album.year}` : ''}</h3>
+                <div class="flex flex-wrap gap-3 justify-center sm:justify-start items-center mt-4">
+                  ${album.spotify ? `<a href="${album.spotify}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 bg-black"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify</a>` : ''}
+                  ${album.apple ? `<a href="${album.apple}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 bg-black"><i class="fa-brands fa-apple text-pink-400"></i> Apple Music</a>` : ''}
+                </div>
+              </div>
+            </div>`).join('');
+      }
+      document.getElementById('albumPage').classList.remove('hidden');
     }
 
-    function closeModal() {
-      document.getElementById('modal').classList.add('hidden');
-      document.getElementById('modal').classList.remove('flex');
-    }
-
-    function copyAlbumLink(key, albumId) {
-      const url = `${window.location.origin}${window.location.pathname}?fecha=${key}&album=${albumId}`;
-      navigator.clipboard.writeText(url);
-      alert('¡Enlace único del álbum copiado!\n' + url);
-    }
-
-    window.onload = () => {
-      loadCloudDB();
-    };
+    function goHome() { if (isIsolatedMode) return; document.getElementById('albumPage').classList.add('hidden'); document.getElementById('mainView').classList.remove('hidden'); }
+    function closeModal() { document.getElementById('modal').classList.add('hidden'); document.getElementById('modal').classList.remove('flex'); }
+    function copyAlbumLink(key, albumId) { const url = `${window.location.origin}${window.location.pathname}?fecha=${key}&album=${albumId}`; navigator.clipboard.writeText(url); alert('Enlace copiado: ' + url); }
+    window.onload = loadCloudDB;
   </script>
 </body>
 </html>
