@@ -6,132 +6,256 @@
   <title>Calendario Musical</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@300;400;500;700&display=swap');
     
-    body { background-color: #0c0c0c; color: #f4f4f0; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
-    h1, h2, h3, .zombie-font { font-family: 'Space Grotesk', sans-serif; }
+    body { 
+      background-color: #0c0c0c; 
+      color: #f4f4f0; 
+      font-family: 'Inter', sans-serif; 
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, .zombie-font {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
     .border-subtle { border-color: #262626; }
     .bg-card { background-color: #141414; }
-    .calendar-day { transition: all 0.15s ease-in-out; background-size: cover; background-position: center; border: 2px solid #222222; min-height: 80px; }
-    @media (min-width: 768px) { .calendar-day { min-height: 96px; } }
-    .calendar-day:hover { border-color: #f4f4f0; transform: translateY(-2px); box-shadow: 4px 4px 0px #f4f4f0; z-index: 10; }
-    .star-container { position: relative; display: inline-block; cursor: pointer; }
+
+    .calendar-day {
+      transition: all 0.15s ease-in-out;
+      background-size: cover;
+      background-position: center;
+      border: 2px solid #222222;
+    }
+
+    .calendar-day:hover {
+      border-color: #f4f4f0;
+      transform: translateY(-2px);
+      box-shadow: 4px 4px 0px #f4f4f0;
+      z-index: 10;
+    }
+
+    .star-rating i {
+      cursor: pointer;
+      transition: color 0.1s ease;
+    }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between p-4 md:p-12">
+<body class="min-h-screen flex flex-col justify-between p-6 md:p-12">
 
-  <header class="max-w-4xl mx-auto w-full flex justify-between items-center mb-8 md:mb-12 border-b-2 border-subtle pb-6">
+  <!-- Header Estilo Zine -->
+  <header class="max-w-4xl mx-auto w-full flex justify-between items-center mb-12 border-b-2 border-subtle pb-6">
     <div id="brandLogo" class="cursor-pointer" onclick="goHome()">
-      <h1 class="text-lg md:text-xl font-bold tracking-tight text-white uppercase">Calendario Musical</h1>
-      <p class="text-[10px] md:text-xs text-zinc-400 font-mono mt-0.5 tracking-wider">// ARCHIVO DE CUMPLEAÑOS</p>
+      <h1 class="text-xl font-bold tracking-tight text-white uppercase">Calendario Musical</h1>
+      <p class="text-xs text-zinc-400 font-mono mt-0.5 tracking-wider">// ARCHIVO DE CUMPLEAÑOS</p>
     </div>
-    <button id="adminBtn" onclick="toggleAdmin()" class="text-xs font-bold uppercase tracking-wider text-black bg-[#f4f4f0] hover:bg-white px-3 md:px-4 py-2 transition flex items-center gap-2 shadow-[2px_2px_0px_#555]">
+
+    <button id="adminBtn" onclick="toggleAdmin()" class="text-xs font-bold uppercase tracking-wider text-black bg-[#f4f4f0] hover:bg-white px-4 py-2 transition flex items-center gap-2 shadow-[2px_2px_0px_#555]">
       <i class="fa-solid fa-lock text-[10px]" id="adminIcon"></i> <span id="adminText">Admin</span>
     </button>
   </header>
 
+  <!-- Vista Principal: Calendario -->
   <main id="mainView" class="max-w-4xl mx-auto w-full flex-1">
-    <div class="flex justify-between items-center mb-6 md:mb-8">
-      <h2 id="monthTitle" class="text-2xl md:text-3xl font-bold tracking-tight text-white uppercase underline decoration-2 underline-offset-8">Enero</h2>
+    
+    <!-- Controles de Mes -->
+    <div class="flex justify-between items-center mb-8">
+      <h2 id="monthTitle" class="text-3xl font-bold tracking-tight text-white uppercase underline decoration-2 underline-offset-8">
+        Enero
+      </h2>
       <div class="flex items-center gap-2">
-        <button onclick="changeMonth(-1)" class="w-9 h-9 md:w-10 md:h-10 rounded border-2 border-subtle hover:border-white bg-card flex items-center justify-center text-zinc-300 hover:text-white transition shadow-[2px_2px_0px_#222]"><i class="fa-solid fa-chevron-left text-xs"></i></button>
-        <button onclick="changeMonth(1)" class="w-9 h-9 md:w-10 md:h-10 rounded border-2 border-subtle hover:border-white bg-card flex items-center justify-center text-zinc-300 hover:text-white transition shadow-[2px_2px_0px_#222]"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+        <button onclick="changeMonth(-1)" class="w-10 h-10 rounded border-2 border-subtle hover:border-white bg-card flex items-center justify-center text-zinc-300 hover:text-white transition shadow-[2px_2px_0px_#222]">
+          <i class="fa-solid fa-chevron-left text-xs"></i>
+        </button>
+        <button onclick="changeMonth(1)" class="w-10 h-10 rounded border-2 border-subtle hover:border-white bg-card flex items-center justify-center text-zinc-300 hover:text-white transition shadow-[2px_2px_0px_#222]">
+          <i class="fa-solid fa-chevron-right text-xs"></i>
+        </button>
       </div>
     </div>
-    <div class="grid grid-cols-7 gap-1.5 md:gap-2 mb-2 text-center text-[10px] md:text-xs text-zinc-500 font-bold uppercase tracking-widest">
+
+    <!-- Encabezado de Días -->
+    <div class="grid grid-cols-7 gap-2 mb-2 text-center text-xs text-zinc-500 font-bold uppercase tracking-widest">
       <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
     </div>
-    <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 md:gap-2.5"></div>
+
+    <!-- Grid del Calendario -->
+    <div id="calendarGrid" class="grid grid-cols-7 gap-2.5"></div>
   </main>
 
+  <!-- Vista Álbum en Pantalla Completa / Vista Compartida -->
   <main id="albumPage" class="max-w-2xl mx-auto w-full flex-1 hidden">
-    <div class="bg-card rounded-xl p-6 md:p-8 border-2 border-subtle shadow-[6px_6px_0px_#222]" id="albumPageContent"></div>
+    <div class="bg-card rounded-xl p-8 border-2 border-subtle shadow-[6px_6px_0px_#222]" id="albumPageContent"></div>
   </main>
 
+  <!-- Modal para Día / Formulario -->
   <div id="modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-    <div class="bg-card max-w-md w-full rounded-xl p-5 md:p-6 relative border-2 border-subtle max-h-[85vh] overflow-y-auto shadow-[8px_8px_0px_#111]">
-      <button onclick="closeModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white text-base"><i class="fa-solid fa-xmark"></i></button>
+    <div class="bg-card max-w-md w-full rounded-xl p-6 relative border-2 border-subtle max-h-[85vh] overflow-y-auto shadow-[8px_8px_0px_#111]">
+      <button onclick="closeModal()" class="absolute top-5 right-5 text-zinc-400 hover:text-white text-base">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
       <div id="modalContent"></div>
     </div>
   </div>
 
   <script>
-    const SUPABASE_URL = 'https://rpkbqxyhjpkwvvxlgerd.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwa2JxeHloanBrd3Z2eGxnZXJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5NDgyMDYsImV4cCI6MjEwNzUyNDIwNn0.V4y-aVBjfiijiTJCRXkzl-44GsXF4P-JuWPClxuz1nI';
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const fullMusicData = {
+      "01-01": [{ id: "e1", title: "Aquí vamos otra vez", artist: "1280 Almas", year: "1998", note: "" }],
+      "01-15": [{ id: "e15", title: "Almendra", artist: "Almendra", year: "1969", note: "POR FIN" }],
+      "01-17": [{ id: "e17", title: "Circles", artist: "Mac Miller", year: "2020", note: "" }],
+      "01-27": [{ id: "e27", title: "Let’s Start Here", artist: "Lil Yachty", year: "2023", note: "" }],
+      "02-14": [{ id: "f14", title: "The Life of Pablo", artist: "Kanye West", year: "2016", note: "" }],
+      "02-19": [{ id: "f19", title: "Por si mañana no estoy", artist: "", year: "2021", note: "" }],
+      "02-24": [{ id: "f24", title: "Todavía No", artist: "La Paloma", year: "2023", note: "" }],
+      "02-25": [{ id: "f25", title: "Dios y la Mata de Lulo", artist: "Nicolas y los Fumadores", year: "2022", note: "" }],
+      "02-26": [{ id: "f26", title: "El Madrileño", artist: "C. Tangana", year: "2021", note: "" }],
+      "02-27": [{ id: "f27", title: "David Ruffin", artist: "David Ruffin", year: "1969", note: "no realmente pero lo es en mi corazón" }],
+      "02-28": [{ id: "f28", title: "CHASE", artist: "AARON MAY", year: "2019", note: "" }],
+      "03-03": [{ id: "m3", title: "American Teen", artist: "Khalid", year: "2017", note: "" }],
+      "03-09": [{ id: "m9", title: "Como Pez en el Hielo", artist: "Nicolás y los Fumadores", year: "2018", note: "" }],
+      "03-16": [{ id: "m16", title: "Gran Santiago", artist: "Teleradio Donoso", year: "2007", note: "" }],
+      "03-18": [{ id: "m18", title: "Cara y Cruz", artist: "Ayax y Prok", year: "2018", note: "" }],
+      "03-22": [{ id: "m22", title: "Mika’s Laundry", artist: "Matt Champion", year: "2024", note: "" }],
+      "03-24": [{ id: "m24", title: "Películas", artist: "La máquina de hacer pájaros", year: "1977", note: "" }],
+      "03-25": [{ id: "m25", title: "Casiopea", artist: "Casiopea", year: "1979", note: "" }],
+      "03-26": [{ id: "m26", title: "Comedown Machine", artist: "The Strokes", year: "2013", note: "" }],
+      "03-28": [{ id: "m28_1", title: "The Dude", artist: "Quincy Jones", year: "1981", note: "" }, { id: "m28_2", title: "10 Songs", artist: "Q", year: "2018", note: "" }],
+      "03-31": [{ id: "m31", title: "JúJú & The Flowerbug", artist: "Sunny Colon", year: "2023", note: "" }],
+      "04-02": [{ id: "a2", title: "Starry Cat", artist: "Starry Cat", year: "2013", note: "" }],
+      "04-10": [{ id: "a10_1", title: "The New Abnormal", artist: "The Strokes", year: "2020", note: "" }, { id: "a10_2", title: "QNEPT", artist: "JAZE", year: "2021", note: "" }],
+      "04-14": [{ id: "a14", title: "Damn", artist: "Kendrick Lamar", year: "2017", note: "" }],
+      "04-18": [{ id: "a18_1", title: "Cripta y vida", artist: "Pedropiedra", year: "2011", note: "" }, { id: "a18_2", title: "I Heard That Noise", artist: "quickly, quickly", year: "2017", note: "" }],
+      "04-23": [{ id: "a23", title: "FERXXO (VOL 1: MOR)", artist: "Feid", year: "2020", note: "" }],
+      "04-26": [{ id: "a26_1", title: "Apricot Princess", artist: "Rex Orange County", year: "2017", note: "" }, { id: "a26_2", title: "Por Cesarea", artist: "DILLOM", year: "2024", note: "" }],
+      "05-05": [{ id: "may5", title: "Soul, PRESENT", artist: "Q", year: "2023", note: "" }],
+      "05-06": [{ id: "may6", title: "Melanchole", artist: "Salvia Palth", year: "2013", note: "" }],
+      "05-08": [{ id: "may8", title: "Pedropiedra", artist: "Pedropiedra", year: "2009", note: "" }],
+      "05-10": [{ id: "may10", title: "Hopes and Fears", artist: "Keane", year: "2004", note: "" }],
+      "05-13": [{ id: "may13", title: "Mr Morale & the Big Steppers", artist: "Kendrick Lamar", year: "2022", note: "" }],
+      "05-17": [{ id: "may17_1", title: "IGOR", artist: "TYLER, THE CREATOR", year: "2019", note: "" }, { id: "may17_2", title: "Sayonara", artist: "Alvaro Diaz", year: "2024", note: "" }, { id: "may17_3", title: "Hit Me Hard and Soft", artist: "Billie Eilish", year: "2024", note: "" }],
+      "05-22": [{ id: "may22", title: "Omakase", artist: "Alvaro Diaz", year: "2024", note: "" }],
+      "05-23": [{ id: "may23", title: "Goodbye and good Riddance", artist: "Juice Wrld", year: "2018", note: "" }],
+      "06-05": [{ id: "j5", title: "The Shave Experiment (Director's Cut)", artist: "Q", year: "2021", note: "" }],
+      "06-06": [{ id: "j6", title: "Les Étolies Vagabondes", artist: "Nekfeu", year: "2019", note: "" }],
+      "06-08": [{ id: "j8", title: "Kids See Ghost", artist: "Kanye West & Kid Cudi", year: "2018", note: "" }],
+      "06-10": [{ id: "j10", title: "Channel Orange", artist: "Frank Ocean", year: "2012", note: "" }],
+      "06-16": [{ id: "j16_1", title: "Inefable", artist: "Micro Tdh", year: "2017", note: "" }, { id: "j16_2", title: "Abysmal Thoughts", artist: "The Drums", year: "2017", note: "" }],
+      "06-20": [{ id: "j20", title: "RANDOM ACCESS MEMORIES", artist: "DAFT PUNK", year: "2013", note: "" }],
+      "06-25": [{ id: "j25", title: "Vice Versa", artist: "Rauw Alejandro", year: "2021", note: "" }],
+      "06-26": [{ id: "j26", title: "El Retorno", artist: "Santiago Motorizado", year: "2021", note: "" }],
+      "06-29": [{ id: "j29", title: "DATA", artist: "Tainy", year: "2023", note: "" }],
+      "07-08": [{ id: "jul8", title: "Introducción a los Fother Muckers: Menudencias (Sólo para fanáticos)", artist: "Fother Muckers", year: "2011", note: "" }],
+      "07-11": [{ id: "jul11", title: "166", artist: "Milo J", year: "2024", note: "" }],
+      "07-15": [{ id: "jul15", title: "Gemini Rights", artist: "Steve Lacy", year: "2022", note: "" }],
+      "07-16": [{ id: "jul16", title: "Oh yeah?", artist: "Steve Lacy", year: "2022", note: "" }],
+      "07-17": [{ id: "jul17", title: "Kill the Lights", artist: "Tony Molina", year: "2018", note: "" }],
+      "07-28": [{ id: "jul28", title: "Utopia", artist: "Travis Scott", year: "2023", note: "" }],
+      "07-30": [{ id: "jul30", title: "Is This It", artist: "The Strokes", year: "2001", note: "" }],
+      "08-03": [{ id: "ag3", title: "Swimming", artist: "Mac Miller", year: "2018", note: "" }],
+      "08-08": [{ id: "ag8", title: "Coastal Grooves", artist: "Blood Orange", year: "2011", note: "" }],
+      "08-10": [{ id: "ag10_1", title: "Off The Wall", artist: "Michael Jackson", year: "1979", note: "" }, { id: "ag10_2", title: "Life is a Trip", artist: "Trippie Redd", year: "2018", note: "" }],
+      "08-14": [{ id: "ag14", title: "ATP", artist: "Nsqk", year: "2024", note: "" }],
+      "08-15": [{ id: "ag15", title: "Baby", artist: "Dijon", year: "2021", note: "" }],
+      "08-20": [{ id: "ag20_1", title: "Blonde", artist: "Frank Ocean", year: "2016", note: "" }, { id: "ag20_2", title: "Intershibuya La Mafia", artist: "Feid", year: "2021", note: "" }],
+      "08-25": [{ id: "ag25", title: "17", artist: "Xxxtentacion", year: "2017", note: "" }],
+      "08-26": [{ id: "ag26", title: "All The Topings", artist: "Panuccis Pizza", year: "2016", note: "" }],
+      "08-28": [{ id: "ag28_1", title: "CTV3 Cool Tape Vol.3", artist: "Jaden Smith", year: "2020", note: "" }, { id: "ag28_2", title: "Lets get it on", artist: "Marvin Gaye", year: "1973", note: "" }],
+      "08-29": [{ id: "ag29", title: "Donda", artist: "Kanye West", year: "2021", note: "" }],
+      "08-31": [{ id: "ag31", title: "Peperina", artist: "Serú Girán", year: "1981", note: "" }],
+      "09-02": [{ id: "s2", title: "Portamento", artist: "The Drums", year: "2011", note: "" }],
+      "09-03": [{ id: "s3", title: "Juventud Americana", artist: "Ases Falsos", year: "2012", note: "" }],
+      "09-04": [{ id: "s4_1", title: "Rodeo", artist: "Travis Scott", year: "2015", note: "" }, { id: "s4_2", title: "Bcos U Will Never B Free", artist: "Rex Orange County", year: "2015", note: "" }],
+      "09-05": [{ id: "s5_1", title: "Mourn", artist: "Corbin", year: "2017", note: "" }, { id: "s5_2", title: "Absolutely", artist: "Dijon", year: "2021", note: "" }],
+      "09-06": [{ id: "s6", title: "Inútil Corazón", artist: "Axel Catalán", year: "2022", note: "" }],
+      "09-07": [{ id: "s7_1", title: "Siembra", artist: "Rubén Blades & Willy Colón", year: "1978", note: "" }, { id: "s7_2", title: "Para Hondo", artist: "Cristobal Briceño", year: "2019", note: "" }],
+      "09-09": [{ id: "s9", title: "ALTA SUCIEDAD", artist: "ANDRES CALAMARO", year: "1997", note: "" }],
+      "09-11": [{ id: "s11", title: "Graduation", artist: "Kanye West", year: "2007", note: "" }],
+      "09-12": [{ id: "s12", title: "Bailar y llorar", artist: "teleradio donoso", year: "2008", note: "" }],
+      "09-13": [{ id: "s13", title: "Heaven Surrounds You", artist: "Surf Curse", year: "2019", note: "" }],
+      "09-14": [{ id: "s14", title: "Feliz Cumpleaños FERXXO te pirateamos el álbum", artist: "Feid", year: "2022", note: "" }],
+      "09-15": [{ id: "s15_1", title: "I will be on my one because there is a devil inside my body", artist: "Teen Suicide", year: "2012", note: "" }, { id: "s15_2", title: "SUPERNOVA", artist: "Ralphie Choo", year: "2023", note: "" }],
+      "09-20": [{ id: "s20", title: "El jardin de los presentes", artist: "Invisible", year: "1976", note: "" }],
+      "09-23": [{ id: "s23", title: "El Círculo", artist: "Kase.O", year: "2016", note: "" }],
+      "09-24": [{ id: "s24_1", title: "Nothing Was The Same", artist: "Drake", year: "2013", note: "" }, { id: "s24_2", title: "Nectar", artist: "Joji", year: "2020", note: "" }],
+      "09-25": [{ id: "s25", title: "De la Linea Diez al Sol", artist: "Niña Polaca", year: "2020", note: "" }],
+      "09-28": [{ id: "s28", title: "Songs In The Key of Life", artist: "Stevie Wonder", year: "1976", note: "" }],
+      "09-29": [{ id: "s29_1", title: "The Stranger", artist: "Billy Joel", year: "1977", note: "" }, { id: "s29_2", title: "Salvavidas(O de las balas perdidas)", artist: "La Maravillosa Orquesta del Alcohol", year: "2017", note: "" }],
+      "10-03": [{ id: "o3", title: "Un Golpe de Suerte", artist: "La Paloma", year: "2023", note: "" }],
+      "10-06": [{ id: "o6_1", title: "Artaud", artist: "Pescado Rabioso", year: "1973", note: "" }, { id: "o6_2", title: "Así se hace", artist: "Fother Muckers", year: "2008", note: "" }],
+      "10-08": [{ id: "o8", title: "Melophobia", artist: "Cage the Elephant", year: "2013", note: "" }],
+      "10-11": [{ id: "o11", title: "Emanuel", artist: "Pedro Piedra", year: "2013", note: "" }],
+      "10-13": [{ id: "o13", title: "52nd Street", artist: "Billy Joel", year: "1978", note: "" }],
+      "10-18": [{ id: "o18_1", title: "Reconoceronte", artist: "Los Mil Jinetes", year: "2010", note: "" }, { id: "o18_2", title: "Salen otras diez", artist: "Las Chaquetas Amarillas", year: "2014", note: "" }, { id: "o18_3", title: "Glimmer of God", artist: "Jean Dawson", year: "2024", note: "" }],
+      "10-21": [{ id: "o21", title: "Durazno Sangrando", artist: "Invisible", year: "1975", note: "" }],
+      "10-26": [{ id: "o26", title: "Ballads 1", artist: "Joji", year: "2018", note: "" }],
+      "10-28": [{ id: "o28_1", title: "Chromakopia", artist: "Tyler the Creator", year: "2024", note: "" }, { id: "o28_2", title: "Room in Fire", artist: "The Strokes", year: "2003", note: "" }, { id: "o28_3", title: "Dúo Niagara", artist: "Dúo Niagara", year: "2022", note: "" }],
+      "10-29": [{ id: "o29_1", title: "Felicilandia", artist: "Alvaro Diaz", year: "2021", note: "" }, { id: "o29_2", title: "No soy uno", artist: "Fother Muckers", year: "2008", note: "" }],
+      "10-31": [{ id: "o31", title: "Ghost with Skin", artist: "Corbin", year: "2021", note: "" }],
+      "11-04": [{ id: "n4", title: "Her Loss", artist: "Drake & 21 Savage", year: "2022", note: "" }],
+      "11-08": [{ id: "n8", title: "Mal que bien", artist: "Nicolas y los fumadores", year: "2022", note: "" }],
+      "11-11": [{ id: "n11_1", title: "No", artist: "Pánico", year: "1995", note: "" }, { id: "n11_2", title: "Espejo", artist: "ZPU", year: "2016", note: "" }, { id: "n11_3", title: "Modal Soul", artist: "Mojabes", year: "2005", note: "" }],
+      "11-15": [{ id: "n15", title: "Cosa Nuestra", artist: "Rauw Alejando", year: "2024", note: "" }],
+      "11-17": [{ id: "n17", title: "Syre", artist: "Jaden Smith", year: "2017", note: "" }],
+      "11-18": [{ id: "n18", title: "Harmless Melodies", artist: "Yellow Days", year: "2016", note: "" }],
+      "11-21": [{ id: "n21_1", title: "Justo y necesario", artist: "Fother Muckers", year: "2008", note: "" }, { id: "n21_2", title: "You", artist: "Larry Lovestein & The Velvet Revival", year: "2012", note: "" }],
+      "11-23": [{ id: "n23", title: "Roy", artist: "NSQK", year: "2022", note: "" }],
+      "11-26": [{ id: "n26", title: "Una idea, pero es triste", artist: "La Paloma", year: "2021", note: "" }],
+      "12-02": [{ id: "d2", title: "Awaken, My Love!", artist: "Childish Gambino", year: "2016", note: "" }],
+      "12-04": [{ id: "d4", title: "The Lo-Fis", artist: "Steve Lacy", year: "2020", note: "" }],
+      "12-06": [{ id: "d6", title: "Perro Viejo", artist: "Axel Catalán", year: "2016", note: "" }],
+      "12-09": [{ id: "d9_1", title: "Stoney", artist: "Post Malone", year: "2016", note: "" }, { id: "d9_2", title: "Lift Your Skinny Fists like Antennas to Heaven", artist: "Godspeed You! Black Emperor", year: "2000", note: "" }],
+      "12-10": [{ id: "d10", title: "Because the Internet", artist: "Childish Gambino", year: "2013", note: "" }],
+      "12-11": [{ id: "d11", title: "Man On The Moon lll", artist: "Kid Cudi", year: "2020", note: "" }],
+      "12-14": [{ id: "d14", title: "Spiderman Into the Spiderverse", artist: "Muchos", year: "2018", note: "" }],
+      "12-17": [{ id: "d17", title: "El Paisaje Salvaje", artist: "Fother Muckers", year: "2010", note: "" }],
+      "12-20": [{ id: "d20", title: "La Grasa de Las Capitales", artist: "Serú Giran", year: "1979", note: "" }],
+      "12-21": [{ id: "d21", title: "Sin Futuro", artist: "Axel Catalán?", year: "2018", note: "" }],
+      "12-24": [{ id: "d24_1", title: "X100PRE", artist: "Bad Bunny", year: "2018", note: "" }, { id: "d24_2", title: "Andate Cabrita", artist: "Los Mil Jinetes", year: "2008", note: "" }],
+      "12-25": [{ id: "d25", title: "Una Navidad con los Fother Muckers", artist: "Fother Muckers", year: "2008", note: "" }],
+      "12-30": [{ id: "d30", title: "Diaz Antes", artist: "Alvaro Diaz", year: "2020", note: "" }],
+      "12-31": [{ id: "d31", title: "Si No Tienes Nada Que Decir Entonces Calla", artist: "Fother Muckers", year: "2009", note: "" }]
+    };
 
-    let db = {};
     const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
     let currentMonth = new Date().getMonth();
     let isAdmin = false;
     let isIsolatedMode = false;
 
+    let db = JSON.parse(localStorage.getItem('musicCalendarDB_vRate')) || fullMusicData;
+
     function getTodayKey() {
       const today = new Date();
-      return `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const m = String(today.getMonth() + 1).padStart(2, '0');
+      const d = String(today.getDate()).padStart(2, '0');
+      return `${m}-${d}`;
     }
 
-    async function loadCloudDB() {
-      try {
-        const { data, error } = await supabaseClient.from('albums').select('*');
-        if (error) throw error;
-        db = {};
-        if (data) {
-          data.forEach(row => {
-            if (!db[row.date_key]) db[row.date_key] = [];
-            db[row.date_key].push({
-              id: row.id, title: row.title, artist: row.artist, year: row.year, note: row.note,
-              cover: row.cover, spotify: row.spotify, apple: row.apple, isMainCover: row.is_main_cover, rating: row.rating
-            });
-          });
-        }
-      } catch (err) {
-        console.error("Error cargando DB:", err);
-      }
-      
-      const urlParams = new URLSearchParams(window.location.search);
-      const fecha = urlParams.get('fecha');
-      const albumId = urlParams.get('album');
-
-      if (fecha && db[fecha]) {
-        renderIsolatedDayView(fecha, albumId);
-      } else {
-        renderCalendar(currentMonth);
-      }
-    }
-
-    async function saveAlbumToCloud(key, albumData) {
-      const payload = {
-        id: albumData.id, date_key: key, title: albumData.title, artist: albumData.artist, year: albumData.year,
-        note: albumData.note, cover: albumData.cover, spotify: albumData.spotify, apple: albumData.apple,
-        is_main_cover: albumData.isMainCover, rating: albumData.rating
-      };
-      await supabaseClient.from('albums').upsert(payload);
-      await loadCloudDB();
-    }
-
-    async function deleteAlbumFromCloud(key, albumId) {
-      await supabaseClient.from('albums').delete().eq('id', albumId);
-      await loadCloudDB();
+    function saveDB() {
+      localStorage.setItem('musicCalendarDB_vRate', JSON.stringify(db));
+      renderCalendar(currentMonth);
     }
 
     function toggleAdmin() {
+      const adminPassword = 'roxin';
       if (!isAdmin) {
-        if (prompt("Contraseña:") === 'roxin') {
+        const pass = prompt("Contraseña de administrador:");
+        if (pass === adminPassword) {
           isAdmin = true;
           document.getElementById('adminIcon').className = "fa-solid fa-lock-open text-black";
           document.getElementById('adminBtn').classList.add('bg-emerald-400');
           document.getElementById('adminText').innerText = "Admin Activo";
-        } else { alert("Contraseña incorrecta."); }
+          renderCalendar(currentMonth);
+        } else if (pass !== null) {
+          alert("Contraseña incorrecta.");
+        }
       } else {
         isAdmin = false;
         document.getElementById('adminIcon').className = "fa-solid fa-lock";
         document.getElementById('adminBtn').classList.remove('bg-emerald-400');
         document.getElementById('adminText').innerText = "Admin";
+        renderCalendar(currentMonth);
       }
-      renderCalendar(currentMonth);
     }
 
     function changeMonth(delta) {
@@ -145,28 +269,71 @@
       img.src = 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
     }
 
-    async function setRating(key, albumId, rating) {
+    async function extractCoverFromUrl(url) {
+      if (!url) return '';
+      if (url.includes('spotify.com')) {
+        try {
+          const res = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`);
+          const data = await res.json();
+          if (data.thumbnail_url) return data.thumbnail_url;
+        } catch (e) {}
+      }
+      if (url.includes('apple.com')) {
+        try {
+          const match = url.match(/\/album\/[^\/]+\/([0-9]+)/) || url.match(/i=([0-9]+)/) || url.match(/id=([0-9]+)/);
+          if (match) {
+            const resApi = await fetch(`https://itunes.apple.com/lookup?id=${match[1]}`);
+            const dataApi = await resApi.json();
+            if (dataApi.results && dataApi.results[0].artworkUrl100) {
+              return dataApi.results[0].artworkUrl100.replace('100x100bb', '600x600bb');
+            }
+          }
+        } catch (e) {}
+      }
+      return '';
+    }
+
+    async function getAppleCoverUrl(title, artist) {
+      if (!title) return '';
+      const query = encodeURIComponent(`${title} ${artist || ''}`);
+      try {
+        const res = await fetch(`https://itunes.apple.com/search?term=${query}&entity=album&limit=1`);
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+          return data.results[0].artworkUrl100.replace('100x100bb', '400x400bb');
+        }
+      } catch (e) {}
+      return 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
+    }
+
+    async function preloadCovers() {
+      for (const key in db) {
+        if (db[key] && db[key].length > 0) {
+          for (let item of db[key]) {
+            if (!item.cover) {
+              item.cover = await getAppleCoverUrl(item.title, item.artist);
+            }
+          }
+        }
+      }
+      localStorage.setItem('musicCalendarDB_vRate', JSON.stringify(db));
+      renderCalendar(currentMonth);
+    }
+
+    function setRating(key, albumId, rating) {
       if (!db[key]) return;
       const album = db[key].find(a => a.id === albumId);
       if (album) {
         album.rating = rating;
-        await saveAlbumToCloud(key, album);
-        isIsolatedMode ? renderIsolatedDayView(key, new URLSearchParams(window.location.search).get('album')) : openDayModal(key, parseInt(key.split('-')[1]), monthNames[parseInt(key.split('-')[0]) - 1]);
+        saveDB();
+        // Actualizar visualmente las estrellas si estamos en el modal o página de álbum
+        if (isIsolatedMode) {
+          renderIsolatedDayView(key);
+        } else {
+          const dateObj = new Date(2026, parseInt(key.split('-')[0]) - 1, parseInt(key.split('-')[1]));
+          openDayModal(key, dateObj.getDate(), monthNames[dateObj.getMonth()]);
+        }
       }
-    }
-
-    function handleStarClick(e, key, albumId, starIndex) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      setRating(key, albumId, (e.clientX - rect.left < rect.width / 2) ? starIndex - 0.5 : starIndex);
-    }
-
-    function generateStarsHtml(key, albumId, currentRating) {
-      let html = '';
-      for (let s = 1; s <= 5; s++) {
-        let icon = currentRating >= s ? 'fa-solid fa-star' : (currentRating >= s - 0.5 ? 'fa-solid fa-star-half-stroke' : 'fa-regular fa-star');
-        html += `<span class="star-container px-0.5 text-amber-400 text-sm" onclick="handleStarClick(event, '${key}', '${albumId}', ${s})"><i class="${icon}"></i></span>`;
-      }
-      return html;
     }
 
     function renderCalendar(month) {
@@ -178,7 +345,9 @@
       const firstDay = new Date(2026, month, 1).getDay();
       const todayKey = getTodayKey();
 
-      for (let i = 0; i < firstDay; i++) grid.appendChild(Object.assign(document.createElement('div'), { className: "calendar-day rounded bg-[#101010]/40 border-2 border-transparent" }));
+      for (let i = 0; i < firstDay; i++) {
+        grid.appendChild(Object.assign(document.createElement('div'), { className: "h-24 rounded bg-[#101010]/40 border-2 border-transparent" }));
+      }
 
       for (let day = 1; day <= daysInMonth; day++) {
         const key = `${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -186,18 +355,31 @@
         const isToday = key === todayKey;
 
         const dayCell = document.createElement('div');
-        dayCell.className = `calendar-day rounded-lg p-1.5 md:p-2.5 cursor-pointer flex flex-col justify-between overflow-hidden relative ${isToday ? 'border-amber-400 shadow-[3px_3px_0px_#fbbf24]' : (releases.length > 0 ? 'border-subtle bg-card' : 'bg-[#111] border-subtle')}`;
+        dayCell.className = `calendar-day h-24 rounded-lg p-2.5 cursor-pointer flex flex-col justify-between overflow-hidden relative ${
+          isToday ? 'border-amber-400 shadow-[3px_3px_0px_#fbbf24]' : (releases.length > 0 ? 'border-subtle bg-card' : 'bg-[#111] border-subtle')
+        }`;
 
-        if (releases.length > 0 && (releases.find(a => a.isMainCover) || releases[0]).cover) {
-          dayCell.style.backgroundImage = `linear-gradient(to top, rgba(12, 12, 12, 0.94), rgba(12, 12, 12, 0.6)), url('${(releases.find(a => a.isMainCover) || releases[0]).cover}')`;
+        if (releases.length > 0) {
+          let mainAlbum = releases.find(a => a.isMainCover) || releases[0];
+          let coverUrl = mainAlbum.cover || '';
+          if (coverUrl) {
+            dayCell.style.backgroundImage = `linear-gradient(to top, rgba(12, 12, 12, 0.92), rgba(12, 12, 12, 0.5)), url('${coverUrl}')`;
+          }
         }
 
         let html = `<div class="flex justify-between items-center relative z-10"><span class="text-xs font-bold ${isToday ? 'text-amber-400' : (releases.length > 0 ? 'text-white' : 'text-zinc-600')}">${day}</span>`;
-        if (isAdmin) html += `<button onclick="event.stopPropagation(); openEditForm('${key}')" class="text-[9px] font-bold text-black bg-[#f4f4f0] px-1.5 py-0.5 rounded"><i class="fa-solid fa-plus"></i></button>`;
+        if (isAdmin) {
+          html += `<button onclick="event.stopPropagation(); openEditForm('${key}')" class="text-[9px] font-bold text-black bg-[#f4f4f0] px-1.5 py-0.5 rounded"><i class="fa-solid fa-plus"></i></button>`;
+        }
         html += `</div>`;
 
         if (releases.length > 0) {
-          html += `<div class="truncate text-[9px] md:text-[10px] text-zinc-200 flex items-center gap-1 relative z-10 font-semibold"><span class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-none ${isToday ? 'bg-amber-400' : 'bg-white'} shrink-0"></span><span class="truncate">${releases[0].title}</span></div>`;
+          html += `
+            <div class="truncate text-[10px] text-zinc-200 flex items-center gap-1.5 relative z-10 font-semibold">
+              <span class="w-2 h-2 rounded-none ${isToday ? 'bg-amber-400' : 'bg-white'} shrink-0"></span>
+              <span class="truncate">${releases[0].title}</span>
+            </div>
+          `;
         }
         dayCell.innerHTML = html;
         dayCell.onclick = () => openDayModal(key, day, monthNames[month]);
@@ -205,133 +387,336 @@
       }
     }
 
-    function openDayModal(key, day, monthName) {
+    async function openDayModal(key, day, monthName) {
       const items = db[key] || [];
       const isToday = key === getTodayKey();
 
-      let html = `<div class="mb-6 flex justify-between items-center border-b-2 border-subtle pb-4">
-          <div><h3 class="text-base font-bold text-white uppercase">${day} de ${monthName}</h3>${isToday ? `<p class="text-[11px] text-amber-400 font-bold mt-0.5 uppercase tracking-wide">🎉 ¡Feliz Cumpleaños!</p>` : ''}</div>
-          <span class="text-xs text-zinc-500 font-mono">Lanzamientos</span>
-        </div>`;
+      let html = `
+        <div class="mb-6 flex justify-between items-center border-b-2 border-subtle pb-4">
+          <div>
+            <h3 class="text-base font-bold text-white uppercase">${day} de ${monthName}</h3>
+            ${isToday ? `<p class="text-[11px] text-amber-400 font-bold mt-0.5 uppercase tracking-wide">🎉 ¡Feliz Cumpleaños!</p>` : ''}
+          </div>
+          <button onclick="copyDayLink('${key}')" class="text-xs font-bold text-zinc-400 hover:text-white transition uppercase">
+            <i class="fa-solid fa-share-nodes"></i> Compartir
+          </button>
+        </div>
+      `;
 
       if (items.length === 0) {
         html += `<p class="text-xs text-zinc-600 italic py-6 text-center">Sin lanzamientos.</p>`;
       } else {
-        items.forEach(item => {
-          let coverUrl = item.cover || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777';
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          if (!item.cover) {
+            item.cover = await getAppleCoverUrl(item.title, item.artist);
+          }
+
+          let currentRating = item.rating || 0;
+          let starsHtml = '';
+          for (let s = 1; s <= 5; s++) {
+            starsHtml += `<i class="fa-${s <= currentRating ? 'solid' : 'regular'} fa-star text-amber-400 text-xs" onclick="setRating('${key}', '${item.id}', ${s})"></i>`;
+          }
+
           html += `
             <div class="mb-4 p-3 rounded-lg border-2 border-subtle bg-black flex flex-col gap-2">
               <div class="flex items-center gap-3">
-                <img src="${coverUrl}" crossorigin="anonymous" onerror="handleImageError(this)" class="w-12 h-12 rounded object-cover border border-subtle bg-zinc-900 shrink-0">
+                <img src="${item.cover}" onerror="handleImageError(this)" class="w-12 h-12 rounded object-cover border border-subtle bg-zinc-900">
                 <div class="flex-1 min-w-0">
-                  <div class="flex items-center gap-2"><h4 class="font-bold text-xs text-white truncate cursor-pointer hover:text-amber-400 transition" onclick="showAlbumPage('${key}', '${item.id}')">${item.title}</h4>${item.isMainCover ? `<span class="text-[9px] zombie-font bg-amber-400 text-black px-1.5 py-0.2 uppercase font-bold">Portada</span>` : ''}</div>
+                  <div class="flex items-center gap-2">
+                    <h4 class="font-bold text-xs text-white truncate cursor-pointer hover:text-amber-400 transition" onclick="showAlbumPage('${key}', '${item.id}')">${item.title}</h4>
+                    ${item.isMainCover ? `<span class="text-[9px] zombie-font bg-amber-400 text-black px-1.5 py-0.2 uppercase font-bold">Portada</span>` : ''}
+                  </div>
                   <p class="text-[11px] text-zinc-400 truncate">${item.artist || 'Artista'}${item.year ? ` • ${item.year}` : ''}</p>
-                  <div class="flex flex-wrap gap-2 mt-1 items-center">
-                    ${item.spotify ? `<a href="${item.spotify}" target="_blank" class="text-[10px] font-bold text-zinc-300 hover:text-emerald-400"><i class="fa-brands fa-spotify"></i> Spotify</a>` : (isAdmin ? `<span class="text-[10px] text-zinc-700 italic"><i class="fa-brands fa-spotify"></i> Sin link</span>` : '')}
-                    ${item.apple ? `<a href="${item.apple}" target="_blank" class="text-[10px] font-bold text-zinc-300 hover:text-pink-400"><i class="fa-brands fa-apple"></i> Apple</a>` : (isAdmin ? `<span class="text-[10px] text-zinc-700 italic"><i class="fa-brands fa-apple"></i> Sin link</span>` : '')}
-                    <button onclick="copyAlbumLink('${key}', '${item.id}')" class="text-[10px] font-bold text-zinc-400 hover:text-white ml-auto transition uppercase"><i class="fa-solid fa-share-nodes"></i> Compartir</button>
+                  <div class="flex gap-2 mt-1">
+                    ${item.spotify ? `<a href="${item.spotify}" target="_blank" class="text-[10px] font-bold text-zinc-300 hover:text-emerald-400"><i class="fa-brands fa-spotify"></i> Spotify</a>` : ''}
+                    ${item.apple ? `<a href="${item.apple}" target="_blank" class="text-[10px] font-bold text-zinc-300 hover:text-pink-400"><i class="fa-brands fa-apple"></i> Apple</a>` : ''}
                   </div>
                 </div>
-                ${isAdmin ? `<div class="flex items-center gap-1.5"><button onclick="openEditForm('${key}', '${item.id}')" class="text-xs text-zinc-400 hover:text-amber-400 p-1"><i class="fa-solid fa-pen"></i></button><button onclick="deleteAlbum('${key}', '${item.id}')" class="text-xs text-zinc-400 hover:text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button></div>` : ''}
+                ${isAdmin ? `
+                  <div class="flex items-center gap-1.5">
+                    ${i > 0 ? `<button onclick="moveAlbumOrder('${key}', ${i}, -1)" class="text-xs text-zinc-400 hover:text-white p-1" title="Subir"><i class="fa-solid fa-arrow-up"></i></button>` : ''}
+                    ${i < items.length - 1 ? `<button onclick="moveAlbumOrder('${key}', ${i}, 1)" class="text-xs text-zinc-400 hover:text-white p-1" title="Bajar"><i class="fa-solid fa-arrow-down"></i></button>` : ''}
+                    <button onclick="openEditForm('${key}', '${item.id}')" class="text-xs text-zinc-400 hover:text-amber-400 p-1"><i class="fa-solid fa-pen"></i></button>
+                    <button onclick="deleteAlbum('${key}', '${item.id}')" class="text-xs text-zinc-400 hover:text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button>
+                  </div>
+                ` : ''}
               </div>
+              <!-- Espacio de calificación para el cumpleañero -->
               <div class="border-t border-subtle/60 pt-2 flex items-center justify-between text-xs">
-                <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-mono">Calificación (${item.rating || 0}/5):</span>
-                <div class="flex">${generateStarsHtml(key, item.id, item.rating || 0)}</div>
+                <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-mono">Calificación:</span>
+                <div class="star-rating flex gap-1">${starsHtml}</div>
               </div>
-            </div>`;
-        });
+            </div>
+          `;
+        }
       }
 
-      if (isAdmin) html += `<button onclick="openEditForm('${key}')" class="w-full mt-2 py-2.5 border-2 border-subtle hover:border-white text-white font-bold text-xs rounded-lg transition uppercase tracking-wider bg-black shadow-[2px_2px_0px_#333]">+ Agregar Álbum</button>`;
+      if (isAdmin) {
+        html += `<button onclick="openEditForm('${key}')" class="w-full mt-2 py-2.5 border-2 border-subtle hover:border-white text-white font-bold text-xs rounded-lg transition uppercase tracking-wider bg-black shadow-[2px_2px_0px_#333]">+ Agregar Álbum</button>`;
+      }
+
       document.getElementById('modalContent').innerHTML = html;
-      document.getElementById('modal').classList.remove('hidden'); document.getElementById('modal').classList.add('flex');
+      document.getElementById('modal').classList.remove('hidden');
+      document.getElementById('modal').classList.add('flex');
     }
 
     function openEditForm(key, albumId = null) {
       const item = albumId && db[key] ? db[key].find(a => a.id === albumId) : { title: '', artist: '', year: '', note: '', cover: '', spotify: '', apple: '', isMainCover: false };
-      document.getElementById('modalContent').innerHTML = `
+      
+      let html = `
         <h3 class="text-sm font-bold text-white uppercase mb-4 tracking-wider">${albumId ? 'Editar Álbum' : 'Agregar Álbum'}</h3>
         <form onsubmit="saveAlbumForm(event, '${key}', '${albumId || ''}')" class="space-y-3">
-          <div><label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Álbum / Canción</label><input type="text" id="formTitle" value="${item.title}" required class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white"></div>
-          <div><label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Artista</label><input type="text" id="formArtist" value="${item.artist}" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white"></div>
-          <div><label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Año</label><input type="number" id="formYear" value="${item.year || ''}" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white"></div>
-          <div><label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Spotify Link</label><input type="url" id="formSpotify" value="${item.spotify || ''}" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white"></div>
-          <div><label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Apple Music Link</label><input type="url" id="formApple" value="${item.apple || ''}" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white"></div>
-          <div><label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">URL Portada Imagen</label><input type="url" id="formCover" value="${item.cover || ''}" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white"></div>
-          <div><label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Nota</label><textarea id="formNote" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white">${item.note || ''}</textarea></div>
-          <div class="flex items-center gap-2 pt-1"><input type="checkbox" id="formIsMainCover" ${item.isMainCover ? 'checked' : ''} class="rounded bg-black border-subtle text-amber-400 focus:ring-0"><label for="formIsMainCover" class="text-xs text-zinc-300 cursor-pointer font-medium">Usar como portada de fondo de este día</label></div>
-          <button type="submit" id="saveSubmitBtn" class="w-full bg-[#f4f4f0] text-black py-2.5 rounded font-bold text-xs uppercase tracking-wider transition hover:bg-white mt-2 shadow-[2px_2px_0px_#555]">Guardar en la Nube</button>
-        </form>`;
+          <div>
+            <label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Álbum / Canción</label>
+            <input type="text" id="formTitle" value="${item.title}" required class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Artista</label>
+            <input type="text" id="formArtist" value="${item.artist}" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Año de Lanzamiento</label>
+            <input type="number" id="formYear" value="${item.year || ''}" placeholder="Ej: 2016" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Spotify Link</label>
+            <input type="url" id="formSpotify" value="${item.spotify || ''}" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Apple Music Link</label>
+            <input type="url" id="formApple" value="${item.apple || ''}" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">URL Portada Imagen (Opcional)</label>
+            <input type="url" id="formCover" value="${item.cover || ''}" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Nota</label>
+            <textarea id="formNote" class="w-full bg-black border-2 border-subtle rounded p-2 text-xs text-white focus:outline-none focus:border-white">${item.note || ''}</textarea>
+          </div>
+          <div class="flex items-center gap-2 pt-1">
+            <input type="checkbox" id="formIsMainCover" ${item.isMainCover ? 'checked' : ''} class="rounded bg-black border-subtle text-amber-400 focus:ring-0">
+            <label for="formIsMainCover" class="text-xs text-zinc-300 cursor-pointer font-medium">Usar como portada de fondo de este día</label>
+          </div>
+          <button type="submit" id="saveSubmitBtn" class="w-full bg-[#f4f4f0] text-black py-2.5 rounded font-bold text-xs uppercase tracking-wider transition hover:bg-white mt-2 shadow-[2px_2px_0px_#555]">Guardar</button>
+        </form>
+      `;
+
+      document.getElementById('modalContent').innerHTML = html;
+      document.getElementById('modal').classList.remove('hidden');
+      document.getElementById('modal').classList.add('flex');
     }
 
     async function saveAlbumForm(e, key, albumId) {
       e.preventDefault();
-      document.getElementById('saveSubmitBtn').innerText = "Guardando..."; document.getElementById('saveSubmitBtn').disabled = true;
+      
+      const submitBtn = document.getElementById('saveSubmitBtn');
+      if (submitBtn) {
+        submitBtn.innerText = "Guardando...";
+        submitBtn.disabled = true;
+      }
+
       if (!db[key]) db[key] = [];
+
+      const title = document.getElementById('formTitle').value;
+      const artist = document.getElementById('formArtist').value;
+      const year = document.getElementById('formYear').value;
+      const spotify = document.getElementById('formSpotify').value;
+      const apple = document.getElementById('formApple').value;
+      let cover = document.getElementById('formCover').value;
+      const isMainCover = document.getElementById('formIsMainCover').checked;
+
+      let extracted = await extractCoverFromUrl(spotify);
+      if (!extracted) {
+        extracted = await extractCoverFromUrl(apple);
+      }
+
+      if (extracted) {
+        cover = extracted;
+      } else if (!cover) {
+        cover = await getAppleCoverUrl(title, artist);
+      }
+
+      if (isMainCover) {
+        db[key].forEach(a => a.isMainCover = false);
+      }
+
       const existingAlbum = albumId ? db[key].find(a => a.id === albumId) : null;
+
       const newAlbum = {
-        id: albumId || String(Date.now()), title: document.getElementById('formTitle').value, artist: document.getElementById('formArtist').value,
-        year: document.getElementById('formYear').value, spotify: document.getElementById('formSpotify').value, apple: document.getElementById('formApple').value,
-        cover: document.getElementById('formCover').value, isMainCover: document.getElementById('formIsMainCover').checked, note: document.getElementById('formNote').value,
+        id: albumId || String(Date.now()),
+        title: title,
+        artist: artist,
+        year: year,
+        spotify: spotify,
+        apple: apple,
+        cover: cover,
+        isMainCover: isMainCover,
+        note: document.getElementById('formNote').value,
         rating: existingAlbum ? (existingAlbum.rating || 0) : 0
       };
-      if (newAlbum.isMainCover) db[key].forEach(a => a.isMainCover = false);
-      await saveAlbumToCloud(key, newAlbum);
+
+      if (albumId) {
+        const idx = db[key].findIndex(a => a.id === albumId);
+        if (idx !== -1) db[key][idx] = newAlbum;
+      } else {
+        db[key].push(newAlbum);
+      }
+
+      saveDB();
       closeModal();
-      isIsolatedMode ? renderIsolatedDayView(key, new URLSearchParams(window.location.search).get('album')) : renderCalendar(currentMonth);
+
+      if (isIsolatedMode) {
+        renderIsolatedDayView(key);
+      }
     }
 
-    async function deleteAlbum(key, albumId) { if (confirm("¿Eliminar este álbum?")) { await deleteAlbumFromCloud(key, albumId); closeModal(); } }
+    function moveAlbumOrder(key, index, direction) {
+      const items = db[key];
+      const targetIndex = index + direction;
+      if (targetIndex >= 0 && targetIndex < items.length) {
+        const temp = items[index];
+        items[index] = items[targetIndex];
+        items[targetIndex] = temp;
+        saveDB();
+        const dateObj = new Date(2026, parseInt(key.split('-')[0]) - 1, parseInt(key.split('-')[1]));
+        openDayModal(key, dateObj.getDate(), monthNames[dateObj.getMonth()]);
+      }
+    }
+
+    function deleteAlbum(key, albumId) {
+      if (confirm("¿Eliminar este álbum?")) {
+        db[key] = db[key].filter(a => a.id !== albumId);
+        saveDB();
+        closeModal();
+      }
+    }
 
     async function showAlbumPage(key, albumId) {
       const album = db[key].find(a => a.id === albumId);
-      closeModal(); document.getElementById('mainView').classList.add('hidden');
+      closeModal();
+      document.getElementById('mainView').classList.add('hidden');
+      const albumPage = document.getElementById('albumPage');
+      const isToday = key === getTodayKey();
+
+      let coverUrl = album ? album.cover : '';
+      if (album && !coverUrl) {
+        coverUrl = await getAppleCoverUrl(album.title, album.artist);
+      }
+
+      let currentRating = album ? (album.rating || 0) : 0;
+      let starsHtml = '';
+      for (let s = 1; s <= 5; s++) {
+        starsHtml += `<i class="fa-${s <= currentRating ? 'solid' : 'regular'} fa-star text-amber-400 text-sm" onclick="setRating('${key}', '${albumId}', ${s})"></i>`;
+      }
+      
       document.getElementById('albumPageContent').innerHTML = `
         <div class="flex flex-col sm:flex-row gap-6 items-center">
-          <img src="${album.cover || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777'}" crossorigin="anonymous" onerror="handleImageError(this)" class="w-40 h-40 md:w-48 md:h-48 object-cover rounded border-2 border-subtle bg-zinc-900 shadow-xl">
+          <img src="${coverUrl || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777'}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded border-2 border-subtle bg-zinc-900 shadow-xl">
           <div class="flex-1 text-center sm:text-left w-full">
-            <h1 class="text-xl md:text-2xl font-bold text-white uppercase mb-1">${album.title}</h1>
-            <h3 class="text-xs md:text-sm text-zinc-400 font-mono mb-4">${album.artist || ''}${album.year ? ` // ${album.year}` : ''}</h3>
-            ${album.note ? `<p class="text-xs text-zinc-300 italic mb-4 bg-black p-3 rounded border-2 border-subtle">"${album.note}"</p>` : ''}
-            <div class="mb-5 flex items-center justify-between sm:justify-start gap-3 bg-black p-3 rounded border-2 border-subtle">
-              <span class="text-xs text-zinc-400 uppercase tracking-widest font-mono">Calificación (${album.rating || 0}/5):</span>
-              <div class="flex">${generateStarsHtml(key, albumId, album.rating || 0)}</div>
+            ${isToday ? `<p class="text-xs text-amber-400 font-bold tracking-widest uppercase mb-2">🎉 ¡Feliz Cumpleaños!</p>` : ''}
+            <h1 class="text-2xl font-bold text-white uppercase mb-1">${album ? album.title : ''}</h1>
+            <h3 class="text-sm text-zinc-400 font-mono mb-4">${album ? album.artist || '' : ''}${album && album.year ? ` // ${album.year}` : ''}</h3>
+            ${album && album.note ? `<p class="text-xs text-zinc-300 italic mb-4 bg-black p-3 rounded border-2 border-subtle">"${album.note}"</p>` : ''}
+            
+            <div class="mb-5 flex items-center justify-center sm:justify-start gap-3 bg-black p-3 rounded border-2 border-subtle">
+              <span class="text-xs text-zinc-400 uppercase tracking-widest font-mono">Tu Calificación:</span>
+              <div class="star-rating flex gap-1.5">${starsHtml}</div>
             </div>
-            <div class="flex flex-wrap gap-3 justify-center sm:justify-start items-center">
-              ${album.spotify ? `<a href="${album.spotify}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 transition hover:border-white bg-black shadow-[2px_2px_0px_#333]"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify</a>` : ''}
-              ${album.apple ? `<a href="${album.apple}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 transition hover:border-white bg-black shadow-[2px_2px_0px_#333]"><i class="fa-brands fa-apple text-pink-400"></i> Apple Music</a>` : ''}
-              <button onclick="copyAlbumLink('${key}', '${albumId}')" class="border-2 border-subtle text-zinc-300 hover:text-white font-bold text-xs px-3 py-2 rounded transition bg-black shadow-[2px_2px_0px_#333] uppercase"><i class="fa-solid fa-share-nodes"></i> Compartir</button>
+
+            <div class="flex gap-3 justify-center sm:justify-start">
+              ${album && album.spotify ? `<a href="${album.spotify}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 transition hover:border-white bg-black shadow-[2px_2px_0px_#333]"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify</a>` : ''}
+              ${album && album.apple ? `<a href="${album.apple}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 transition hover:border-white bg-black shadow-[2px_2px_0px_#333]"><i class="fa-brands fa-apple text-pink-400"></i> Apple Music</a>` : ''}
             </div>
           </div>
-        </div>`;
-      document.getElementById('albumPage').classList.remove('hidden');
+        </div>
+      `;
+      albumPage.classList.remove('hidden');
     }
 
-    async function renderIsolatedDayView(fecha, targetAlbumId = null) {
-      isIsolatedMode = true; document.getElementById('mainView').classList.add('hidden');
-      document.getElementById('brandLogo').onclick = null; document.getElementById('brandLogo').classList.remove('cursor-pointer');
-      let albums = db[fecha] || []; if (targetAlbumId) albums = albums.filter(a => a.id === targetAlbumId);
-      if (albums.length === 0) { document.getElementById('albumPageContent').innerHTML = `<p class="text-xs text-zinc-500 italic text-center py-8">No hay lanzamientos.</p>`; } 
-      else { document.getElementById('albumPageContent').innerHTML = albums.map(album => `
+    async function renderIsolatedDayView(fecha) {
+      isIsolatedMode = true;
+      document.getElementById('mainView').classList.add('hidden');
+      document.getElementById('brandLogo').onclick = null;
+      document.getElementById('brandLogo').classList.remove('cursor-pointer');
+
+      const albums = db[fecha] || [];
+      const isToday = fecha === getTodayKey();
+
+      if (albums.length === 0) {
+        document.getElementById('albumPageContent').innerHTML = `<p class="text-xs text-zinc-500 italic text-center py-8">No hay lanzamientos registrados para esta fecha.</p>`;
+      } else {
+        let htmlContent = '';
+        for (const album of albums) {
+          let coverUrl = album.cover;
+          if (!coverUrl) {
+            coverUrl = await getAppleCoverUrl(album.title, album.artist);
+            album.cover = coverUrl;
+          }
+
+          let currentRating = album.rating || 0;
+          let starsHtml = '';
+          for (let s = 1; s <= 5; s++) {
+            starsHtml += `<i class="fa-${s <= currentRating ? 'solid' : 'regular'} fa-star text-amber-400 text-sm" onclick="setRating('${fecha}', '${album.id}', ${s})"></i>`;
+          }
+
+          htmlContent += `
             <div class="flex flex-col sm:flex-row gap-6 items-center border-b-2 border-subtle pb-6 mb-6 last:border-none last:pb-0 last:mb-0">
-              <img src="${album.cover || 'https://images.placeholders.dev/?width=300&height=300&text=🎵&bgColor=%23111111&textColor=%23777777'}" crossorigin="anonymous" onerror="handleImageError(this)" class="w-40 h-40 md:w-48 md:h-48 object-cover rounded border-2 border-subtle bg-zinc-900 shadow-xl">
+              <img src="${coverUrl}" onerror="handleImageError(this)" class="w-48 h-48 object-cover rounded border-2 border-subtle bg-zinc-900 shadow-xl">
               <div class="flex-1 text-center sm:text-left w-full">
-                <h1 class="text-xl md:text-2xl font-bold text-white uppercase mb-1">${album.title}</h1>
-                <h3 class="text-xs md:text-sm text-zinc-400 font-mono mb-4">${album.artist || ''}${album.year ? ` // ${album.year}` : ''}</h3>
-                <div class="flex flex-wrap gap-3 justify-center sm:justify-start items-center mt-4">
-                  ${album.spotify ? `<a href="${album.spotify}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 bg-black"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify</a>` : ''}
-                  ${album.apple ? `<a href="${album.apple}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 bg-black"><i class="fa-brands fa-apple text-pink-400"></i> Apple Music</a>` : ''}
+                ${isToday ? `<p class="text-xs text-amber-400 font-bold tracking-widest uppercase mb-2">🎉 ¡Feliz Cumpleaños!</p>` : ''}
+                <h1 class="text-2xl font-bold text-white uppercase mb-1">${album.title}</h1>
+                <h3 class="text-sm text-zinc-400 font-mono mb-4">${album.artist || ''}${album.year ? ` // ${album.year}` : ''}</h3>
+                ${album.note ? `<p class="text-xs text-zinc-300 italic mb-4 bg-black p-3 rounded border-2 border-subtle">"${album.note}"</p>` : ''}
+                
+                <div class="mb-5 flex items-center justify-center sm:justify-start gap-3 bg-black p-3 rounded border-2 border-subtle">
+                  <span class="text-xs text-zinc-400 uppercase tracking-widest font-mono">Tu Calificación:</span>
+                  <div class="star-rating flex gap-1.5">${starsHtml}</div>
+                </div>
+
+                <div class="flex gap-3 justify-center sm:justify-start">
+                  ${album.spotify ? `<a href="${album.spotify}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 transition hover:border-white bg-black shadow-[2px_2px_0px_#333]"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify</a>` : ''}
+                  ${album.apple ? `<a href="${album.apple}" target="_blank" class="border-2 border-subtle text-white font-bold text-xs px-4 py-2 rounded flex items-center gap-2 transition hover:border-white bg-black shadow-[2px_2px_0px_#333]"><i class="fa-brands fa-apple text-pink-400"></i> Apple Music</a>` : ''}
                 </div>
               </div>
-            </div>`).join('');
+            </div>
+          `;
+        }
+        document.getElementById('albumPageContent').innerHTML = htmlContent;
       }
+
       document.getElementById('albumPage').classList.remove('hidden');
     }
 
-    function goHome() { if (isIsolatedMode) return; document.getElementById('albumPage').classList.add('hidden'); document.getElementById('mainView').classList.remove('hidden'); }
-    function closeModal() { document.getElementById('modal').classList.add('hidden'); document.getElementById('modal').classList.remove('flex'); }
-    function copyAlbumLink(key, albumId) { const url = `${window.location.origin}${window.location.pathname}?fecha=${key}&album=${albumId}`; navigator.clipboard.writeText(url); alert('Enlace copiado: ' + url); }
-    window.onload = loadCloudDB;
+    function goHome() {
+      if (isIsolatedMode) return;
+      document.getElementById('albumPage').classList.add('hidden');
+      document.getElementById('mainView').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+      document.getElementById('modal').classList.remove('flex');
+    }
+
+    function copyDayLink(key) {
+      const url = `${window.location.origin}${window.location.pathname}?fecha=${key}`;
+      navigator.clipboard.writeText(url);
+      alert('¡Enlace único del día copiado!\n' + url);
+    }
+
+    window.onload = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const fecha = urlParams.get('fecha');
+
+      if (fecha && db[fecha]) {
+        renderIsolatedDayView(fecha);
+      } else {
+        renderCalendar(currentMonth);
+        preloadCovers();
+      }
+    };
   </script>
 </body>
 </html>
